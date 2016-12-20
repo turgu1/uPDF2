@@ -1,6 +1,5 @@
 
-Please note that this is work in progress. Some work still remains to be done,
-but it is sufficiently advanced to allow for general use.
+Please note that this is work in progress. This is NOT ready for normal usage.
 
 This software is licensed under Gnu General Public License Version 3. Please look
 at the COPYING file for further details.
