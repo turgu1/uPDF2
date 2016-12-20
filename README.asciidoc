@@ -1,0 +1,149 @@
+
+Please note that this is work in progress. Some work still remains to be done,
+but it is sufficiently advanced to allow for general use.
+
+This software is licensed under Gnu General Public License Version 3. Please look
+at the COPYING file for further details.
+
+
+uPDF (micro PDF)
+================
+
+This is a spinoff made from the excellent piece of software FlaxPDF
+(see http://github.com/clbr/flaxpdf). The original announcement
+page of the application is available below under the <<FlaxPDF,FlaxPDF>> header.
+
+uPDF is being developped for Debian related Linux distributions. In particular, it is
+used on Ubuntu, Linux Mint and Rasbian platforms.
+
+New capabilities / modifications (Decembre 2016)
+------------------------------------------------
+
+- Title pages alignment
+- MyTrim view - Page trim fine adjustment by the user
+- Some bug fixing
+
+New capabilities / modifications (November 2016)
+------------------------------------------------
+
+The following modifications have been made to the original software:
+
+- Multi-columns document display
+- Selection for the last 10 viewed documents
+- Automatically open the last viewed document with last display parameters
+- Fullscreen mode
+- PageUp and PageDown buttons
+- Exit button
+- Gnome standard icons
+
+image::screenshot.png[Screenshot,503,534,align="center"]
+
+
+These new capabilities have been sent to the original author of FlaxPDF for potential
+integration in his own application.
+
+
+Installation
+============
+
+The following packages are required and may need to be built and installed if not
+available as a package:
+
+- poppler (http://poppler.freedesktop.org/poppler-0.49.0.tar.xz)
+- fltk 1.3.3 (http://www.fltk.org/software.php?VERSION=1.3.3&FILE=fltk/1.3.3/fltk-1.3.3-source.tar.gz) or later (but not version 2.0)
+
+The following packages are usually available via package management under linux:
+
+- libconfig{plus}{plus} v 1.5.0 or later (package libconfig{plus}{plus}-dev)
+- libjpeg (package libjpeg-dev)
+- libpng (package libpng12-dev)
+- libtiff (package libtiff5-dev)
+- libfontconfig (package libfontconfig1.dev)
+- libxrender (package libxrender-dev)
+- liblzo (package liblzo2-dev)
+
+For example with the apt-get command, they can be installed as follow:
+
+  $ sudo apt-get install libconfig{plus}{plus}-dev libjpeg-dev libpng12-dev libtiff5-dev libfontconfig1-dev libxrender-dev liblzo2-dev
+
+Poppler
+-------
+
+To properly build poppler, some libraries are required to be installed. That's the case for libjpeg, libpng and libtiff to manage embedded images in PDFs. Other libraries are required and are often already installed. Here is a page to get some more information about dependencies:
+
+http://www.linuxfromscratch.org/blfs/view/svn/general/poppler.html
+
+Once the popper library is untared, you need to build it with the following commands:
+
+------------------------------------------
+$ ./configure --prefix=/usr               \
+              --sysconfdir=/etc           \
+              --disable-static            \
+              --enable-build-type=release \
+              --enable-cmyk               \
+              --enable-xpdf-headers
+$ make
+$ sudo make install
+------------------------------------------
+
+FLTK
+----
+
+The FLTK library is installed using the usual GNU autoconf commands:
+
+--------------------
+$ ./configure
+$ make
+$ sudo make install
+--------------------
+
+uPDF
+----
+
+To install uPDF, the following commands are required:
+
+--------------------
+$ ./autogen.sh
+$ ./configure
+$ make
+$ sudo make install
+--------------------
+
+All the previously indicated libraries must have been installed before building the application. The installation will add an entry into the OFFICE main menu of you linux installation.
+
+Here is the original announcement for the FlaxPDF application:
+
+[[FLAXPDF]]
+FlaxPDF
+=======
+
+FlaxPDF is a fast, nice multithreaded PDF viewer for the desktop.
+
+As long as there are more pages than cores, every core will get a workout.
+
+Light on dependencies, trimming borders, and aggressive caching are its major points. Okular and Evince are nice but heavy; and the point for starting this project, ePDFview, is dead.
+
+EPDFview was nice and light, but lacking in a couple ways:
+
+- no caching, if you wanted to backtrack one page, it reloaded slowly
+- no automatic zoom to content/trim
+
+Now with my main PDF viewer being dead, why not build a fresh one with those two itches scratched?
+
+Requirements
+------------
+
+Poppler, LZO, and FLTK 1.3.
+
+Comparison
+----------
+
+Evince 3.10.3, FlaxPDF 0.6.1 and ePDFview 0.1.8 were tested. The same document was scrolled repeatedly to check the cpu usage, the binary size was measured, as well as RAM use.
+
+		CPU		RAM		Binary
+Evince		90%		56.8 MB		507 KB (evince + libpdfdocument.so)
+ePDFView	72%		46.3 MB		124 KB
+FlaxPDF		57% (5% *)	36.5 MB		45 KB
+
+* To be fair to all, these measurements were done using the Vesa driver. FlaxPDF, as the only one of the three, is able to take advantage of the GPU, dropping its CPU use when scrolling to 5% (tested on radeon).
+

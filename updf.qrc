@@ -1,0 +1,55 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>img/updf-64x64.png</file>
+        <file>img/updf-128x128.png</file>
+        <file>img/updf-256x256.png</file>
+        <file>img/updf-512x512.png</file>
+    </qresource>
+    <qresource prefix="/icons/22">
+        <file>img/22x22/document-open.png</file>
+        <file>img/22x22/go-top.png</file>
+        <file>img/22x22/view-fullscreen.png</file>
+        <file>img/22x22/application-exit.png</file>
+        <file>img/22x22/edit-select-all.png</file>
+        <file>img/22x22/go-bottom.png</file>
+        <file>img/22x22/go-down.png</file>
+        <file>img/22x22/go-up.png</file>
+        <file>img/22x22/view-restore.png</file>
+        <file>img/22x22/zoom-in.png</file>
+        <file>img/22x22/zoom-out.png</file>
+        <file>img/22x22/emblem-documents.png</file>
+        <file>img/22x22/window-close.png</file>
+    </qresource>
+    <qresource prefix="/icons/32">
+        <file>img/32x32/updf.png</file>
+        <file>img/32x32/application-exit.png</file>
+        <file>img/32x32/document-open.png</file>
+        <file>img/32x32/go-top.png</file>
+        <file>img/32x32/view-fullscreen.png</file>
+        <file>img/32x32/edit-select-all.png</file>
+        <file>img/32x32/emblem-documents.png</file>
+        <file>img/32x32/go-bottom.png</file>
+        <file>img/32x32/go-down.png</file>
+        <file>img/32x32/go-up.png</file>
+        <file>img/32x32/view-restore.png</file>
+        <file>img/32x32/zoom-in.png</file>
+        <file>img/32x32/zoom-out.png</file>
+        <file>img/32x32/window-close.png</file>
+    </qresource>
+    <qresource prefix="/icons/48">
+        <file>img/48x48/updf.png</file>
+        <file>img/48x48/application-exit.png</file>
+        <file>img/48x48/document-open.png</file>
+        <file>img/48x48/go-bottom.png</file>
+        <file>img/48x48/go-down.png</file>
+        <file>img/48x48/go-top.png</file>
+        <file>img/48x48/go-up.png</file>
+        <file>img/48x48/view-fullscreen.png</file>
+        <file>img/48x48/edit-select-all.png</file>
+        <file>img/48x48/emblem-documents.png</file>
+        <file>img/48x48/view-restore.png</file>
+        <file>img/48x48/zoom-in.png</file>
+        <file>img/48x48/zoom-out.png</file>
+        <file>img/48x48/window-close.png</file>
+    </qresource>
+</RCC>
