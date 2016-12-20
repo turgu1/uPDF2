@@ -23,23 +23,34 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 
-SOURCES += main.cpp\
-        mainwindow.cpp \
+SOURCES += \
+    main.cpp\
+    mainwindow.cpp \
     loadfile.cpp \
     utils.cpp \
-    pdfloader.cpp
+    pdfloader.cpp \
+    pdfviewer.cpp
 
-HEADERS  += mainwindow.h \
+HEADERS  += \
+    mainwindow.h \
     updf.h \
     loadfile.h \
     utils.h \
-    pdfloader.h
+    pdfloader.h \
+    pdfviewer.h
 
-FORMS    += mainwindow.ui
+FORMS    += \
+    mainwindow.ui
 
 RESOURCES += \
     updf.qrc
 
 INCLUDEPATH += /usr/local/include
 INCLUDEPATH += /usr/local/include/poppler
+
+QMAKE_CXXFLAGS += -isystem -Wno-unused-parameter -Wall -Wextra -fopenmp
+
+unix|win32: LIBS += -lpoppler -llzo2
+
+QMAKE_LFLAGS += -fopenmp
 

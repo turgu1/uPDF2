@@ -7,7 +7,6 @@
 #include <PDFDoc.h>
 #include <splash/SplashBitmap.h>
 
-#include "updf.h"
 #include "pdfloader.h"
 
 struct cachedpage {
@@ -21,17 +20,12 @@ struct cachedpage {
   bool  ready;
 };
 
-enum msg {
-  MSG_REFRESH = 0,
-  MSG_READY
-};
-
 class LoadFile : public QObject
 {
     Q_OBJECT
 
   private:
-    char       * filename;
+    QString      filename;
     bool         loaded;
     bool         loading;
     cachedpage * cache;
@@ -44,20 +38,23 @@ class LoadFile : public QObject
     u32          last_visible;
     u32          details;
 
-    QThread      loaderThread;
-
     PDFLoader  * pdfLoader;
 
     void dopage(const u32 page);
     void store(SplashBitmap * const bm, cachedpage & cache);
-    friend void PDFLoader::renderer();
+    friend void PDFLoader::run();
 
   public:
-    LoadFile(const char * fname);
+    LoadFile(const QString & fname);
     ~LoadFile();
+    void clean();
+
+  public slots:
+    void handleResults();
 
   signals:
     void refresh();
+    void resultReady();
 };
 
 #endif // LOADFILE_H

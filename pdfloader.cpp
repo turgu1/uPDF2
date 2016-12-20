@@ -1,9 +1,9 @@
+
 #include <ErrorCodes.h>
 #include <GlobalParams.h>
 #include <SplashOutputDev.h>
 
 #include "updf.h"
-#include "utils.h"
 
 #include "pdfloader.h"
 #include "loadfile.h"
@@ -30,9 +30,8 @@ void PDFLoader::abort()
   aborting = true;
 }
 
-void PDFLoader::renderer()
+void PDFLoader::run()
 {
-
   // Optional timing
   struct timeval start, end;
   gettimeofday(&start, NULL);
@@ -92,14 +91,15 @@ void PDFLoader::renderer()
       totalcomp += file->cache[i].size;
     }
 
-    printf("Compressed mem usage %.2fmb, compressed to %.2f%%\n",
-      totalcomp / 1024 / 1024.0f, 100 * totalcomp / (float) total);
+    info(QString(tr("Compressed mem usage %1.2fmb, compressed to %2.2f%%"))
+      .arg(totalcomp / 1024 / 1024.0f)
+      .arg(100 * totalcomp / (float) total));
 
     gettimeofday(&end, NULL);
     const u32 us = usecs(start, end);
 
-    printf("Processing the file took %u us (%.2f s)\n", us,
-      us / 1000000.0f);
+    info(QString(tr("Processing the file took %1u us (%2.2f s)"))
+      .arg(us).arg(us / 1000000.0f));
   }
 
   u32 maxw = 0, maxh = 0;
@@ -113,10 +113,7 @@ void PDFLoader::renderer()
   file->maxh = maxh;
 
   // Set normal cursor
-  emit resultReady("READY");
+  emit resultReady();
 
   return;
 }
-
-
-

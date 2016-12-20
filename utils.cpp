@@ -1,5 +1,7 @@
+#include <QObject>
+#include <QTextStream>
+
 #include "updf.h"
-#include "utils.h"
 
 void *xcalloc(size_t nmemb, size_t size) {
 
@@ -29,16 +31,27 @@ void die(const char fmt[], ...) {
   exit(1);
 }
 
-void warn(const char fmt[], ...) {
+void warn(const QString & str)
+{
+  QTextStream stream(stderr);
 
-  va_list ap;
-
-  va_start(ap, fmt);
-
-  vfprintf(stderr, fmt, ap);
-
-  va_end(ap);
+  stream << QString(QObject::tr("Warning: ")) << str << endl;
 }
+
+void info(const QString & str)
+{
+  QTextStream stream(stdout);
+
+  stream << QString(QObject::tr("Info: ")) << str << endl;
+}
+
+void dbg(const QString & str)
+{
+  QTextStream stream(stdout);
+
+  stream << QString(QObject::tr("Debug: ")) << str << endl;
+}
+
 
 u32 usecs(const timeval old, const timeval now) {
 

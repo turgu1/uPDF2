@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>700</width>
+    <width>4217</width>
     <height>800</height>
    </rect>
   </property>
@@ -277,7 +277,7 @@
             </size>
            </property>
            <property name="flat">
-            <bool>true</bool>
+            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -334,7 +334,7 @@
             </size>
            </property>
            <property name="flat">
-            <bool>true</bool>
+            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -364,7 +364,7 @@
            </property>
            <property name="maximumSize">
             <size>
-             <width>16777215</width>
+             <width>70</width>
              <height>16777215</height>
             </size>
            </property>
@@ -673,21 +673,6 @@ Trim Parameters</string>
             <property name="currentRow">
              <number>-1</number>
             </property>
-            <item>
-             <property name="text">
-              <string>1</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>2</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>3</string>
-             </property>
-            </item>
            </widget>
           </item>
           <item>
@@ -713,13 +698,6 @@ Trim Parameters</string>
            </widget>
           </item>
          </layout>
-         <zorder>trimParametersLabel</zorder>
-         <zorder>trimParametersLabel</zorder>
-         <zorder>editTrimButton</zorder>
-         <zorder>evenOddButton</zorder>
-         <zorder>thisPageButton</zorder>
-         <zorder>trimPageList</zorder>
-         <zorder>clearTrimsButton</zorder>
         </widget>
        </item>
        <item>
@@ -1170,6 +1148,11 @@ Trim Parameters</string>
     <string>Show Toolbar</string>
    </property>
   </action>
+  <action name="actionOpenFile">
+   <property name="text">
+    <string>OpenFile</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
@@ -1320,6 +1303,38 @@ Trim Parameters</string>
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>openFileButton</sender>
+   <signal>clicked()</signal>
+   <receiver>actionOpenFile</receiver>
+   <slot>trigger()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>32</x>
+     <y>109</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionOpenFile</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>openFile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>2108</x>
+     <y>399</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>showToolbar()</slot>
@@ -1328,5 +1343,6 @@ Trim Parameters</string>
   <slot>updateTrimButtons()</slot>
   <slot>onFullScreen()</slot>
   <slot>aboutBox()</slot>
+  <slot>openFile()</slot>
  </slots>
 </ui>

@@ -1,12 +1,22 @@
+#include <QFileDialog>
+
+#include "updf.h"
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "loadfile.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    toolbarVisible(true)
+    toolbarVisible(true),
+    loadedFile(NULL)
 {
     ui->setupUi(this);
+
+    iconFull    = new QIcon(":/icons/32/img/32x32/view-fullscreen.png");
+    iconRestore = new QIcon(":/icons/32/img/32x32/view-restore.png"   );
+
     updateButtons();
 }
 
@@ -20,9 +30,9 @@ void MainWindow::aboutBox()
   QMessageBox aboutBox;
 
   aboutBox.setIconPixmap(QPixmap(":/icons/48/img/48x48/updf.png"));
-  aboutBox.setText("\nuPDF (micro PDF) Version 1.0");
-  aboutBox.setDetailedText("Written by:\n\n(c) 2017 - Guy Turcotte\n(c) 2015 - Lauri Kasanen\n\nGNU General Public License 3.0");
-  aboutBox.setWindowTitle("About uPDF");
+  aboutBox.setText(tr("\nuPDF (micro PDF) Version 1.0"));
+  aboutBox.setDetailedText(tr("Written by:\n\n(c) 2017 - Guy Turcotte\n(c) 2015 - Lauri Kasanen\n\nGNU General Public License 3.0"));
+  aboutBox.setWindowTitle(tr("About uPDF"));
   aboutBox.exec();
 }
 
@@ -30,13 +40,13 @@ void MainWindow::onFullScreen()
 {
   if (isFullScreen()) {
     showNormal();
-    ui->fullScreenButton->setIcon(QIcon::QIcon(":/icons/32/img/32x32/view-fullscreen.png"));
-    ui->fullScreenButton->setToolTip("Full Screen View");
+    ui->fullScreenButton->setIcon(*iconFull);
+    ui->fullScreenButton->setToolTip(tr("Full Screen View"));
   }
   else {
     showFullScreen();
-    ui->fullScreenButton->setIcon(QIcon::QIcon(":/icons/32/img/32x32/view-restore.png"));
-    ui->fullScreenButton->setToolTip("Normal View");
+    ui->fullScreenButton->setIcon(*iconRestore);
+    ui->fullScreenButton->setToolTip(tr("Normal View"));
   }
 }
 
@@ -93,4 +103,17 @@ void MainWindow::hideToolbar()
 {
   toolbarVisible = false;
   updateButtons();
+}
+
+void MainWindow::openFile()
+{
+  QString filename = QFileDialog::getOpenFileName(this, tr("Open Document"), NULL, tr("PDF (*.pdf)"));
+
+  if (filename.isEmpty()) return;
+
+  if (loadedFile) {
+    loadedFile->clean();
+    delete loadedFile;
+  }
+  loadedFile = new LoadFile(filename);
 }

@@ -16,15 +16,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 Modifications Copyright (C) 2016 Guy Turcotte
 */
 
-#include "loadfile.h"
-
-#include "utils.h"
-
-//#include <omp.h>
-#include <lzo/lzo1x.h>
 #include <ErrorCodes.h>
 #include <GlobalParams.h>
 #include <SplashOutputDev.h>
+
+#include "updf.h"
+#include "loadfile.h"
 
 static bool nonwhite(const u8 * const pixel) {
 
@@ -141,10 +138,12 @@ void LoadFile::store(SplashBitmap * const bm, cachedpage & cache)
   cache.data         = dst;
 }
 
-void LoadFile::dopage(const u32 page) {
-
+void LoadFile::dopage(const u32 page)
+{
   struct timeval start, end;
   gettimeofday(&start, NULL);
+
+  debug(QString("do page %1").arg(page));
 
   SplashColor white = { 255, 255, 255 };
   SplashOutputDev * splash = new SplashOutputDev(splashModeXBGR8, 4, false, white);
@@ -181,8 +180,37 @@ void LoadFile::dopage(const u32 page) {
   }
 }
 
-LoadFile::LoadFile(const char *fname) :
-  filename(NULL),
+void LoadFile::clean()
+{
+  if (pdfLoader) {
+    pdfLoader->abort();
+    pdfLoader->wait();
+
+    delete pdfLoader;
+    pdfLoader = NULL;
+  }
+
+  if (cache) {
+    u32 i;
+    const u32 max = pages;
+    for (i = 0; i < max; i++) {
+      if (cache[i].ready) {
+        free(cache[i].data);
+      }
+    }
+    free(cache);
+    cache = NULL;
+  }
+
+  filename = "";
+  if (pdf) {
+    free(pdf);
+    pdf = NULL;
+  }
+}
+
+LoadFile::LoadFile(const QString & fname) :
+  filename(""),
   loaded(false),
   loading(false),
   cache(NULL),
@@ -191,61 +219,52 @@ LoadFile::LoadFile(const char *fname) :
   pdfLoader(NULL)
 {
   // Parse info
-  GooString gooname(fname);
+
+  QByteArray ba = fname.toLatin1(); // This maybe not appropriate for non-latin or english languages
+
+  GooString gooname(ba.data());
+
+  debug(QString(tr("Opening File: %1")).arg(fname));
 
   PDFDoc *pdfDoc = new PDFDoc(&gooname);
   if (!pdfDoc->isOk()) {
     const int err = pdfDoc->getErrorCode();
-    const char *msg = "Unknown";
+    QString msg = tr("Unknown");
 
     switch (err) {
       case errOpenFile:
       case errFileIO:
-        msg = "Couldn't open file";
+        msg = tr("Couldn't open file");
       break;
       case errBadCatalog:
       case errDamaged:
       case errPermission:
-        msg = "Damaged PDF file";
+        msg = tr("Damaged PDF file");
       break;
     }
 
-    warn("Warning %d, %s", err, msg);
+    warn(QString("%1, %2").arg(err).arg(msg));
 
     return;
   }
 
   if (pdfLoader) {
-    // Free the old one
-    //pthread_cancel(tid);
-    pdfLoader->abort();
-    loaderThread.wait();
-
-    u32 i;
-    const u32 max = pages;
-    for (i = 0; i < max; i++) {
-      if (cache[i].ready)
-        free(cache[i].data);
-    }
-    free(cache);
-    cache = NULL;
+    // Free the old one, clean all related parameters
+    clean();
   }
 
-  if (filename) free(filename);
-  if (pdf) free(pdf);
-  filename = (char *) xmalloc(strlen(fname) + 1);
-  strcpy(filename,  fname);
-  pdf = pdfDoc;
-  pages = pdf->getNumPages();
-  maxw = maxh = first_visible = last_visible = 0;
+  filename = fname;
+  pdf      = pdfDoc;
+  pages    = pdf->getNumPages();
+  maxw     = maxh
+           = first_visible
+           = last_visible = 0;
 
   // Start threaded magic
   if (pages < 1) {
-    warn("Couldn't open %s, perhaps it's corrupted?", fname);
+    warn(QString(tr("Couldn't open %1, perhaps it's corrupted?")).arg(fname));
     return;
   }
-
-  //fl_cursor(FL_CURSOR_WAIT);
 
   cache = (cachedpage *) xcalloc(pages, sizeof(cachedpage));
 
@@ -258,27 +277,20 @@ LoadFile::LoadFile(const char *fname) :
   if (pdfLoader == NULL) {
     pdfLoader = new PDFLoader(this);
   }
-  pdfLoader->moveToThread(&loaderThread);
 
-//  connect(&loaderThread, &QThread::finished, pdfLoader, &QObject::deleteLater);
-//  connect(this, &LoadFile::operate, pdfLoader, &PDFLoader::renderer);
-//  connect(pdfLoader, &Worker::resultReady, this, &LoadFile::handleResults);
+  connect(pdfLoader, &PDFLoader::resultReady, this, &LoadFile::handleResults);
 
-  loaderThread.start();
+  pdfLoader->start();
+}
 
-//  pthread_attr_t attr;
-//  pthread_attr_init(&attr);
-//  const struct sched_param nice = { 15 };
-//  pthread_attr_setschedparam(&attr, &nice);
+void LoadFile::handleResults()
+{
+  debug(tr("Document Load complete!"));
 
-//  aborting = false;
-//  pthread_create(tid, &attr, renderer, NULL);
-
-//  loading = true;
+  emit resultReady();
 }
 
 LoadFile::~LoadFile()
 {
-  loaderThread.quit();
-  loaderThread.wait();
+  clean();
 }

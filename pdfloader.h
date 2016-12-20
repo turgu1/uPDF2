@@ -2,22 +2,25 @@
 #define PDFLOADER_H
 
 #include <QObject>
+#include <QThread>
+
+#include "updf.h"
 
 class LoadFile;
 
-class PDFLoader: public QObject
+class PDFLoader: public QThread
 {
     Q_OBJECT
 
   public:
     PDFLoader(LoadFile * loadFile);
+    void run() Q_DECL_OVERRIDE;
 
   signals:
-    void resultReady(const QString &result);
+    void resultReady();
 
   public slots:
     void abort();
-    void renderer();
 
   private:
     bool aborting;
