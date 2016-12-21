@@ -1,16 +1,20 @@
 #ifndef PDFVIEWER_H
 #define PDFVIEWER_H
 
+#include <QObject>
+#include <QWidget>
 
-class PDFViewer : public QWidget
+#include "updf.h"
+#include "loadfile.h"
+
+class PDFViewer : QWidget
 {
-  Q_OBJECT
-public:
-  explicit PDFViewer(QWidget *parent = 0);
+  public:
+    PDFViewer(QWidget * parent = 0);
+    void setLoadFile(LoadFile *lf);
 
-signals:
-
-public slots:
+  private:
+    LoadFile * loadFile;
 };
 
 #endif // PDFVIEWER_H

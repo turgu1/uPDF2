@@ -29,6 +29,7 @@ SOURCES += \
     loadfile.cpp \
     utils.cpp \
     pdfloader.cpp \
+    pdfviewerplugin.cpp \
     pdfviewer.cpp
 
 HEADERS  += \
@@ -37,6 +38,7 @@ HEADERS  += \
     loadfile.h \
     utils.h \
     pdfloader.h \
+    pdfviewerplugin.h \
     pdfviewer.h
 
 FORMS    += \
@@ -45,6 +47,7 @@ FORMS    += \
 RESOURCES += \
     updf.qrc
 
+INCLUDEPATH += /usr/include/poppler
 INCLUDEPATH += /usr/local/include
 INCLUDEPATH += /usr/local/include/poppler
 
