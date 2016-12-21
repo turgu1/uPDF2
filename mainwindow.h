@@ -4,7 +4,10 @@
 #include <QMainWindow>
 #include <QMessageBox>
 
-#include "loadfile.h"
+#include "updf.h"
+#include "loadpdffile.h"
+#include "pdffile.h"
+#include "pdfviewer.h"
 
 namespace Ui {
 class MainWindow;
@@ -29,12 +32,12 @@ class MainWindow : public QMainWindow
 
   private:
     Ui::MainWindow * ui;
-    QIcon * iconFull;
-    QIcon * iconRestore;
-
-    bool toolbarVisible;
-
-    LoadFile * loadedFile;
+    PDFViewer      * pdfViewer;
+    QIcon          * iconFullScreen;
+    QIcon          * iconRestore;
+    bool             toolbarVisible;
+    PDFFile          file;
+    LoadPDFFile    * loadedPDFFile;
 };
 
 #endif // MAINWINDOW_H

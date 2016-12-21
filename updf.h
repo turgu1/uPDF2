@@ -12,6 +12,9 @@
 #include <lzo/lzo1x.h>
 #include <omp.h>
 
+#include <QObject>
+#include <PDFDoc.h>
+
 #define DEBUGGING 0
 
 typedef uint64_t u64;

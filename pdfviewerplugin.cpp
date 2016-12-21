@@ -1,7 +1,7 @@
 #include "pdfviewerplugin.h"
 #include "pdfviewer.h"
 
-PDFViewerPlugin::PDFViewer(QObject * parent) : QObject(parent), initialized(false)
+PDFViewerPlugin::PDFViewerPlugin(QObject * parent) : QObject(parent), initialized(false)
 {
 
 }

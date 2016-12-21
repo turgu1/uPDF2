@@ -17,6 +17,7 @@ class PDFViewerPlugin : public QObject, public QDesignerCustomWidgetInterface
     explicit  PDFViewerPlugin(QObject * parent = 0);
     QWidget * createWidget(QWidget * parent) Q_DECL_OVERRIDE;
     void      initialize(QDesignerFormEditorInterface * core) Q_DECL_OVERRIDE;
+
     bool      isInitialized() const Q_DECL_OVERRIDE;
     QSize     sizeHint()      const Q_DECL_OVERRIDE;
     QString   name()          const Q_DECL_OVERRIDE;

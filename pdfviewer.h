@@ -5,16 +5,21 @@
 #include <QWidget>
 
 #include "updf.h"
-#include "loadfile.h"
+#include "pdffile.h"
+#include "loadpdffile.h"
 
-class PDFViewer : QWidget
+class PDFViewer : public QWidget
 {
   public:
     PDFViewer(QWidget * parent = 0);
-    void setLoadFile(LoadFile *lf);
+    void setPDFFile(PDFFile * f);
+    void mouseMoveEvent(QMouseEvent * event);
+    void mousePressEvent(QMouseEvent * event);
+    void paintEvent(QPaintEvent * event);
 
   private:
-    LoadFile * loadFile;
+    PDFFile * pdfFile;
+    QWidget & myParent;
 };
 
 #endif // PDFVIEWER_H

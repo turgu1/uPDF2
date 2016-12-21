@@ -26,20 +26,22 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     main.cpp\
     mainwindow.cpp \
-    loadfile.cpp \
     utils.cpp \
     pdfloader.cpp \
     pdfviewerplugin.cpp \
-    pdfviewer.cpp
+    pdfviewer.cpp \
+    loadpdffile.cpp \
+    pdffile.cpp
 
 HEADERS  += \
     mainwindow.h \
     updf.h \
-    loadfile.h \
     utils.h \
     pdfloader.h \
     pdfviewerplugin.h \
-    pdfviewer.h
+    pdfviewer.h \
+    loadpdffile.h \
+    pdffile.h
 
 FORMS    += \
     mainwindow.ui
@@ -47,13 +49,16 @@ FORMS    += \
 RESOURCES += \
     updf.qrc
 
-INCLUDEPATH += /usr/include/poppler
 INCLUDEPATH += /usr/local/include
 INCLUDEPATH += /usr/local/include/poppler
+INCLUDEPATH += /usr/include/poppler
 
-QMAKE_CXXFLAGS += -isystem -Wno-unused-parameter -Wall -Wextra -fopenmp
+QMAKE_CXXFLAGS += -isystem -Wall -Wextra -Wno-unused-parameter -fopenmp
 
 unix|win32: LIBS += -lpoppler -llzo2
 
 QMAKE_LFLAGS += -fopenmp
 
+QT          += widgets uiplugin
+CONFIG      += plugin
+#TEMPLATE    = lib

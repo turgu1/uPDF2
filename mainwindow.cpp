@@ -4,18 +4,21 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "loadfile.h"
+#include "loadpdffile.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     toolbarVisible(true),
-    loadedFile(NULL)
+    loadedPDFFile(NULL)
 {
     ui->setupUi(this);
 
-    iconFull    = new QIcon(":/icons/32/img/32x32/view-fullscreen.png");
-    iconRestore = new QIcon(":/icons/32/img/32x32/view-restore.png"   );
+    pdfViewer = new PDFViewer(ui->viewer);
+    pdfViewer->setPDFFile(&file);
+
+    iconFullScreen = new QIcon(":/icons/32/img/32x32/view-fullscreen.png");
+    iconRestore    = new QIcon(":/icons/32/img/32x32/view-restore.png"   );
 
     updateButtons();
 }
@@ -40,7 +43,7 @@ void MainWindow::onFullScreen()
 {
   if (isFullScreen()) {
     showNormal();
-    ui->fullScreenButton->setIcon(*iconFull);
+    ui->fullScreenButton->setIcon(*iconFullScreen);
     ui->fullScreenButton->setToolTip(tr("Full Screen View"));
   }
   else {
@@ -111,9 +114,10 @@ void MainWindow::openFile()
 
   if (filename.isEmpty()) return;
 
-  if (loadedFile) {
-    loadedFile->clean();
-    delete loadedFile;
+  if (loadedPDFFile) {
+    loadedPDFFile->clean();
+    delete loadedPDFFile;
   }
-  loadedFile = new LoadFile(filename);
+
+  loadedPDFFile = new LoadPDFFile(filename, file);
 }

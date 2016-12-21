@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>664</width>
-    <height>700</height>
+    <width>4190</width>
+    <height>709</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -140,7 +140,7 @@
         <number>0</number>
        </property>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,1">
+        <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,0">
          <property name="spacing">
           <number>0</number>
          </property>
@@ -197,7 +197,7 @@
             <enum>Qt::Horizontal</enum>
            </property>
            <property name="sizeType">
-            <enum>QSizePolicy::Minimum</enum>
+            <enum>QSizePolicy::Expanding</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -254,7 +254,7 @@
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="0,0,0">
+        <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="0,0">
          <property name="spacing">
           <number>0</number>
          </property>
@@ -303,22 +303,6 @@
           </widget>
          </item>
          <item>
-          <spacer name="horizontalSpacer_3">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeType">
-            <enum>QSizePolicy::MinimumExpanding</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
           <widget class="QPushButton" name="openRecentButton">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
@@ -362,7 +346,7 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,1,0">
+        <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0,0">
          <property name="spacing">
           <number>0</number>
          </property>
@@ -888,7 +872,7 @@ Trim Parameters</string>
             </size>
            </property>
            <property name="flat">
-            <bool>true</bool>
+            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -917,7 +901,7 @@ Trim Parameters</string>
             </size>
            </property>
            <property name="flat">
-            <bool>true</bool>
+            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -946,7 +930,7 @@ Trim Parameters</string>
             </size>
            </property>
            <property name="flat">
-            <bool>true</bool>
+            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -955,7 +939,7 @@ Trim Parameters</string>
            <property name="minimumSize">
             <size>
              <width>16</width>
-             <height>16</height>
+             <height>32</height>
             </size>
            </property>
            <property name="toolTip">
@@ -975,7 +959,7 @@ Trim Parameters</string>
             </size>
            </property>
            <property name="flat">
-            <bool>true</bool>
+            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -1127,7 +1111,7 @@ Trim Parameters</string>
        <number>0</number>
       </property>
       <item>
-       <widget class="QWidget" name="widget" native="true">
+       <widget class="QWidget" name="viewer" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
           <horstretch>0</horstretch>
@@ -1180,22 +1164,6 @@ Trim Parameters</string>
   <include location="updf.qrc"/>
  </resources>
  <connections>
-  <connection>
-   <sender>exitButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>close()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>80</x>
-     <y>775</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>349</x>
-     <y>399</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>showToolbarButton</sender>
    <signal>clicked()</signal>
@@ -1261,6 +1229,70 @@ Trim Parameters</string>
    </hints>
   </connection>
   <connection>
+   <sender>openFileButton</sender>
+   <signal>clicked()</signal>
+   <receiver>actionOpenFile</receiver>
+   <slot>trigger()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>32</x>
+     <y>109</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionOpenFile</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>openFile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>2108</x>
+     <y>399</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>fullScreenButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onFullScreen()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>74</x>
+     <y>586</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>349</x>
+     <y>399</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>exitButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>80</x>
+     <y>775</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>349</x>
+     <y>399</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
    <sender>editTrimButton</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
@@ -1293,22 +1325,6 @@ Trim Parameters</string>
    </hints>
   </connection>
   <connection>
-   <sender>fullScreenButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>onFullScreen()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>74</x>
-     <y>586</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>349</x>
-     <y>399</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>aboutButton</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
@@ -1320,38 +1336,6 @@ Trim Parameters</string>
     </hint>
     <hint type="destinationlabel">
      <x>349</x>
-     <y>399</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>openFileButton</sender>
-   <signal>clicked()</signal>
-   <receiver>actionOpenFile</receiver>
-   <slot>trigger()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>32</x>
-     <y>109</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionOpenFile</sender>
-   <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>openFile()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>2108</x>
      <y>399</y>
     </hint>
    </hints>

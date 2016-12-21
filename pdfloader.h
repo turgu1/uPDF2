@@ -5,27 +5,28 @@
 #include <QThread>
 
 #include "updf.h"
+#include "pdffile.h"
 
-class LoadFile;
-
-class PDFLoader: public QThread
+class PDFLoader : public QThread
 {
     Q_OBJECT
 
   public:
-    PDFLoader(LoadFile * loadFile);
+    PDFLoader(PDFFile & pdfFile);
     void run() Q_DECL_OVERRIDE;
+    void dopage(const u32 page);
 
   signals:
     void resultReady();
+    void refresh();
 
   public slots:
     void abort();
 
   private:
-    bool aborting;
-    u32  details;
-    LoadFile * file;
+    bool      aborting;
+    u32       details;
+    PDFFile & pdfFile;
 
 };
 
