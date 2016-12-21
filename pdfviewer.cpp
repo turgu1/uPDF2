@@ -8,11 +8,10 @@
 PDFViewer::PDFViewer(QWidget * parent) : QWidget(parent),
   myParent(*parent)
 {
-  setWidgetResizable(true);
   setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   update();
   updateGeometry();
-  myParent.setLayout(new QVBoxLayout);
+  //myParent.setLayout(new QVBoxLayout);
 }
 
 void PDFViewer::setPDFFile(PDFFile * f)
@@ -40,3 +39,9 @@ void PDFViewer::paintEvent(QPaintEvent * event)
   debug(QString("Parent Geometry: %1 %2 %3 %4").arg(gp.x()).arg(gp.y()).arg(gp.width()).arg(gp.height()));
   QWidget::paintEvent(event);
 }
+
+QSize PDFViewer::sizeHint() const
+{
+  return QSize(0,0);
+}
+

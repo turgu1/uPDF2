@@ -23,11 +23,6 @@ QWidget * PDFViewerPlugin::createWidget(QWidget *parent)
   return new PDFViewer(parent);
 }
 
-QSize PDFViewerPlugin::sizeHint() const
-{
-  return QSize(0,0);
-}
-
 QString PDFViewerPlugin::name() const
 {
   return "PDFViewer";

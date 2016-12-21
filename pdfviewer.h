@@ -16,6 +16,7 @@ class PDFViewer : public QWidget
     void mouseMoveEvent(QMouseEvent * event);
     void mousePressEvent(QMouseEvent * event);
     void paintEvent(QPaintEvent * event);
+    QSize sizeHint() const;
 
   private:
     PDFFile * pdfFile;

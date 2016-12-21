@@ -19,7 +19,6 @@ class PDFViewerPlugin : public QObject, public QDesignerCustomWidgetInterface
     void      initialize(QDesignerFormEditorInterface * core) Q_DECL_OVERRIDE;
 
     bool      isInitialized() const Q_DECL_OVERRIDE;
-    QSize     sizeHint()      const Q_DECL_OVERRIDE;
     QString   name()          const Q_DECL_OVERRIDE;
     QString   group()         const Q_DECL_OVERRIDE;
     QIcon     icon()          const Q_DECL_OVERRIDE;

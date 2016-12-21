@@ -1111,7 +1111,7 @@ Trim Parameters</string>
        <number>0</number>
       </property>
       <item>
-       <widget class="QWidget" name="viewer" native="true">
+       <widget class="QFrame" name="viewer">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
           <horstretch>0</horstretch>
