@@ -110,6 +110,7 @@ LoadPDFFile::LoadPDFFile(const QString & fname, PDFFile & pdfFile) :
   connect(pdfLoader, &PDFLoader::resultReady, this, &LoadPDFFile::handleResults);
 
   pdfLoader->dopage(0);
+  file.setValid(true);
   file.setLoading(true);
   pdfLoader->start();
 }

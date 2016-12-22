@@ -12,15 +12,24 @@ MainWindow::MainWindow(QWidget *parent) :
     toolbarVisible(true),
     loadedPDFFile(NULL)
 {
-    ui->setupUi(this);
+  QVBoxLayout * lay = new QVBoxLayout;
 
-    pdfViewer = new PDFViewer(ui->viewer);
-    pdfViewer->setPDFFile(&file);
+  ui->setupUi(this);
 
-    iconFullScreen = new QIcon(":/icons/32/img/32x32/view-fullscreen.png");
-    iconRestore    = new QIcon(":/icons/32/img/32x32/view-restore.png"   );
+  lay->setContentsMargins(0, 0, 0, 0);
+  ui->viewer->setLayout(lay);
 
-    updateButtons();
+  pdfViewer = new PDFViewer(ui->viewer);
+  pdfViewer->setPDFFile(&file);
+
+  lay->addWidget(pdfViewer, 1);
+
+  iconFullScreen = new QIcon(":/icons/32/img/32x32/view-fullscreen.png");
+  iconRestore    = new QIcon(":/icons/32/img/32x32/view-restore.png"   );
+
+  updateButtons();
+  update();
+  updateGeometry();
 }
 
 MainWindow::~MainWindow()

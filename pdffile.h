@@ -19,6 +19,11 @@ struct CachedPage {
 class PDFFile : public QObject
 {
   Q_OBJECT
+private:
+  bool         valid;
+  bool         loaded;
+  bool         loading;
+
 public:
   explicit PDFFile(QObject *parent = 0);
   ~PDFFile();
@@ -33,15 +38,15 @@ public:
 
   void setLoading(bool val);
   void setLoaded(bool val);
+  void setValid(bool val);
+  bool isValid() { return valid; }
   void pageCompleted(u32 pageNbr);
 
-private:
-  bool         loaded;
-  bool         loading;
 
 signals:
   void fileLoading();
   void fileLoaded();
+  void fileIsValid();
   void pageLoadCompleted(u32 pageNbr);
 
 public slots:

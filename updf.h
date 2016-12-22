@@ -15,7 +15,7 @@
 #include <QObject>
 #include <PDFDoc.h>
 
-#define DEBUGGING 0
+#define DEBUGGING 1
 
 typedef uint64_t u64;
 typedef uint32_t u32;

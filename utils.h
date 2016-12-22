@@ -3,7 +3,7 @@
 
 #include <QString>
 
-#ifdef DEBUGGING
+#if DEBUGGING
   #define debug(str) dbg(str)
 #else
   #define debug(str)
@@ -11,7 +11,7 @@
 
 extern void *xcalloc(size_t nmemb, size_t size);
 extern void *xmalloc(size_t size);
-extern void      die(const char fmt[], ...);
+extern void      die(const QString & str);
 extern void     warn(const QString & str);
 extern void     info(const QString & str);
 extern void      dbg(const QString & str);

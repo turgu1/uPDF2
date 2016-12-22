@@ -2,15 +2,21 @@
 #include "pdffile.h"
 
 PDFFile::PDFFile(QObject * parent) : QObject(parent),
-  cache(NULL),
-  pdf(NULL),
+  valid(false),
   loaded(false),
-  loading(false)
+  loading(false),
+  cache(NULL),
+  pdf(NULL)
 {
 }
 
 PDFFile::~PDFFile()
 {
+}
+
+void PDFFile::setValid(bool val) {
+  valid = val;
+  if (valid) emit fileIsValid();
 }
 
 void PDFFile::setLoading(bool val)

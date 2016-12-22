@@ -19,15 +19,11 @@ void *xmalloc(size_t size) {
   return tmp;
 }
 
-void die(const char fmt[], ...) {
+void die(const QString & str)
+{
+  QTextStream stream(stderr);
 
-  va_list ap;
-
-  va_start(ap, fmt);
-
-  vfprintf(stderr, fmt, ap);
-
-  va_end(ap);
+  stream << str << endl;
   exit(1);
 }
 
@@ -70,7 +66,7 @@ u64 msec() {
   return ms;
 }
 
-#if DEBUGGING
+#if 0 //DEBUGGING
 
   void debug_it(char const * fmt, ...)
   {
