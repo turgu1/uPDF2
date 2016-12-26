@@ -1,9 +1,9 @@
 #ifndef PDFVIEWER_H
 #define PDFVIEWER_H
 
-#include <QObject>
 #include <QWidget>
 #include <QPixmap>
+#include <QRubberBand>
 
 #include "updf.h"
 #include "pdffile.h"
@@ -14,6 +14,7 @@
 #define MAX_COLUMNS_COUNT     5
 #define MARGIN               36
 #define MARGINHALF           18
+#define SMALL_MOVE         0.05f
 
 
 // Used to keep drawing postion of displayed pages to
@@ -25,7 +26,7 @@ struct PagePos {
   int X0, Y0, W0, H0, X, Y, W, H;
 };
 
-enum TrimZoneLoc {
+enum ZoneLoc {
   TZL_N = 0,
   TZL_S,
   TZL_E,
@@ -46,44 +47,136 @@ enum ViewMode {
   VM_ZOOMFACTOR
 };
 
+struct SinglePageTrim {
+  int              page;
+  QRect            pageTrim;
+  SinglePageTrim * next;
+};
+
+struct CustomTrim {
+  QRect            odd, even;
+  SinglePageTrim * singles;
+  bool             initialized;  // true if the struct contains valid data
+  bool             similar;      // true if even and odd are the same
+};
+
+struct ViewState {
+    int      page;
+    int      pageCount;
+    ViewMode viewMode;
+    float    viewZoom;
+    bool     fileLoading;
+    bool     trimSelection;
+    bool     textSelection;
+};
+
 class PDFViewer : public QWidget
 {
+    Q_OBJECT
+
   public:
-    PDFViewer(QWidget * parent = 0);
-    void setPDFFile(PDFFile * f);
-    void mouseMoveEvent(QMouseEvent * event);
-    void mousePressEvent(QMouseEvent * event);
-    void paintEvent(QPaintEvent * event);
+    explicit PDFViewer(QWidget * parent = 0);
+    ~PDFViewer() {}
+
+    void  setPDFFile(PDFFile * f);
+    void  keyPressEvent(QKeyEvent * event)           Q_DECL_OVERRIDE;
+    void  wheelEvent(QWheelEvent * event)            Q_DECL_OVERRIDE;
+    void  mouseMoveEvent(QMouseEvent * event)        Q_DECL_OVERRIDE;
+    void  mousePressEvent(QMouseEvent * event)       Q_DECL_OVERRIDE;
+    void  mouseDoubleClickEvent(QMouseEvent * event) Q_DECL_OVERRIDE;
+    void  mouseReleaseEvent(QMouseEvent * event)     Q_DECL_OVERRIDE;
+    void  paintEvent(QPaintEvent * event)            Q_DECL_OVERRIDE;
     QSize sizeHint() const;
 
   private:
-    PDFFile * pdfFile;
+    PDFFile     * pdfFile;
 
-    ViewMode  viewMode;
-    float     viewZoom;
-    float     xOff, yOff;
-    u32       columns, titlePages;
+    ViewMode      viewMode;
+    float         viewZoom;
+    float         xOff, yOff;
+    u32           columns, titlePages;
+    u32           leftDClickColumnsCount;
+    u32           rightDClickColumnsCount;
 
-    PagePos   pagePosOnScreen[PAGES_ON_SCREEN_MAX];
-    u32       pagePosCount;
+    // pages positioning parameters for mouse selection decoding
+    bool          zoneSelection; // Encompass both trimZoneSelection and textSelection
+    bool          trimZoneSelection;
+    bool          textSelection;
+    PagePos       pagePosOnScreen[PAGES_ON_SCREEN_MAX];
+    u32           pagePosCount;
+    u16           selX, selY, selX2, selY2, savedX, savedY;
+    u16           lastX, lastY;
+    bool          someDrag;
+    QRubberBand * selector;
+    QString       clipText;
 
-    u32       cachedSize;
-    u8      * cache[CACHE_MAX];
-    u16       cachedPage[CACHE_MAX];
-    QPixmap   pix[CACHE_MAX];
+    // caching
+    u32           cachedSize;
+    u8          * cache[CACHE_MAX];
+    u16           cachedPage[CACHE_MAX];
+    QPixmap       pix[CACHE_MAX];
 
-    void    computeScreenSize();
-    QPixmap doCache(const u32 page);
-    u32     pageH(u32 page) const;
-    u32     pageW(u32 page) const;
-    u32     fullH(u32 page) const;
-    u32     fullW(u32 page) const;
-    bool    hasMargins(const u32 page) const;
-    float   lineZoomFactor(const u32 firstPage, u32 &retWidth, u32 &retHeight) const;
-    void    updateVisible() const;
+    // custom trimming management (VM_CUSTOMTRIM)
+    CustomTrim    customTrim;
+    bool          singlePageTrim;
+
+    bool          fileIsLoading;
+
+    // internal processing support methods
+    void        sendState();
+    void        clearSingles(CustomTrim & customTrim);
+    void        endOfSelection();
+    ZoneLoc     getZoneLoc(s32 x, s32 y) const;
+    void        computeScreenSize();
+    QPixmap     getPage(const u32 page);
+    u32         pageH(u32 page) const;
+    u32         pageW(u32 page) const;
+    u32         fullH(u32 page) const;
+    u32         fullW(u32 page) const;
+    bool        hasMargins(const u32 page) const;
+    float       lineZoomFactor(const u32 firstPage, u32 &retWidth, u32 &retHeight) const;
+    void        updateVisible() const;
+    QRect       getTrimmingForPage(s32 page) const;
+    void        pageChanged();
+    float       maxYOff() const;
+    void        adjustYOff(float offset);
+    void        adjustFloorYOff(float offset);
+    void        resetSelection(bool anyway = false);
+    u32         pxrel(u32 page) const;
 
   public slots:
+    void textSelect(bool doSelect);
+    void trimZoneDifferent(bool diff);
+    void thisPageTrim(bool thisPage);
+    void removeSinglePageTrim(s32 page);
+    void addSinglePageTrim(s32 page, QRect trim);
+    void clearAllSingleTrims();
+    void trimZoneSelect(bool doSelect);
+    void selectPageAt(s32 X, s32 Y, bool rightDClick);
+    void gotoPage(const int page);
+    void setColumnCount(int count);
+    void setTitlePageCount(int count);
     void validFilePresent();
+    void up();
+    void down();
+    void top();
+    void bottom();
+    void beginningOfPage();
+    void endOfPage();
+    void pageUp();
+    void pageDown();
+    void pageUpWithOverlap();
+    void pageDownWithOverlap();
+    void zoomIn();
+    void zoomOut();
+    void setViewMode(ViewMode newViewMode);
+    void setZoomFactor(float zoomFactor);
+    void refreshView();
+    void fileLoading();
+    void fileLoaded();
+
+  signals:
+    void stateUpdated(ViewState & state);
 };
 
 #endif // PDFVIEWER_H

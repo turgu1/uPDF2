@@ -52,4 +52,7 @@
         <file>img/48x48/zoom-out.png</file>
         <file>img/48x48/window-close.png</file>
     </qresource>
+    <qresource prefix="/agif">
+        <file>img/busy.gif</file>
+    </qresource>
 </RCC>

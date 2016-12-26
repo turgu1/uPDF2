@@ -18,38 +18,37 @@ struct CachedPage {
 
 class PDFFile : public QObject
 {
-  Q_OBJECT
-private:
-  bool         valid;
-  bool         loaded;
-  bool         loading;
+    Q_OBJECT
+  private:
+    bool         valid;
+    bool         loaded;
+    bool         loading;
 
-public:
-  explicit PDFFile(QObject *parent = 0);
-  ~PDFFile();
+  public:
+    explicit PDFFile(QObject *parent = 0);
+    ~PDFFile();
 
-  QString      filename;
-  CachedPage * cache;
-  PDFDoc     * pdf;
-  u32          maxw, maxh;
-  u32          pages;
-  u32          firstVisible;
-  u32          lastVisible;
+    QString      filename;
+    CachedPage * cache;
+    PDFDoc     * pdf;
+    u32          maxw, maxh;
+    u32          pages;
+    u32          firstVisible;
+    u32          lastVisible;
 
-  void setLoading(bool val);
-  void setLoaded(bool val);
-  void setValid(bool val);
-  bool isValid() { return valid; }
-  void pageCompleted(u32 pageNbr);
+    void setLoading(bool val);
+    void setLoaded(bool val);
+    void setValid(bool val);
+    bool isValid() { return valid; }
 
+  signals:
+    void fileIsLoading();
+    void fileLoadCompleted();
+    void fileIsValid();
+    void pageLoadCompleted();
 
-signals:
-  void fileLoading();
-  void fileLoaded();
-  void fileIsValid();
-  void pageLoadCompleted(u32 pageNbr);
-
-public slots:
+  public slots:
+    void pageCompleted();
 };
 
 #endif // PDFFILE_H

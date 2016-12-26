@@ -108,6 +108,7 @@ LoadPDFFile::LoadPDFFile(const QString & fname, PDFFile & pdfFile) :
   pdfLoader = new PDFLoader(file);
 
   connect(pdfLoader, &PDFLoader::resultReady, this, &LoadPDFFile::handleResults);
+  connect(pdfLoader, &PDFLoader::refresh,     this, &LoadPDFFile::pageReadyForRefresh);
 
   pdfLoader->dopage(0);
   file.setValid(true);
@@ -120,6 +121,11 @@ void LoadPDFFile::handleResults()
   debug(tr("Document Load complete!"));
 
   emit resultReady();
+}
+
+void LoadPDFFile::pageReadyForRefresh()
+{
+  file.pageCompleted();
 }
 
 LoadPDFFile::~LoadPDFFile()

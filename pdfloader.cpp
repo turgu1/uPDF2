@@ -95,8 +95,7 @@ void store(SplashBitmap * const bm, CachedPage & cache)
   const u32 trimh = maxy - miny + 1;
 
   u8 * const trimmed = (u8 *) xcalloc(trimw * trimh * 4, 1);
-  u32 j;
-  for (j = miny; j <= maxy; j++) {
+  for (u32 j = miny; j <= maxy; j++) {
     const u32 destj = j - miny;
     memcpy(trimmed + destj * trimw * 4, src + j * rowsize + minx * 4, trimw * 4);
   }
@@ -174,7 +173,7 @@ void PDFLoader::dopage(const u32 page)
 
 static bool notdone(const bool arr[], const u32 num) {
   u32 i;
-  for (i = 0; i < num; i++) {
+  for (i = 0; i <= num; i++) {
     if (!arr[i]) return true;
   }
   return false;
@@ -206,11 +205,11 @@ void PDFLoader::run()
     const u32 chunks    = pdfFile.pages / chunksize;
     const u32 remainder = pdfFile.pages % chunksize;
 
-    bool done[chunks];
-    memset(done, 0, sizeof(bool) * chunks);
+    bool done[chunks + 1];
+    memset(done, 0, sizeof(bool) * (chunks + 1));
 
     while (notdone(done, chunks)) {
-      for (c = 0; c < chunks; c++) {
+      for (c = 0; c <= chunks; c++) {
 
         if (aborting) return;
 
@@ -218,22 +217,20 @@ void PDFLoader::run()
         const u32 first = __sync_fetch_and_add(&pdfFile.firstVisible, 0);
         if (first) {
           const u32 tmp = pdfFile.firstVisible / chunksize;
-          if (tmp < chunks && !done[tmp]) c = tmp;
+          if (tmp <= chunks && !done[tmp]) c = tmp;
         }
 
-        const u32 max = (c + 1) * chunksize;
         if (done[c]) continue;
+
+        u32 max = (c + 1) * chunksize;
+        if (c == chunks) max -= (chunksize - remainder);
+
         #pragma omp parallel for schedule(guided)
         for (u32 i = c * chunksize; i < max; i++) {
           dopage(i);
         }
         done[c] = true;
       }
-    }
-
-    #pragma omp parallel for schedule(guided)
-    for (c = 0; c < remainder; c++) {
-      dopage(c + chunks * chunksize);
     }
   }
 

@@ -27,6 +27,7 @@ class LoadPDFFile : public QObject
 
   public slots:
     void handleResults();
+    void pageReadyForRefresh();
 
   signals:
     void refresh();

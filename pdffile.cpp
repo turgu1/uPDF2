@@ -6,7 +6,8 @@ PDFFile::PDFFile(QObject * parent) : QObject(parent),
   loaded(false),
   loading(false),
   cache(NULL),
-  pdf(NULL)
+  pdf(NULL),
+  pages(0)
 {
 }
 
@@ -22,16 +23,16 @@ void PDFFile::setValid(bool val) {
 void PDFFile::setLoading(bool val)
 {
   loading = val;
-  if (loading) emit fileLoading();
+  if (loading) emit fileIsLoading();
 }
 
 void PDFFile::setLoaded(bool val)
 {
   loaded = val;
-  if (loaded)  emit fileLoaded();
+  if (loaded)  emit fileLoadCompleted();
 }
 
-void PDFFile::pageCompleted(u32 pageNbr)
+void PDFFile::pageCompleted()
 {
-  emit pageLoadCompleted(pageNbr);
+  emit pageLoadCompleted();
 }

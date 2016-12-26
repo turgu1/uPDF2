@@ -5,6 +5,12 @@
 #include <QSizePolicy>
 #include <QVBoxLayout>
 #include <QPainter>
+#include <QKeyEvent>
+#include <TextOutputDev.h>
+
+#define CTRL_PRESSED event->modifiers().testFlag(Qt::ControlModifier)
+#define LEFT_BUTTON  (event->button() == Qt::LeftButton)
+#define RIGHT_BUTTON (event->button() == Qt::RightButton)
 
 PDFViewer::PDFViewer(QWidget * parent) : QWidget(parent),
   viewMode(VM_PAGE),
@@ -13,11 +19,27 @@ PDFViewer::PDFViewer(QWidget * parent) : QWidget(parent),
   yOff(0.0f),
   columns(1),
   titlePages(0),
-  cachedSize(7 * 1024 * 1024)
+  leftDClickColumnsCount(2),
+  rightDClickColumnsCount(5),
+  zoneSelection(false),
+  trimZoneSelection(false),
+  textSelection(false),
+  pagePosCount(0),
+  selX(0), selY(0), selX2(0), selY2(0), savedX(0), savedY(0),
+  lastX(0), lastY(0),
+  someDrag(false),
+  selector(NULL),
+  clipText(""),
+  cachedSize(7 * 1024 * 1024),
+  singlePageTrim(false),
+  fileIsLoading(false)
 {
   setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   update();
   updateGeometry();
+
+  customTrim.initialized = false;
+  customTrim.similar     = true;
 
   // Initialize the uncompressed images cache
   srand(time(NULL));
@@ -27,29 +49,377 @@ PDFViewer::PDFViewer(QWidget * parent) : QWidget(parent),
     cachedPage[i] = USHRT_MAX;
     pix[i]        = QPixmap();
   }
+
+  setFocusPolicy(Qt::StrongFocus);
 }
 
 void PDFViewer::setPDFFile(PDFFile * f)
 {
   pdfFile = f;
 
-  connect(f, &PDFFile::fileIsValid, this, &PDFViewer::validFilePresent);
+  connect(f, &PDFFile::fileIsValid,       this, &PDFViewer::validFilePresent);
+  connect(f, &PDFFile::pageLoadCompleted, this, &PDFViewer::refreshView     );
+  connect(f, &PDFFile::fileIsLoading,     this, &PDFViewer::fileLoading     );
+  connect(f, &PDFFile::fileLoadCompleted, this, &PDFViewer::fileLoaded      );
+
   update();
 }
 
-void PDFViewer::validFilePresent()
+void PDFViewer::keyPressEvent(QKeyEvent * event)
 {
-  update();
+  resetSelection();
+  switch (event->key()) {
+    case Qt::Key_J:    if (CTRL_PRESSED) bottom(); else pageDownWithOverlap(); break;
+    case Qt::Key_K:    if (CTRL_PRESSED) top();    else pageUpWithOverlap();   break;
+    case Qt::Key_Home: if (CTRL_PRESSED) top();    else beginningOfPage();     break;
+    case Qt::Key_End:  if (CTRL_PRESSED) bottom(); else endOfPage();           break;
+
+    case Qt::Key_Up:       up();       break;
+    case Qt::Key_Down:     down();     break;
+    case Qt::Key_PageDown: pageDown(); break;
+    case Qt::Key_PageUp:   pageUp();   break;
+
+    default:
+      QWidget::keyPressEvent(event);
+  }
+}
+
+void PDFViewer::wheelEvent(QWheelEvent * event)
+{
+  int numPixels  = event->angleDelta().y() / 30;
+
+  if (event->inverted()) numPixels = -numPixels;
+
+  if (CTRL_PRESSED) {
+    viewMode = VM_ZOOMFACTOR;
+    if (numPixels > 0){
+      viewZoom *= 0.833333f;
+      if (viewZoom < 0.1f) viewZoom = 0.1f;
+    }
+    else{
+      viewZoom *= 1.2f;
+      if (viewZoom > 10.0f) viewZoom = 10.0f;
+    }
+  }
+  else{
+    adjustYOff(SMALL_MOVE * numPixels);
+  }
+  pageChanged();
+  event->accept();
 }
 
 void PDFViewer::mouseMoveEvent(QMouseEvent * event)
 {
-  QWidget::mouseMoveEvent(event);
+  if (LEFT_BUTTON) {
+    debug(QString("Drag..."));
+  }
+  else {
+    // Set the cursor appropriately
+    if (zoneSelection) {
+      ZoneLoc zl = getZoneLoc(event->x(), event->y());
+      debug(QString("Zone Loc: %1").arg(zl));
+      switch (zl) {
+        case TZL_NW:
+        case TZL_SE: setCursor(Qt::SizeAllCursor); break;
+        case TZL_NE:
+        case TZL_SW: setCursor(Qt::SizeAllCursor); break;
+        case TZL_E:
+        case TZL_W:  setCursor(Qt::SizeHorCursor); break;
+        case TZL_N:
+        case TZL_S:  setCursor(Qt::SizeVerCursor); break;
+
+        default:     setCursor(Qt::CrossCursor);   break;
+      }
+    }
+    else {
+      setCursor(Qt::ArrowCursor);
+    }
+  }
+  event->accept();
 }
 
 void PDFViewer::mousePressEvent(QMouseEvent * event)
 {
-  QWidget::mousePressEvent(event);
+  lastX = event->x();
+  lastY = event->y();
+
+  if (LEFT_BUTTON) {
+    resetSelection();
+    if (textSelection) {
+
+      selX   = lastX;
+      selY   = lastY;
+      update();
+    }
+    else if (trimZoneSelection) {
+      savedX = selX;
+      savedY = selY;
+
+      ZoneLoc zoneLoc = getZoneLoc(event->x(), event->y());
+      if (zoneLoc == TZL_NONE) {
+        selX   = lastX;
+        selY   = lastY;
+      }
+    }
+  }
+
+  event->accept();
+}
+
+void PDFViewer::mouseDoubleClickEvent(QMouseEvent * event)
+{
+  lastX = event->x();
+  lastY = event->y();
+
+  if (LEFT_BUTTON) {
+    someDrag = false;
+    selectPageAt(lastX, lastY, CTRL_PRESSED);
+  }
+  else if (RIGHT_BUTTON) {
+    selectPageAt(lastX, lastY, true);
+  }
+
+  event->accept();
+}
+
+void PDFViewer::mouseReleaseEvent(QMouseEvent * event)
+{
+  if (zoneSelection && LEFT_BUTTON &&
+      selX && selY && selX2 && selY2) {
+    if ((selX != selX2) && (selY != selY2) && someDrag) {
+
+      if (trimZoneSelection) {
+        s32 tmp;
+        if (selX > selX2) {
+          tmp   = selX;
+          selX  = selX2;
+          selX2 = tmp;
+        }
+        if (selY > selY2) {
+          tmp   = selY;
+          selY  = selY2;
+          selY2 = tmp;
+        }
+      }
+      endOfSelection();
+    }
+    if (trimZoneSelection && !someDrag) {
+      selX = savedX;
+      selY = savedY;
+    }
+  }
+}
+
+QSize PDFViewer::sizeHint() const
+{
+  return QSize(0,0);
+}
+
+void PDFViewer::sendState()
+{
+  ViewState state;
+  u32 page = yOff;
+
+  state.page          = page;
+  state.pageCount     = pdfFile->pages;
+  state.viewMode      = viewMode;
+  state.viewZoom      = viewZoom;
+  state.fileLoading   = fileIsLoading;
+  state.trimSelection = trimZoneSelection;
+  state.textSelection = textSelection;
+
+  emit stateUpdated(state);
+}
+
+void PDFViewer::clearSingles(CustomTrim & customTrim)
+{
+  SinglePageTrim *curr, *next;
+
+  curr = customTrim.singles;
+  while (curr) {
+    next = curr->next;
+    free(curr);
+    curr = next;
+  }
+  customTrim.singles = NULL;
+}
+
+void PDFViewer::endOfSelection()
+{
+  s32 X, Y, W, H;
+  if (selX < selX2) {
+    X = selX;
+    W = selX2 - X;
+  }
+  else {
+    X = selX2;
+    W = selX - X;
+  }
+
+  if (selY < selY2) {
+    Y = selY;
+    H = selY2 - Y;
+  }
+  else {
+    Y = selY2;
+    H = selY - Y;
+  }
+
+  // Search for the page caracteristics saved before with
+  // the draw method.
+  u32 idx = 0;
+  PagePos *pp = pagePosOnScreen;
+
+  while (idx < pagePosCount) {
+    if ((X >= pp->X0)         &&
+        (Y >= pp->Y0)         &&
+        (X < (pp->X + pp->W)) &&
+        (Y < (pp->Y + pp->H))) {
+      break;
+    }
+    idx++;
+    pp++;
+  }
+  if (idx >= pagePosCount) {
+    update();
+    return; // Not found
+  }
+
+  if (textSelection) {
+    // Adjust the selection rectangle to be inside the real page data
+    if ((X + W) > (pp->X + pp->W)) {
+      W = pp->X + pp->W - X;
+    }
+    if ((Y + H) > (pp->Y + pp->H)) {
+      H = pp->Y + pp->H - Y;
+    }
+    if (((X + W) < pp->X) ||
+      ((Y + H) < pp->Y)) {
+      update();
+      return; // Out of the printed area
+    }
+    if (X < pp->X) {
+      W -= (pp->X - X);
+      X = pp->X;
+    }
+    if (Y < pp->Y) {
+      H -= (pp->Y - Y);
+      Y = pp->Y;
+    }
+  }
+  else if (trimZoneSelection) {
+    // Adjust the selection rectangle to be inside the extended page data
+    if ((X + W) > (pp->X0 + pp->W0)) {
+      W = pp->X0 + pp->W0 - X;
+    }
+    if ((Y + H) > (pp->Y0 + pp->H0)) {
+      H = pp->Y0 + pp->H0 - Y;
+    }
+    if (((X + W) < pp->X0) || ((Y + H) < pp->Y0)) {
+      update();
+      return; // Out of the printed area
+    }
+    if (X < pp->X0) {
+      W -= (pp->X0 - X);
+      X = pp->X0;
+    }
+    if (Y < pp->Y0) {
+      H -= (pp->Y0 - Y);
+      Y = pp->Y0;
+    }
+  }
+
+  // Convert to page coords
+  if (viewMode == VM_TRIM   ||
+      viewMode == VM_PGTRIM ||
+     (viewMode == VM_CUSTOMTRIM && !trimZoneSelection)) {
+    X = X - pp->X0 + (pp->zoom * pdfFile->cache[pp->page].left);
+    Y = Y - pp->Y0 + (pp->zoom * pdfFile->cache[pp->page].top ) ;
+
+    if (hasMargins(pp->page)) {
+      X -= (pp->X - pp->X0);
+      Y -= (pp->Y - pp->Y0);
+    }
+  }
+  else {
+    X -= pp->X0;
+    Y -= pp->Y0;
+  }
+
+  // Convert to original page resolution
+  X /= (pp->zoom * pp->ratioX);
+  Y /= (pp->zoom * pp->ratioY);
+  W /= (pp->zoom * pp->ratioX);
+  H /= (pp->zoom * pp->ratioY);
+
+  if (textSelection) {
+    TextOutputDev * const dev = new TextOutputDev(NULL, true, 0, false, false);
+    pdfFile->pdf->displayPage(dev, pp->page + 1, 144, 144, 0, true, false, false);
+    GooString *str = dev->getText(X, Y, X + W, Y + H);
+    const char * const cstr = str->getCString();
+
+    // Save it for clipboard retrieval
+    clipText = cstr;
+
+    delete str;
+    delete dev;
+  }
+  else if (trimZoneSelection) {
+    if (singlePageTrim) {
+      addSinglePageTrim(pp->page, QRect(X, Y, W, H));
+    }
+    else {
+      if (customTrim.similar) {
+        customTrim.odd = customTrim.even = QRect(X, Y, W, H);
+      }
+      else if (pp->page & 1) {
+        customTrim.even = QRect(X, Y, W, H);
+      }
+      else {
+        customTrim.odd = QRect(X, Y, W, H);
+      }
+      customTrim.initialized = true;
+    }
+  }
+}
+
+ZoneLoc PDFViewer::getZoneLoc(s32 x, s32 y) const
+{
+  if (x > (selX - 5) && x < (selX + 5)) {
+    if      (y > (selY  - 5) && y < (selY  + 5)) return TZL_NW;
+    else if (y > (selY2 - 5) && y < (selY2 + 5)) return TZL_SW;
+    else                                         return TZL_W;
+  }
+  else if (x > (selX2 - 5) && x < (selX2 + 5)) {
+    if      (y > (selY  - 5) && y < (selY + 5 )) return TZL_NE;
+    else if (y > (selY2 - 5) && y < (selY2 + 5)) return TZL_SE;
+    else                                         return TZL_E;
+  }
+  else if (y > (selY  - 5) && y < (selY  + 5))   return TZL_N;
+  else if (y > (selY2 - 5) && y < (selY2 + 5))   return TZL_S;
+  else                                           return TZL_NONE;
+}
+
+QRect PDFViewer::getTrimmingForPage(s32 page) const
+{
+  SinglePageTrim * curr = customTrim.singles;
+  QRect result;
+
+  while (curr && (curr->page < page)) curr = curr->next;
+
+  if (curr && (curr->page == page)) {
+    result = curr->pageTrim;
+  }
+  else {
+    if (page & 1) {
+      result = customTrim.even;
+    }
+    else {
+      result = customTrim.odd;
+    }
+  }
+
+  return result;
 }
 
 u32 PDFViewer::pageH(u32 page) const
@@ -61,16 +431,16 @@ u32 PDFViewer::pageH(u32 page) const
   if (viewMode == VM_TRIM || viewMode == VM_PGTRIM) {
     h = pdfFile->cache[page].h;
   }
-  else if (viewMode == VM_CUSTOMTRIM && !trim_zone_selection) {
-    if (my_trim.initialized) {
-      const trim_struct * the_trim = get_trimming_for_page(page);
-      h = the_trim->H;
+  else if (viewMode == VM_CUSTOMTRIM && !trimZoneSelection) {
+    if (customTrim.initialized) {
+      QRect theTrim = getTrimmingForPage(page);
+      h = theTrim.height();
     }
     else {
       return pdfFile->cache[page].h;
     }
   }
-  else { // VM_PAGE || VM_WIDTH || VM_ZOOMFACTOR || (VM_CUSTOMTRIM && trim_zone_selection)
+  else { // VM_PAGE || VM_WIDTH || VM_ZOOMFACTOR || (VM_CUSTOMTRIM && trimZoneSelection)
     return  pdfFile->cache[page].h +
         pdfFile->cache[page].top   +
         pdfFile->cache[page].bottom;
@@ -86,16 +456,16 @@ u32 PDFViewer::pageW(u32 page) const
   if (viewMode == VM_TRIM || viewMode == VM_PGTRIM) {
     return pdfFile->cache[page].w;
   }
-  else if (viewMode == VM_CUSTOMTRIM && !trim_zone_selection) {
-    if (my_trim.initialized) {
-      const trim_struct * the_trim = get_trimming_for_page(page);
-      return  the_trim->W;
+  else if (viewMode == VM_CUSTOMTRIM && !trimZoneSelection) {
+    if (customTrim.initialized) {
+      QRect theTrim = getTrimmingForPage(page);
+      return  theTrim.width();
     }
     else {
       return pdfFile->cache[page].w;
     }
   }
-  else { // VM__PAGE || VM__WIDTH || VM__ZOOMFACTOR || (VM_CUSTOMTRIM && trim_zone_selection)
+  else { // VM_PAGE || VM_WIDTH || VM_ZOOMFACTOR || (VM_CUSTOMTRIM && trimZoneSelection)
     return pdfFile->cache[page].w +
         pdfFile->cache[page].left  +
         pdfFile->cache[page].right;
@@ -126,22 +496,6 @@ u32 PDFViewer::fullH(u32 page) const
     if (h > fh) fh = h;
   }
 
-  // if (view_mode == Z_TRIM || view_mode == Z_PGTRIM || (view_mode == Z_MYTRIM && !trim_zone_selection))
-  //   for (i = page; i < limit; i++) {
-  //     if (file->cache[i].ready && (file->cache[i].h > fh))
-  //       fh = file->cache[i].h;
-  //   }
-  // else
-  //   for (i = page; i < limit; i++) {
-  //     if (file->cache[i].ready) {
-  //       u32 h = file->cache[i].h +
-  //           file->cache[i].top   +
-  //           file->cache[i].bottom;
-  //       if (h > fh)
-  //         fh = h;
-  //     }
-  //   }
-
   return fh;
 }
 
@@ -159,7 +513,7 @@ u32 PDFViewer::fullW(u32 page) const
     limit = page + columns;
   }
 
-  if (limit > file->pages) limit = pdfFile->pages;
+  if (limit > pdfFile->pages) limit = pdfFile->pages;
 
   for (i = page; i < (page + columns); i++) {
     fw += pageW(i < limit ? i : 0);
@@ -198,16 +552,16 @@ float PDFViewer::lineZoomFactor(const u32 firstPage, u32 &retWidth, u32 &retHeig
   switch (viewMode) {
     case VM_TRIM:
     case VM_WIDTH:
-      zoomFactor = (float)width / lineWidth;
+      zoomFactor = (float)(width()) / lineWidth;
       break;
     case VM_PAGE:
     case VM_PGTRIM:
     case VM_CUSTOMTRIM:
-      if (((float)lineWidth / lineHeight) > ((float)width / height)) {
-        zoomFactor = (float)width / lineWidth;
+      if (((float)lineWidth / lineHeight) > ((float)(width()) / height())) {
+        zoomFactor = (float)(width()) / lineWidth;
       }
       else {
-        zoomFactor = (float)height / lineHeight;
+        zoomFactor = (float)(height()) / lineHeight;
       }
       break;
     default:
@@ -261,7 +615,7 @@ void PDFViewer::updateVisible() const
 
 // Put an uncompressed page Pixmap version in the cache if not already
 // available. Return the uncompressed page.
-QPixmap PDFViewer::doCache(const u32 page)
+QPixmap PDFViewer::getPage(const u32 page)
 {
   u32 i;
   for (i = 0; i < CACHE_MAX; i++) {
@@ -312,23 +666,17 @@ void PDFViewer::paintEvent(QPaintEvent * event)
   QPainter painter(this);
 
   // If nothing is visible on screen, nothing to do
-  if (!visible) return;
+  if (!isVisible()) return;
+
+  painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
   // Paint background
   painter.fillRect(geometry(), QColor("gray"));
 
   if (!pdfFile->isValid()) return;
 
-#if 0
-  QPixmap px = doCache(0);
-
-  painter.drawPixmap(0, 0, px);
-  debug("Ready to show...");
-
-#else
   if (!pdfFile->cache) return;
 
-  //?computeScreenSize();
   updateVisible();
 
   const QColor pageColor("white");
@@ -336,19 +684,11 @@ void PDFViewer::paintEvent(QPaintEvent * event)
   int X, Y, W, H;
   int Xs, Ys, Ws, Hs; // Saved values
 
-  //?fl_clip_box(screenX, screenY, screenWidth, screenHeight, X, Y, W, H);
-
-  //?if (W == 0 || H == 0)
-  //?  return;
-
   //--> fl_overlay_clear(); rubber banding...
 
-  struct cachedPage *cur = &pdfFile->cache[pdfFile->firstVisible];
+  CachedPage * cur = &pdfFile->cache[pdfFile->firstVisible];
 
   if (!cur->ready) return;
-
-  //? insure that nothing will be drawned outside the clipped area
-  //?fl_push_clip(X, Y, W, H);
 
   if (viewMode != VM_ZOOMFACTOR) xOff = 0.0f;
 
@@ -364,7 +704,7 @@ void PDFViewer::paintEvent(QPaintEvent * event)
 
   const float invisibleY = yOff - floorf(yOff);
 
-  // pp will acquire all topological information required to identify the selection
+  // pp will hold all topological information required to identify the selection
   // made by the user with mouse movements
   PagePos * pp = pagePosOnScreen;
   pagePosCount = 0;
@@ -372,7 +712,7 @@ void PDFViewer::paintEvent(QPaintEvent * event)
   u32 page = pdfFile->firstVisible;
 
   // Do the following for each line of pages
-  while ((currentScreenVPos < height) && (firstPageInLine < pdfFile->pages)) {
+  while ((currentScreenVPos < height()) && (firstPageInLine < pdfFile->pages)) {
 
     float zoom;
     u32   lineWidth, lineHeight;
@@ -392,11 +732,11 @@ void PDFViewer::paintEvent(QPaintEvent * event)
     H = lineHeight * zoom; // Line of pages height in screen pixels
 
     if (firstLine) {
-      Y = y - invisibleY * H;
+      Y = y() - invisibleY * H;
     }
 
-    X = x +
-        width / 2 -
+    X = x() +
+        width() / 2 -
         zoom * lineWidth / 2 +
         (zoom * xOff * lineWidth);
 
@@ -420,7 +760,6 @@ void PDFViewer::paintEvent(QPaintEvent * event)
       W = pageW(page) * zoom;
 
       // Paint the page backgroud rectangle, save coordinates for next loop
-      //?fl_rectf(Xs = X, Ys = Y, Ws = W, Hs = H, pageColor);
       painter.fillRect(QRect(Xs = X, Ys = Y, Ws = W, Hs = H), pageColor);
 
       #if DEBUGGING && 0
@@ -440,20 +779,20 @@ void PDFViewer::paintEvent(QPaintEvent * event)
       float ratioY = 1.0f;
 
       if ((viewMode == VM_CUSTOMTRIM) &&
-          !trim_zone_selection &&
-          my_trim.initialized) {
+          !trimZoneSelection &&
+          customTrim.initialized) {
 
-        const trim_struct * the_trim = get_trimming_for_page(page);
+        QRect theTrim = getTrimmingForPage(page);
 
         s32 w, h, th;
         float zw, zh;
 
-        th = the_trim->H < 2*MARGIN ? the_trim->H + MARGIN : the_trim->H;
+        th = theTrim.height() < 2*MARGIN ? theTrim.height() + MARGIN : theTrim.height();
 
-        fl_push_clip(
+        painter.setClipRect(
           Xs + zoomedMarginHalf,
           Ys + zoomedMarginHalf,
-          w = zoom * the_trim->W - zoomedMargin,
+          w = zoom * theTrim.width() - zoomedMargin,
           h = zoom * th - zoomedMargin);
 
         ratioX = w / (float)(w + zoomedMargin);
@@ -464,8 +803,8 @@ void PDFViewer::paintEvent(QPaintEvent * event)
         zw = ratioX * zoom;
         zh = ratioY * zoom;
 
-        X -= zw * (the_trim->X - cur->left) - zoomedMarginHalf;
-        Y -= zh * (the_trim->Y - cur->top) - zoomedMarginHalf;
+        X -= zw * (theTrim.x() - cur->left) - zoomedMarginHalf;
+        Y -= zh * (theTrim.y() - cur->top) - zoomedMarginHalf;
 
         W = zw * cur->w;
         H = zh * cur->h;
@@ -473,10 +812,10 @@ void PDFViewer::paintEvent(QPaintEvent * event)
         #if DEBUGGING && 0
           if (firstPage) {
             debug("My Trim: X: %d Y: %d W: %d H: %d\n",
-              the_trim->X,
-              the_trim->Y,
-              the_trim->W,
-              the_trim->H);
+              theTrim.x(),
+              theTrim.y(),
+              theTrim.width(),
+              theTrim.height());
             debug("Clipping: X: %d, Y: %d, W: %d, H: %d\n", Xs, Ys, w, h);
           }
         #endif
@@ -509,34 +848,41 @@ void PDFViewer::paintEvent(QPaintEvent * event)
         }
       #endif
 
-      content(page, X, Y, W, H);
+      // Do render the page on the canvas
+      QPixmap img = getPage(page);
+      painter.drawPixmap(QRect(X, Y, W, H), img);
 
-//?      if (viewMode == VM_CUSTOMTRIM &&
-//?          !trim_zone_selection &&
-//?          my_trim.initialized) {
-//?        fl_pop_clip();
-//?      }
+//      if (viewMode == VM_CUSTOMTRIM &&
+//          !trimZoneSelection &&
+//          my_trim.initialized) {
+//        fl_pop_clip();
+//      }
 
-      if (firstPage && (view_mode == VM_CUSTOMTRIM) && trim_zone_selection) {
+      if (firstPage && (viewMode == VM_CUSTOMTRIM) && trimZoneSelection) {
 
-        if (my_trim.initialized) {
+        if (customTrim.initialized) {
 
           s32 w, h;
 
-          const trim_struct * the_trim = get_trimming_for_page(page);
+          QRect theTrim = getTrimmingForPage(page);
 
-          fl_overlay_rect(
-            selx = Xs + (zoom * the_trim->X),
-            sely = Ys + (zoom * the_trim->Y),
-            w    = (zoom * the_trim->W),
-            h    = (zoom * the_trim->H));
+          if (!selector) selector = new QRubberBand(QRubberBand::Rectangle, this);
+          selector->setGeometry(
+            selX = Xs + (zoom * theTrim.x()     ),
+            selY = Ys + (zoom * theTrim.y()     ),
+            w    =      (zoom * theTrim.width() ),
+            h    =      (zoom * theTrim.height()));
 
-          selx2 = selx + w;
-          sely2 = sely + h;
+          if (!selector->isVisible()) selector->show();
 
-          //fl_message("selx: %d, sely: %d, w: %d, h: %d", selx, sely, w, h);
+          selX2 = selX + w;
+          selY2 = selY + h;
+
+          //fl_message("selX: %d, selY: %d, w: %d, h: %d", selX, selY, w, h);
         }
       }
+
+      if (!zoneSelection && selector && selector->isVisible()) selector->hide();
 
       // For each displayed page, we keep those parameters
       // to permit the localization of the page on screen when
@@ -544,16 +890,16 @@ void PDFViewer::paintEvent(QPaintEvent * event)
       if (pagePosCount < PAGES_ON_SCREEN_MAX) {
 
         pp->page    = page;
-        pp->X0      = Xs;
+        pp->X0      = Xs;  // Page output coor
         pp->Y0      = Ys;
         pp->W0      = Ws;
         pp->H0      = Hs;
-        pp->X       = X;
+        pp->X       = X;   // inked portion of the page coor
         pp->Y       = Y;
         pp->W       = W;
         pp->H       = H;
         pp->zoom    = zoom;
-        pp->ratioX  = ratioX;
+        pp->ratioX  = ratioX; // margin ratio
         pp->ratioY  = ratioY;
 
         // if (pagePosCount == 0)
@@ -581,19 +927,567 @@ void PDFViewer::paintEvent(QPaintEvent * event)
     Y += (lineHeight * zoom) + zoomedMarginHalf;
 
     firstPageInLine += limit;
-    currentScreenVPos = Y - y;
+    currentScreenVPos = Y - y();
 
     firstLine = false;
   }
 
   pdfFile->lastVisible = page;
-
-  //?fl_pop_clip();
-#endif
 }
 
-QSize PDFViewer::sizeHint() const
+void PDFViewer::pageChanged()
 {
-  return QSize(0,0);
+  s32 page = yOff;
+
+  if (trimZoneSelection) {
+    SinglePageTrim * curr = customTrim.singles;
+    while (curr && (curr->page < page)) curr = curr->next;
+
+    singlePageTrim = curr && (curr->page == page);
+  }
+
+  sendState();
+  update();
 }
 
+// Compute the maximum yoff value, taking care of the number of
+// columns displayed, title pages and the screen size. Start at the end of the
+// document, getting up to the point where the line of pages will be
+// out of reach on screen.
+//
+// Pages = 8, columns = 3, title pages = 1
+// last = 7 - (7 % 3) - (columns - title_pages) = 7 - 1 - 2 = 4 + 3 = 7
+
+// Pages = 9, columns = 3, title pages = 2
+// last = 8 - (8 % 3) - (columns - title_pages) = 8 - 2 - 1 = 5 + 3
+
+// Pages = 13, columns = 4, title pages = 1
+// last = 12 - (12 % 4) - (columns - title_pages) = 12 - 0 - 3 = 9
+float PDFViewer::maxYOff() const
+{
+  float zoom, f;
+  u32   lineWidth, lineHeight, h;
+
+  if (pdfFile->pages == 0) return 0.0f;
+
+  s32 pages = pdfFile->pages;
+  s32 last  = pages - 1;
+
+  last     -= (last % columns);
+  if ((titlePages > 0) && (titlePages < columns)) {
+    last -= (columns - titlePages);
+    if (last < (pages - (s32)columns)) {
+      last += columns;
+    }
+  }
+
+  if (last < 0) last = 0;
+
+  if (!pdfFile->cache[last].ready)
+    f = last + 0.5f;
+  else {
+    s32 H = height();
+
+    while (true) {
+      zoom = lineZoomFactor(last, lineWidth, lineHeight);
+      H   -= (h = zoom * (lineHeight + MARGINHALF));
+
+      if (H <= 0) {
+        H += (MARGINHALF * zoom);
+        f = last + (float)(-H) / (zoom * lineHeight);
+        break;
+      }
+
+      last -= columns;
+      if (last < 0) {
+        f = 0.0f;
+        break;
+      }
+    }
+  }
+  return f;
+}
+
+// Advance the yoff position by an offset, taking into account the number
+// of columns and the title_pages count. Yoff is adjusted to correspond to
+// the first page offset to be disblayed on a line of pages. For examples:
+//
+//    columns   title_pages   offset    yoff    new_yoff
+//
+//       3           1          1         0        1
+//       3           2          1         0        2
+//       3           2          2         0        5
+//       3           1         -1         3        1
+void PDFViewer::adjustYOff(float offset)
+{
+  float newYOff = yOff;
+
+  if (offset != 0.0f) {
+
+    newYOff += offset;
+    s32 diff = floorf(newYOff) - floorf(yOff); // Number of absolute pages of difference
+
+    if ((diff != 0) && (newYOff >= 0.0f)) {
+      // The displacement is to another line of pages
+      newYOff += (float)diff * (columns - 1);
+      if ((titlePages > 0) && (titlePages < columns)) {
+        // There is title pages to take care of
+        if (newYOff < 1.0f) {
+          newYOff += (columns - titlePages);
+        }
+        else if (yOff < 1.0f) {
+          newYOff -= (columns - titlePages);
+        }
+      }
+    }
+
+    //printf("diff: %d, yoff: %f new_yoff: %f\n", diff, yoff, new_yoff);
+
+    //  float y = floorf(yoff);
+    //  yoff += offset;
+    //  float diff = floorf(yoff) - y; // diff is the number of "line of pages" to advance
+    //  yoff = yoff + (diff * columns) - diff;
+  }
+
+  if (newYOff < 0.0f)
+    newYOff = 0.0f;
+  else {
+    float y = maxYOff();
+
+    if (newYOff > y) newYOff = y;
+  }
+
+  yOff = newYOff;
+}
+
+void PDFViewer::adjustFloorYOff(float offset)
+{
+  float newYOff = floorf(yOff);
+
+  // From here, almost same code as adjustYOff...'
+
+  if (offset != 0.0f) {
+
+    newYOff += offset;
+    s32 diff = newYOff - floorf(yOff);
+
+    if ((diff != 0) && (newYOff >= 0.0f)) {
+      if ((titlePages > 0) && (titlePages < columns) && (yOff < 1.0f)) {
+        newYOff += ((float)diff * (columns - 1)) - (columns - titlePages);
+      }
+      else {
+        newYOff += (float)diff * (columns - 1);
+      }
+    }
+  }
+
+  if (newYOff < 0.0f) {
+    newYOff = 0.0f;
+  }
+  else {
+    float max = maxYOff();
+
+    if (newYOff > max) newYOff = max;
+  }
+
+  yOff = newYOff;
+}
+
+void PDFViewer::resetSelection(bool anyway)
+{
+  if (anyway || !trimZoneSelection) {
+    savedX = savedY = selX = selY = selX2 = selY2 = 0;
+  }
+}
+
+// Compute the vertical screen size of a line of pages
+u32 PDFViewer::pxrel(u32 page) const
+{
+  float zoom;
+  u32 lineWidth, lineHeight;
+
+  zoom = lineZoomFactor(page, lineWidth, lineHeight);
+  return lineHeight * zoom;
+}
+
+//----- Slots ------
+
+// User requested text selection to copy to clipboard (or not if do_select is false)
+void PDFViewer::textSelect(bool doSelect)
+{
+  zoneSelection = textSelection = doSelect;
+  trimZoneSelection = false;
+  resetSelection();
+  update();
+}
+
+void PDFViewer::trimZoneDifferent(bool diff)
+{
+  bool wasSimilar = customTrim.similar;
+  customTrim.similar = !diff;
+
+  if (!wasSimilar && customTrim.similar) {
+    s32 page = yOff;
+
+    if (page & 1) {
+      customTrim.odd = customTrim.even;
+    }
+    else {
+      customTrim.even = customTrim.odd;
+    }
+  }
+  update();
+}
+
+void PDFViewer::thisPageTrim(bool thisPage)
+{
+  s32 page = yOff;
+
+  singlePageTrim = thisPage;
+
+  if (singlePageTrim) {
+    QRect & trim = (page & 1) ? customTrim.even : customTrim.odd;
+    addSinglePageTrim(page, trim);
+  }
+  else {
+    removeSinglePageTrim(page);
+    pageChanged();
+  }
+}
+
+void PDFViewer::removeSinglePageTrim(s32 page)
+{
+  SinglePageTrim *prev, *curr, *next;
+
+  prev = NULL;
+  curr = customTrim.singles;
+  while (curr && (curr->page < page)) {
+    prev = curr;
+    curr = curr->next;
+  }
+
+  if (curr && (curr->page == page)) {
+    next = curr->next;
+    free(curr);
+
+    if (prev) {
+      prev->next = next;
+    }
+    else {
+      customTrim.singles = next;
+    }
+  }
+}
+
+void PDFViewer::addSinglePageTrim(s32 page, QRect trim)
+{
+  SinglePageTrim *prev, *curr, *s;
+
+  prev = NULL;
+  curr = customTrim.singles;
+  while (curr && (curr->page < page)) {
+    prev = curr;
+    curr = curr->next;
+  }
+
+  if ((curr == NULL) || (curr->page != page)) {
+    s = (SinglePageTrim *) xmalloc(sizeof(SinglePageTrim));
+    s->next = curr;
+    if (prev)
+      prev->next = s;
+    else
+      customTrim.singles = s;
+    curr = s;
+  }
+
+  curr->page     = page;
+  curr->pageTrim = trim;
+}
+
+void PDFViewer::clearAllSingleTrims()
+{
+  clearSingles(customTrim);
+}
+
+// User requested trimming zone selection (or not if do_select is false).
+// This is in support of the Z_MYTRIM view_mode
+void PDFViewer::trimZoneSelect(bool doSelect)
+{
+  static float savedXOff;
+  static float savedYOff;
+  static u32   savedColumns;
+  static bool  initialized = false;
+
+  debug(QString("trimZoneSelect: %1").arg(doSelect));
+
+  trimZoneSelection = (viewMode == VM_CUSTOMTRIM) && doSelect;
+
+  if (viewMode == VM_CUSTOMTRIM) {
+
+    if (trimZoneSelection) {
+
+      zoneSelection = true;
+
+      savedXOff     = xOff;
+      savedYOff     = yOff;
+      savedColumns  = columns;
+      initialized   = true;
+      columns       = 1;
+      textSelection = false;
+      yOff          = floorf(yOff);
+
+      if (!customTrim.initialized) {
+        s32 page = yOff;
+
+        customTrim.initialized = true;
+        customTrim.similar     = true;
+        customTrim.singles     = NULL;
+
+        // To insure that the initial trim zone rectangle will be visible on screen
+        // We offset it off 25 pixels from the visible edges of the page
+
+        if ((pdfFile->cache[page].w > 150) && (pdfFile->cache[page].h > 150)) {
+          customTrim.odd = customTrim.even = QRect(
+                pdfFile->cache[page].left + 25,
+                pdfFile->cache[page].top  + 25,
+                pdfFile->cache[page].w    - 50,
+                pdfFile->cache[page].h    - 50);
+        }
+      }
+
+      setMouseTracking(true);
+    }
+    else {
+      zoneSelection = false;
+
+      if (initialized) {
+        xOff    = savedXOff;
+        yOff    = savedYOff;
+        columns = savedColumns;
+      }
+
+      setMouseTracking(false);
+    }
+
+    resetSelection();
+    pageChanged();
+  }
+}
+
+void PDFViewer::selectPageAt(s32 X, s32 Y, bool rightDClick)
+{
+  u32 idx = 0;
+  PagePos *pp = pagePosOnScreen;
+
+  while (idx < pagePosCount) {
+    if ((X >= pp->X0)         &&
+        (Y >= pp->Y0)         &&
+        (X < (pp->X + pp->W)) &&
+        (Y < (pp->Y + pp->H))) {
+      break;
+    }
+    idx++;
+    pp++;
+  }
+  if (idx >= pagePosCount) return; // Not found
+
+  if (rightDClick) {
+    if (columns != rightDClickColumnsCount) {
+      leftDClickColumnsCount = columns;
+    }
+  }
+  setColumnCount(rightDClick ?
+                 rightDClickColumnsCount :
+                (zoneSelection ? 1 : leftDClickColumnsCount));
+  gotoPage(pp->page);
+}
+
+void PDFViewer::gotoPage(const int page)
+{
+  yOff = page;
+  adjustYOff(0);
+  resetSelection();
+  pageChanged();
+}
+
+void PDFViewer::setColumnCount(int count)
+{
+  if ((count >= 1) && (count <= 5)) {
+    columns = count;
+    resetSelection();
+    pageChanged();
+  }
+}
+
+void PDFViewer::setTitlePageCount(int count)
+{
+  if (count <= 4) {
+    titlePages = count;
+    resetSelection();
+    pageChanged();
+  }
+}
+
+void PDFViewer::validFilePresent()
+{
+  update();
+}
+
+void PDFViewer::up()
+{
+  adjustYOff(-SMALL_MOVE);
+  pageChanged();
+}
+
+void PDFViewer::down()
+{
+  adjustYOff(SMALL_MOVE);
+  pageChanged();
+}
+
+void PDFViewer::beginningOfPage()
+{
+  yOff = floor(yOff);
+  pageChanged();
+}
+
+void PDFViewer::endOfPage()
+{
+  u32 page = yOff;
+  s32 sh   = height() * viewZoom;
+
+  if (pdfFile->cache[page].ready) {
+    const s32 hidden = sh - height();
+    float tmp = floorf(yOff) + hidden / (float) sh;
+    if (tmp > yOff) {
+      yOff = tmp;
+    }
+    adjustYOff(0);
+  }
+  else {
+    yOff = ceilf(yOff) - 0.4f;
+  }
+  pageChanged();
+}
+
+void PDFViewer::top()
+{
+  yOff = 0.0f;
+  pageChanged();
+}
+
+void PDFViewer::bottom()
+{
+  yOff = maxYOff();
+  pageChanged();
+}
+
+void PDFViewer::pageUp()
+{
+  adjustFloorYOff(floorf(yOff) == yOff ? -1.0f : 0.0f);
+  pageChanged();
+}
+
+void PDFViewer::pageDown()
+{
+  adjustFloorYOff(1.0f);
+  pageChanged();
+}
+
+void PDFViewer::pageUpWithOverlap()
+{
+  const u32 page = yOff;
+  s32 sh;
+  s32 shp = sh = pxrel(page);
+  if (page >= columns) {
+    shp = pxrel(page - columns);
+  }
+  if (height() >= sh) {
+    pageUp();
+  }
+  else {
+    /* scroll up a bit less than one screen height */
+    float d = (height() - 2 * MARGIN) / (float) sh;
+    if (((u32) yOff) != ((u32) (yOff - d))) {
+      /* scrolling over page border */
+      d -= (yOff - floorf(yOff));
+      yOff = floorf(yOff);
+      /* ratio of prev page can be different */
+      d = d * (float) sh / (float) shp;
+    }
+    adjustYOff(-d);
+    pageChanged();
+  }
+}
+
+void PDFViewer::pageDownWithOverlap()
+{
+  const s32 page = yOff;
+  s32 sh;
+  s32 shn = sh = pxrel(page);
+  if (page + columns <= (u32)(pdfFile->pages - 1)) {
+    shn = pxrel(page + columns);
+  }
+  if (height() >= sh) {
+    pageDown();
+  }
+  else {
+    /* scroll down a bit less than one screen height */
+    float d = (height() - 2 * MARGIN) / (float) sh;
+    if (((u32) yOff) != ((u32) (yOff + d))) {
+      /* scrolling over page border */
+      d -= (ceilf(yOff) - yOff);
+      yOff = floorf(yOff) + columns;
+      /* ratio of next page can be different */
+      d = d * (float) sh / (float) shn;
+    }
+    adjustYOff(d);
+    pageChanged();
+  }
+}
+
+void PDFViewer::zoomIn()
+{
+  viewZoom *= 1.2f;
+  viewZoom  = viewZoom < 10.0f ? viewZoom : 10.0f;
+  viewMode  = VM_ZOOMFACTOR;
+  pageChanged();
+}
+
+void PDFViewer::zoomOut()
+{
+  viewZoom *= 0.833333;
+  viewZoom  = viewZoom > 0.1f ? viewZoom : 0.1f;
+  viewMode  = VM_ZOOMFACTOR;
+  pageChanged();
+}
+
+void PDFViewer::setViewMode(ViewMode newViewMode)
+{
+  viewMode = newViewMode;
+  pageChanged();
+}
+
+void PDFViewer::setZoomFactor(float zoomFactor)
+{
+  viewMode = VM_ZOOMFACTOR;
+  viewZoom = zoomFactor > 0.1f ? (zoomFactor < 10.0f ? zoomFactor : 10.0f) : 0.1f;
+  pageChanged();
+}
+
+void PDFViewer::refreshView()
+{
+  update();
+}
+
+void PDFViewer::fileLoading()
+{
+  fileIsLoading = true;
+  sendState();
+}
+
+void PDFViewer::fileLoaded()
+{
+  fileIsLoading = false;
+  sendState();
+}
