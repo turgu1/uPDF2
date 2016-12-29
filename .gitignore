@@ -3,6 +3,8 @@ updf
 version.h
 *.mo
 Makefile
+uPDF2.pro.user.*
+*.autosave
 
 autom4te.cache
 config
