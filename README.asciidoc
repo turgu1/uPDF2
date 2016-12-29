@@ -15,8 +15,8 @@ Main caracteristics:
 - Text selection and copy to clipboard (from FlaxPDF)
 - 5 different automatic view modes to optimize screen space asset (some from FlaxPDF)
 - 1 customizable trim mode to set the view portion of the document
-    - even/odd page trim management
-    - specific page to page trimming selection
+    * even/odd page trim management
+    * specific page to page trimming selection
 - Fast background document retrieveal through multithreading (from FlaxPDF)
 - Whole document caching in memory (no delay in going from a page to other once loaded) (from FlaxPDF)
 - Free and open source (Gnu General Public License V3.0)
@@ -38,7 +38,7 @@ Planned development
 - Preferences Pane
 - Printing
 
-Some of the new capabilities have been sent to the original author of FlaxPDF for potential integration in his own application at the time it was using FLTK as the gui framework. The decision was made to go to the Qt creator for further development.
+Some of the new capabilities have been sent to the original author of FlaxPDF for potential integration in his own application at the time uPDF was using FLTK as the GUI framework. Since then, the decision was made to go to the Qt creator with uPDF 2.0 for further development.
 
 Build
 =====
