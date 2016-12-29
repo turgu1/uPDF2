@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2016 Guy Turcotte
+Copyright (C) 2017 Guy Turcotte
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -24,6 +24,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define CONFIG_VERSION "1.0"
 
 FileViewParameters *fileViewParameters = NULL;
+
+void clearFileViewParameters()
+{
+  FileViewParameters * curr = fileViewParameters;
+  FileViewParameters * next;
+
+  while (curr) {
+    next = curr->next;
+    clearSingles(curr->customTrim);
+    delete curr;
+    curr = next;
+  }
+
+  fileViewParameters = NULL;
+}
 
 void saveToConfig(FileViewParameters & params)
 {

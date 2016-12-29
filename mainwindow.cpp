@@ -1,3 +1,21 @@
+/*
+Copyright (C) 2017 Guy Turcotte
+Portion Copyright (C) 2015 Lauri Kasanen
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
 #include <QFileDialog>
 #include <QSignalMapper>
 #include <QKeyEvent>
@@ -10,6 +28,8 @@
 #include "ui_mainwindow.h"
 #include "loadpdffile.h"
 #include "selectrecentdialog.h"
+
+u32 details = 0;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -34,20 +54,21 @@ MainWindow::MainWindow(QWidget *parent) :
 
   ui->currentPageEdit->setValidator(new QIntValidator(1, 9999, this));
 
-  connect(ui->showToolbarButton,   SIGNAL(clicked()),     this,      SLOT(showToolbar()));
-  connect(ui->hideToollbarButton,  SIGNAL(clicked()),     this,      SLOT(hideToolbar()));
-  connect(ui->openFileButton,      SIGNAL(clicked()),     this,      SLOT(openFile()));
+  connect(ui->showToolbarButton,   SIGNAL(clicked()),     this,      SLOT(showToolbar()) );
+  connect(ui->hideToollbarButton,  SIGNAL(clicked()),     this,      SLOT(hideToolbar()) );
+  connect(ui->openFileButton,      SIGNAL(clicked()),     this,      SLOT(openFile())    );
   connect(ui->fullScreenButton,    SIGNAL(clicked()),     this,      SLOT(onFullScreen()));
-  connect(ui->exitButton,          SIGNAL(clicked()),     this,      SLOT(closeApp()));
-  connect(ui->aboutButton,         SIGNAL(clicked()),     this,      SLOT(aboutBox()));
-  connect(ui->openRecentButton,    SIGNAL(clicked()),     this,      SLOT(openRecent()));
+  connect(ui->exitButton,          SIGNAL(clicked()),     this,      SLOT(closeApp())    );
+  connect(ui->aboutButton,         SIGNAL(clicked()),     this,      SLOT(aboutBox())    );
+  connect(ui->openRecentButton,    SIGNAL(clicked()),     this,      SLOT(openRecent())  );
 
-  connect(ui->beginDocumentButton, SIGNAL(clicked()),     pdfViewer, SLOT(top())     );
-  connect(ui->endDocumentButton,   SIGNAL(clicked()),     pdfViewer, SLOT(bottom())  );
-  connect(ui->previousPageButton,  SIGNAL(clicked()),     pdfViewer, SLOT(pageUp())  );
-  connect(ui->nextPageButton,      SIGNAL(clicked()),     pdfViewer, SLOT(pageDown()));
-  connect(ui->zoomInButton,        SIGNAL(clicked()),     pdfViewer, SLOT(zoomIn())  );
-  connect(ui->zoomOutButton,       SIGNAL(clicked()),     pdfViewer, SLOT(zoomOut()) );
+  connect(ui->beginDocumentButton, SIGNAL(clicked()),     pdfViewer, SLOT(top())         );
+  connect(ui->endDocumentButton,   SIGNAL(clicked()),     pdfViewer, SLOT(bottom())      );
+  connect(ui->previousPageButton,  SIGNAL(clicked()),     pdfViewer, SLOT(pageUp())      );
+  connect(ui->nextPageButton,      SIGNAL(clicked()),     pdfViewer, SLOT(pageDown())    );
+  connect(ui->zoomInButton,        SIGNAL(clicked()),     pdfViewer, SLOT(zoomIn())      );
+  connect(ui->zoomOutButton,       SIGNAL(clicked()),     pdfViewer, SLOT(zoomOut())     );
+
   connect(ui->editTrimButton,      SIGNAL(clicked(bool)), pdfViewer, SLOT(trimZoneSelect(bool))   );
   connect(ui->evenOddButton,       SIGNAL(clicked(bool)), pdfViewer, SLOT(trimZoneDifferent(bool)));
   connect(ui->thisPageButton,      SIGNAL(clicked(bool)), pdfViewer, SLOT(thisPageTrim(bool))     );
@@ -123,7 +144,7 @@ void MainWindow::aboutBox()
   QMessageBox aboutBox;
 
   aboutBox.setIconPixmap(QPixmap(":/icons/48/img/48x48/updf.png"));
-  aboutBox.setText(tr("\nuPDF (micro PDF) Version 1.0"));
+  aboutBox.setText(QString(tr("\nuPDF (micro PDF) Version %1")).arg(UPDF_VERSION));
   aboutBox.setDetailedText(tr("Written by:\n\n(c) 2017 - Guy Turcotte\n(c) 2015 - Lauri Kasanen\n\nGNU General Public License V3.0"));
   aboutBox.setWindowTitle(tr("About uPDF"));
 
@@ -272,8 +293,6 @@ void MainWindow::loadFile(QString filename)
 void MainWindow::loadRecentFile(FileViewParameters & params)
 {
   loadFile(params.filename);
-  setGeometry(params.winGeometry);
-  pdfViewer->setFileViewParameters(params);
 
   if (params.fullscreen) {
     if (!isFullScreen()) {
@@ -282,11 +301,17 @@ void MainWindow::loadRecentFile(FileViewParameters & params)
       showFullScreen();
     }
   }
-  else if (isFullScreen()) {
-    ui->fullScreenButton->setIcon(*iconFullScreen);
-    ui->fullScreenButton->setToolTip(tr("Full Screen View"));
-    showNormal();
+  else {
+    if (isFullScreen()) {
+      ui->fullScreenButton->setIcon(*iconFullScreen);
+      ui->fullScreenButton->setToolTip(tr("Full Screen View"));
+      showNormal();
+      QApplication::processEvents();
+    }
+    setGeometry(params.winGeometry);
   }
+
+  pdfViewer->setFileViewParameters(params);
   update();
   updateGeometry();
 }
@@ -329,6 +354,8 @@ void MainWindow::openRecent()
 
   recentDialog->setContent();
   FileViewParameters * params = recentDialog->run();
+
+  ui->openRecentButton->setEnabled(fileViewParameters != NULL);
 
   if (params) loadRecentFile(*params);
 }

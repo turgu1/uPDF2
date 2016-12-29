@@ -2,9 +2,47 @@
 #include <QApplication>
 #include <QStyleFactory>
 
+#include <stdio.h>
+#include <unistd.h>
+#include <getopt.h>
+
+#include "updf.h"
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+
+    const struct option opts[] = {
+      { "details", 0, NULL, 'd' },
+      { "help",    0, NULL, 'h' },
+      { "version", 0, NULL, 'v' },
+      { NULL,      0, NULL,  0  }
+    };
+
+    while (1) {
+      const int c = getopt_long(argc, argv, "dhv", opts, NULL);
+      if (c == -1)
+        break;
+
+      switch (c) {
+        case 'd':
+          details++;
+        break;
+        case 'v':
+          printf("%s\n", UPDF_VERSION);
+          return 0;
+        break;
+        case 'h':
+        default:
+          printf("Usage: %s [options] file.pdf\n\n"
+            "   -d --details   Print RAM, timing details (use twice for more)\n"
+            "   -h --help      This help\n"
+            "   -v --version   Print version\n",
+            argv[0]);
+          return 0;
+        break;
+      }
+    }
 
     a.setWindowIcon(QIcon(":/icons/img/updf-512x512.png"));
     a.setApplicationName("uPDF");

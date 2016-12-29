@@ -1,69 +1,63 @@
 
-Please note that this is work in progress. This is NOT ready for normal usage.
+This software is licensed under Gnu General Public License Version 3. Please look at the COPYING file for further details.
 
-This software is licensed under Gnu General Public License Version 3. Please look
-at the COPYING file for further details.
+uPDF (micro PDF) - Qt Creator - Version 2.0
+===========================================
 
+uPDF is a PDF Viewer specifically designed to minimize keyboard interaction requirements. It's being used by the author as a tool to display muscial scores on a dedicated Rasperry Pi and a monitor hooked to an electronic piano. A mouse is the only tool available for interaction with the device. A keyboard is supported by uPDF if available.
 
-uPDF (micro PDF)
-================
+Main caracteristics:
 
-This is a spinoff made from the excellent piece of software FlaxPDF
-(see http://github.com/clbr/flaxpdf). The original announcement
-page of the application is available below under the <<FlaxPDF,FlaxPDF>> header.
-
-uPDF is being developped for Debian related Linux distributions. In particular, it is
-used on Ubuntu, Linux Mint and Rasbian platforms.
-
-New capabilities / modifications (Decembre 2016)
-------------------------------------------------
-
-- Title pages alignment
-- MyTrim view - Page trim fine adjustment by the user
-- Some bug fixing
-
-New capabilities / modifications (November 2016)
-------------------------------------------------
-
-The following modifications have been made to the original software:
-
-- Multi-columns document display
-- Selection for the last 10 viewed documents
+- Multi-columns document display (up to 5 columns)
+- Selection for the last 30 viewed documents
 - Automatically open the last viewed document with last display parameters
 - Fullscreen mode
-- PageUp and PageDown buttons
-- Exit button
-- Gnome standard icons
+- Text selection and copy to clipboard (from FlaxPDF)
+- 5 different automatic view modes to optimize screen space asset (some from FlaxPDF)
+- 1 customizable trim mode to set the view portion of the document
+    - even/odd page trim management
+    - specific page to page trimming selection
+- Fast background document retrieveal through multithreading (from FlaxPDF)
+- Whole document caching in memory (no delay in going from a page to other once loaded) (from FlaxPDF)
+- Free and open source (Gnu General Public License V3.0)
 
-image::screenshot.png[Screenshot,503,534,align="center"]
+This is a spinoff made from the excellent piece of software FlaxPDF (see http://github.com/clbr/flaxpdf). The original announcement page of FlaxPDF is available below under the <<FlaxPDF,FlaxPDF>> header below.
 
+uPDF is being developped using Qt Creator 4.2.0, the free version. In particular, it is used on OSX, Ubuntu, Linux Mint and Rasbian platforms.
 
-These new capabilities have been sent to the original author of FlaxPDF for potential
-integration in his own application.
+image::screenshot.png[Screenshot,500,400,align="center"]
 
+Planned development
+-------------------
 
-Installation
-============
+- Installation packages for OSX, Linux and Raspberry Pi
+- Installation package for Windows
+- Horizontal/Vertical Scrollbars
+- Bookmarks
+- Text search tool
+- Preferences Pane
+- Printing
+
+Some of the new capabilities have been sent to the original author of FlaxPDF for potential integration in his own application at the time it was using FLTK as the gui framework. The decision was made to go to the Qt creator for further development.
+
+Build
+=====
 
 The following packages are required and may need to be built and installed if not
 available as a package:
 
-- poppler (http://poppler.freedesktop.org/poppler-0.49.0.tar.xz)
-- fltk 1.3.3 (http://www.fltk.org/software.php?VERSION=1.3.3&FILE=fltk/1.3.3/fltk-1.3.3-source.tar.gz) or later (but not version 2.0)
+- poppler (At least version 0.50 available as http://poppler.freedesktop.org/poppler-0.50.0.tar.xz)
+- liblzo (package liblzo2-dev)
 
-The following packages are usually available via package management under linux:
+The following packages are usually available via package management under linux and are required by poppler:
 
-- libconfig{plus}{plus} v 1.5.0 or later (package libconfig{plus}{plus}-dev)
 - libjpeg (package libjpeg-dev)
 - libpng (package libpng12-dev)
 - libtiff (package libtiff5-dev)
-- libfontconfig (package libfontconfig1.dev)
-- libxrender (package libxrender-dev)
-- liblzo (package liblzo2-dev)
 
 For example with the apt-get command, they can be installed as follow:
 
-  $ sudo apt-get install libconfig{plus}{plus}-dev libjpeg-dev libpng12-dev libtiff5-dev libfontconfig1-dev libxrender-dev liblzo2-dev
+  $ sudo apt-get install libjpeg-dev libpng12-dev libtiff5-dev liblzo2-dev
 
 Poppler
 -------
@@ -85,30 +79,13 @@ $ make
 $ sudo make install
 ------------------------------------------
 
-FLTK
-----
-
-The FLTK library is installed using the usual GNU autoconf commands:
-
---------------------
-$ ./configure
-$ make
-$ sudo make install
---------------------
-
 uPDF
 ----
 
-To install uPDF, the following commands are required:
+To build uPDF, you will need Qt Creator V 4.2.0 under Unix or OSX. The file uPDF2.pro need to be opened with Qt Creator.
+All the previously indicated libraries must have been installed before building the application.
 
---------------------
-$ ./autogen.sh
-$ ./configure
-$ make
-$ sudo make install
---------------------
-
-All the previously indicated libraries must have been installed before building the application. The installation will add an entry into the OFFICE main menu of you linux installation.
+Insallation packages for OSX, Linux and Rapsberry Pi are under development.
 
 Here is the original announcement for the FlaxPDF application:
 
