@@ -24,35 +24,35 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \
-    main.cpp\
-    mainwindow.cpp \
-    utils.cpp \
-    pdfloader.cpp \
-    pdfviewer.cpp \
-    loadpdffile.cpp \
-    pdffile.cpp \
-    pdfpageworker.cpp \
-    config.cpp \
-    selectrecentdialog.cpp
+    src/config.cpp \
+    src/loadpdffile.cpp \
+    src/main.cpp \
+    src/mainwindow.cpp \
+    src/pdffile.cpp \
+    src/pdfloader.cpp \
+    src/pdfpageworker.cpp \
+    src/pdfviewer.cpp \
+    src/selectrecentdialog.cpp \
+    src/utils.cpp
 
 HEADERS  += \
-    mainwindow.h \
-    updf.h \
-    utils.h \
-    pdfloader.h \
-    pdfviewer.h \
-    loadpdffile.h \
-    pdffile.h \
-    pdfpageworker.h \
-    config.h \
-    selectrecentdialog.h
+    src/config.h \
+    src/loadpdffile.h \
+    src/mainwindow.h \
+    src/pdffile.h \
+    src/pdfloader.h \
+    src/pdfpageworker.h \
+    src/pdfviewer.h \
+    src/selectrecentdialog.h \
+    src/updf.h \
+    src/utils.h
 
 FORMS    += \
-    mainwindow.ui \
-    selectrecentdialog.ui
+    ui/mainwindow.ui \
+    ui/selectrecentdialog.ui
 
 RESOURCES += \
-    updf.qrc
+    res/updf.qrc
 
 INCLUDEPATH += /usr/local/include
 INCLUDEPATH += /usr/local/include/poppler
