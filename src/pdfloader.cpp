@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <GlobalParams.h>
 #include <SplashOutputDev.h>
 #include <splash/SplashBitmap.h>
+#include <QDebug>
 
 #include "pdfloader.h"
 #include "pdfpageworker.h"
@@ -114,16 +115,22 @@ void PDFLoader::run()
       totalcomp += pdfFile.cache[i].size;
     }
 
-    info(QString(tr("Compressed mem usage %1mb, compressed to %2%"))
-      .arg(totalcomp / 1024 / 1024.0f, 0, 'f', 2)
-      .arg(100 * totalcomp / (float) total, 0, 'f', 2));
+    qInfo() <<
+      "Compressed mem usage " <<
+      (totalcomp / 1024 / 1024.0f) <<
+      "mb, compressed to " <<
+      (100 * totalcomp / (float) total) <<
+      "%" << endl;
 
     gettimeofday(&end, NULL);
     const u32 us = usecs(start, end);
 
-    info(QString(tr("Processing the file took %1 us (%2 s)"))
-      .arg(us)
-      .arg(us / 1000000.0f, 0, 'f', 2));
+    qInfo() <<
+      "Processing the file took" <<
+      us <<
+      "us (" <<
+      (us / 1000000.0f) <<
+      " s)" << endl;
   }
 
   u32 maxW = 0, maxH = 0;

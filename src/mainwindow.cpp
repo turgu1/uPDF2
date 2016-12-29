@@ -29,7 +29,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "loadpdffile.h"
 #include "selectrecentdialog.h"
 
-u32 details = 0;
+// Parameters at startup
+
+u32     details = 0;
+QString filenameAtStartup;
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -108,7 +112,12 @@ MainWindow::MainWindow(QWidget *parent) :
   updateGeometry();
 
   loadConfig();
-  if (fileViewParameters) loadRecentFile(*fileViewParameters);
+  if (!filenameAtStartup.isEmpty()) {
+    loadFile(filenameAtStartup);
+  }
+  else {
+    if (fileViewParameters) loadRecentFile(*fileViewParameters);
+  }
 }
 
 MainWindow::~MainWindow()

@@ -84,10 +84,7 @@ void loadConfig()
 
   QString version = cfg.value("Version", "0.0").toString();
 
-  if (version != CONFIG_VERSION) {
-    warn(QString("Error: Config file version is expected to be %1.").arg(CONFIG_VERSION));
-    return;
-  }
+  if (version != CONFIG_VERSION) return;
 
   int cnt = cfg.beginReadArray("fileViewParameters");
 
@@ -221,6 +218,4 @@ void saveConfig()
   }
 
   cfg.endArray();
-
-  debug(QString("Saving config to %1").arg(cfg.fileName()));
 }

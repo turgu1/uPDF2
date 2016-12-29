@@ -28,7 +28,9 @@ typedef int32_t s32;
 typedef int16_t s16;
 typedef int8_t  s8;
 
+// They are instantiated at the beginning of mainwindow.cpp
 extern u32 details;
+extern QString filenameAtStartup;
 
 #include "utils.h"
 

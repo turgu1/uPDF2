@@ -24,48 +24,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 void *xcalloc(size_t nmemb, size_t size) {
 
   void *tmp = calloc(nmemb, size);
-  if (!tmp) die("Out of memory\n");
-
+  if (!tmp) {
+    qFatal("Out of memory\n");
+  }
   return tmp;
 }
 
 void *xmalloc(size_t size) {
 
   void *tmp = malloc(size);
-  if (!tmp) die("Out of memory\n");
-
+  if (!tmp) {
+    qFatal("Out of memory\n");
+  }
   return tmp;
 }
-
-void die(const QString & str)
-{
-  QTextStream stream(stderr);
-
-  stream << str << endl;
-  exit(1);
-}
-
-void warn(const QString & str)
-{
-  QTextStream stream(stderr);
-
-  stream << QString(QObject::tr("Warning: ")) << str << endl;
-}
-
-void info(const QString & str)
-{
-  QTextStream stream(stdout);
-
-  stream << QString(QObject::tr("Info: ")) << str << endl;
-}
-
-void dbg(const QString & str)
-{
-  QTextStream stream(stdout);
-
-  stream << QString(QObject::tr("Debug: ")) << str << endl;
-}
-
 
 u32 usecs(const timeval old, const timeval now) {
 
@@ -83,50 +55,4 @@ u64 msec() {
   ms += t.tv_usec / 1000;
   return ms;
 }
-
-#if 0 //DEBUGGING
-
-  void debug_it(char const * fmt, ...)
-  {
-    va_list ap;
-
-    va_start(ap, fmt);
-
-    vfprintf(stderr, fmt, ap);
-
-    va_end(ap);
-  }
-
-  void debug_it(Fl_Box * ctrl, const float value, const char * hint)
-  {
-    char tmp[20];
-
-    snprintf(tmp, 20, "%5.3f", value);
-    ctrl->copy_label(tmp);
-    ctrl->tooltip(hint);
-    ctrl->redraw_label();
-  }
-
-  void debug_it(Fl_Box * ctrl, const u32 value, const char * hint)
-  {
-    char tmp[20];
-
-    snprintf(tmp, 20, "%u", value);
-    ctrl->copy_label(tmp);
-    ctrl->tooltip(hint);
-    ctrl->redraw_label();
-    Fl::check();
-  }
-
-  void debug_it(Fl_Box * ctrl, const s32 value, const char * hint)
-  {
-    char tmp[20];
-
-    snprintf(tmp, 20, "%d", value);
-    ctrl->copy_label(tmp);
-    ctrl->tooltip(hint);
-    ctrl->redraw_label();
-    Fl::check();
-  }
-#endif
 

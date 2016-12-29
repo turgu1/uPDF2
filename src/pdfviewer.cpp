@@ -27,6 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QClipboard>
 #include <QGuiApplication>
 #include <TextOutputDev.h>
+#include <QDebug>
 
 #define CTRL_PRESSED event->modifiers().testFlag(Qt::ControlModifier)
 #define LEFT_BUTTON  (event->button() == Qt::LeftButton)
@@ -541,7 +542,6 @@ void PDFViewer::endOfSelection()
 
     // Save it for clipboard retrieval
     clipText = cstr;
-    debug(QString("ClipText: %1").arg(clipText));
 
     delete str;
     delete dev;
@@ -838,7 +838,8 @@ QPixmap PDFViewer::getPage(const u32 page)
           &dstSize,
           NULL);
   if (ret != LZO_E_OK || dstSize != cur->uncompressed) {
-    die(QString(tr("Error decompressing")));
+    qCritical() << tr("Fatal: Error decompressing") << endl;
+    exit(1);
   }
 
   cachedPage[dst] = page;
@@ -847,7 +848,8 @@ QPixmap PDFViewer::getPage(const u32 page)
   QImage img(cache[dst], cur->w, cur->h, QImage::Format_RGB32);
 
   if (!pix[dst].convertFromImage(img)) {
-    die(QString(tr("QPixmap::loadFromData failed")));
+    qCritical() << tr("Fatal: QPixmap::loadFromData failed") << endl;
+    exit(1);
   }
 
   return pix[dst];
@@ -954,10 +956,10 @@ void PDFViewer::paintEvent(QPaintEvent * event)
 
       #if DEBUGGING && 0
         if (firstPage) {
-          debug("Zoom factor: %f\n", zoom);
-          debug("Page data: Left: %d Right: %d Top: %d Bottom: %d W: %d H: %d\n",
+          qDebug("Zoom factor: %f\n", zoom);
+          qDebug("Page data: Left: %d Right: %d Top: %d Bottom: %d W: %d H: %d\n",
             cur->left, cur->right, cur->top, cur-> bottom, cur->w, cur->h);
-          debug("Page screen rectangle: X: %d Y: %d W: %d H: %d\n", X, Y, W, H);
+          qDebug("Page screen rectangle: X: %d Y: %d W: %d H: %d\n", X, Y, W, H);
         }
       #endif
 
@@ -988,7 +990,7 @@ void PDFViewer::paintEvent(QPaintEvent * event)
         ratioX = w / (float)(w + zoomedMargin);
         ratioY = h / (float)(h + zoomedMargin);
 
-        //debug("Ratio: %f %f (%d %d)\n", ratioX, ratioY, w, h);
+        //qDebug("Ratio: %f %f (%d %d)\n", ratioX, ratioY, w, h);
 
         zw = ratioX * zoom;
         zh = ratioY * zoom;
@@ -1001,12 +1003,12 @@ void PDFViewer::paintEvent(QPaintEvent * event)
 
         #if DEBUGGING && 0
           if (firstPage) {
-            debug("My Trim: X: %d Y: %d W: %d H: %d\n",
+            qDebug("My Trim: X: %d Y: %d W: %d H: %d\n",
               theTrim.x(),
               theTrim.y(),
               theTrim.width(),
               theTrim.height());
-            debug("Clipping: X: %d, Y: %d, W: %d, H: %d\n", Xs, Ys, w, h);
+            qDebug("Clipping: X: %d, Y: %d, W: %d, H: %d\n", Xs, Ys, w, h);
           }
         #endif
       }
@@ -1034,7 +1036,7 @@ void PDFViewer::paintEvent(QPaintEvent * event)
       // Render real content
       #if DEBUGGING && 0
         if (firstPage) {
-          debug("Drawing page %d: X: %d, Y: %d, W: %d, H: %d\n", page, X, Y, W, H);
+          qDebug("Drawing page %d: X: %d, Y: %d, W: %d, H: %d\n", page, X, Y, W, H);
         }
       #endif
 

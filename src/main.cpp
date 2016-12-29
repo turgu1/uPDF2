@@ -44,9 +44,11 @@ int main(int argc, char *argv[])
       }
     }
 
+    filenameAtStartup = optind < argc ? argv[optind] : "";
+
     a.setWindowIcon(QIcon(":/icons/img/updf-512x512.png"));
-    a.setApplicationName("uPDF");
-    a.setOrganizationName("GTHomeComputing");
+    a.setApplicationName("updf");
+    a.setOrganizationName("updf");
     a.setApplicationDisplayName("uPDF");
     a.setApplicationVersion("V1.0");
     a.setStyle(QStyleFactory::create("fusion"));

@@ -119,7 +119,7 @@ void store(SplashBitmap * const bm, CachedPage & cache)
   lzo_uint outlen;
   int ret = lzo1x_1_compress(trimmed, trimw * trimh * 4, tmp, &outlen, workmem);
   if (ret != LZO_E_OK) {
-    die("Compression failed");
+    qFatal("Compression failed\n");
   }
 
   free(trimmed);

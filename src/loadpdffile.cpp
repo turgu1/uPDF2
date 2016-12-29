@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <ErrorCodes.h>
 #include <QThreadPool>
+#include <QDebug>
 
 #include "updf.h"
 #include "loadpdffile.h"
@@ -64,7 +65,7 @@ LoadPDFFile::LoadPDFFile(const QString & fname, PDFFile & pdfFile) :
   QByteArray ba = fname.toLatin1(); // This maybe not appropriate for non-latin languages
   GooString gooname(ba.data());
 
-  debug(QString(tr("Opening File: %1")).arg(fname));
+  qDebug() << "Opening File: " << fname << endl;
 
   PDFDoc *pdfDoc = new PDFDoc(&gooname);
   if (!pdfDoc->isOk()) {
@@ -83,7 +84,7 @@ LoadPDFFile::LoadPDFFile(const QString & fname, PDFFile & pdfFile) :
       break;
     }
 
-    warn(QString("%1, %2").arg(err).arg(msg));
+    qCritical() << err << ", " << msg << endl;
 
     return;
   }
@@ -100,7 +101,7 @@ LoadPDFFile::LoadPDFFile(const QString & fname, PDFFile & pdfFile) :
 
   // Start threaded magic
   if (file.pages < 1) {
-    warn(QString(tr("Couldn't open %1, perhaps it's corrupted?")).arg(fname));
+    qCritical() << QString(tr("Couldn't open ")) << fname << QString(tr("perhaps it's corrupted?")) << endl;
     return;
   }
 
@@ -125,7 +126,7 @@ LoadPDFFile::LoadPDFFile(const QString & fname, PDFFile & pdfFile) :
 
 void LoadPDFFile::handleResults()
 {
-  debug(tr("Document Load complete!"));
+  qDebug() << tr("Document Load complete!") << endl;
 
   emit loadCompleted();
 }
