@@ -60,7 +60,23 @@ struct CustomTrim {
   bool             similar;      // true if even and odd are the same
 };
 
+struct FileViewParameters {
+    QString       filename;
+    int           columns;
+    int           titlePageCount;
+    float         xOff;
+    float         yOff;
+    float         viewZoom;
+    QRect         winGeometry;
+    bool          fullscreen;
+    ViewMode      viewMode;
+    CustomTrim    customTrim;
+
+    FileViewParameters * next;
+};
+
 struct ViewState {
+    bool     validDocument;
     int      page;
     int      pageCount;
     ViewMode viewMode;
@@ -68,6 +84,9 @@ struct ViewState {
     bool     fileLoading;
     bool     trimSelection;
     bool     textSelection;
+    bool     trimSimilar;
+    bool     thisPageTrim;
+    bool     someClipText;
 };
 
 class PDFViewer : public QWidget
@@ -86,7 +105,11 @@ class PDFViewer : public QWidget
     void  mouseDoubleClickEvent(QMouseEvent * event) Q_DECL_OVERRIDE;
     void  mouseReleaseEvent(QMouseEvent * event)     Q_DECL_OVERRIDE;
     void  paintEvent(QPaintEvent * event)            Q_DECL_OVERRIDE;
-    QSize sizeHint() const;
+    QSize sizeHint() const                           Q_DECL_OVERRIDE;
+    QStringList getSinglePageTrims();
+    bool  getFileViewParameters(FileViewParameters & params);
+    void  setFileViewParameters(FileViewParameters & params);
+    void  reset();
 
   private:
     PDFFile     * pdfFile;
@@ -97,16 +120,19 @@ class PDFViewer : public QWidget
     u32           columns, titlePages;
     u32           leftDClickColumnsCount;
     u32           rightDClickColumnsCount;
+    bool          silent;
 
     // pages positioning parameters for mouse selection decoding
     bool          zoneSelection; // Encompass both trimZoneSelection and textSelection
     bool          trimZoneSelection;
     bool          textSelection;
+    ZoneLoc       zoneLoc;
     PagePos       pagePosOnScreen[PAGES_ON_SCREEN_MAX];
     u32           pagePosCount;
     u16           selX, selY, selX2, selY2, savedX, savedY;
     u16           lastX, lastY;
     bool          someDrag;
+    bool          dragging;
     QRubberBand * selector;
     QString       clipText;
 
@@ -124,7 +150,6 @@ class PDFViewer : public QWidget
 
     // internal processing support methods
     void        sendState();
-    void        clearSingles(CustomTrim & customTrim);
     void        endOfSelection();
     ZoneLoc     getZoneLoc(s32 x, s32 y) const;
     void        computeScreenSize();
@@ -146,6 +171,7 @@ class PDFViewer : public QWidget
 
   public slots:
     void textSelect(bool doSelect);
+    void copyToClipboard();
     void trimZoneDifferent(bool diff);
     void thisPageTrim(bool thisPage);
     void removeSinglePageTrim(s32 page);
@@ -178,5 +204,8 @@ class PDFViewer : public QWidget
   signals:
     void stateUpdated(ViewState & state);
 };
+
+extern void clearSingles(CustomTrim & customTrim);
+extern void  copySingles(CustomTrim &from, CustomTrim &to);
 
 #endif // PDFVIEWER_H

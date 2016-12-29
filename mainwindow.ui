@@ -493,6 +493,11 @@
            <string>Custom Trim</string>
           </property>
          </item>
+         <item>
+          <property name="text">
+           <string>Zoom Factor</string>
+          </property>
+         </item>
         </widget>
        </item>
        <item>
@@ -633,7 +638,7 @@ Trim Parameters</string>
              </size>
             </property>
             <property name="toolTip">
-             <string>Specific Trim Parameters for this Page</string>
+             <string>Set this page with a Specific Trim Zone</string>
             </property>
             <property name="text">
              <string>This Page</string>
@@ -664,7 +669,7 @@ Trim Parameters</string>
              </size>
             </property>
             <property name="toolTip">
-             <string>Specific Trim Parameter Pages</string>
+             <string>Pages with Specific Trim Zone</string>
             </property>
             <property name="frameShape">
              <enum>QFrame::StyledPanel</enum>
@@ -704,7 +709,7 @@ Trim Parameters</string>
              </size>
             </property>
             <property name="toolTip">
-             <string>Clear All Specific Trim Parameters</string>
+             <string>Clear All Pages having a Specific Trim Zone</string>
             </property>
             <property name="text">
              <string>Clear All</string>
@@ -724,6 +729,16 @@ Trim Parameters</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="copyButton">
+         <property name="toolTip">
+          <string>Copy Text To Clipboard</string>
+         </property>
+         <property name="text">
+          <string>Copy</string>
          </property>
         </widget>
        </item>
@@ -860,8 +875,8 @@ Trim Parameters</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>16</width>
-             <height>16</height>
+             <width>32</width>
+             <height>32</height>
             </size>
            </property>
            <property name="toolTip">
@@ -889,8 +904,8 @@ Trim Parameters</string>
           <widget class="QPushButton" name="previousPageButton">
            <property name="minimumSize">
             <size>
-             <width>16</width>
-             <height>16</height>
+             <width>32</width>
+             <height>32</height>
             </size>
            </property>
            <property name="toolTip">
@@ -928,8 +943,8 @@ Trim Parameters</string>
           <widget class="QPushButton" name="endDocumentButton">
            <property name="minimumSize">
             <size>
-             <width>16</width>
-             <height>16</height>
+             <width>32</width>
+             <height>32</height>
             </size>
            </property>
            <property name="toolTip">
@@ -957,8 +972,8 @@ Trim Parameters</string>
           <widget class="QPushButton" name="nextPageButton">
            <property name="minimumSize">
             <size>
-             <width>16</width>
-             <height>16</height>
+             <width>32</width>
+             <height>32</height>
             </size>
            </property>
            <property name="toolTip">
@@ -1190,194 +1205,12 @@ Trim Parameters</string>
     </item>
    </layout>
   </widget>
-  <action name="actionHideToolbar">
-   <property name="text">
-    <string>HideToolbar</string>
-   </property>
-   <property name="toolTip">
-    <string>Hide Toolbar</string>
-   </property>
-  </action>
-  <action name="actionShowToolbar">
-   <property name="text">
-    <string>ShowToolbar</string>
-   </property>
-   <property name="toolTip">
-    <string>Show Toolbar</string>
-   </property>
-  </action>
-  <action name="actionOpenFile">
-   <property name="text">
-    <string>OpenFile</string>
-   </property>
-  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
   <include location="updf.qrc"/>
  </resources>
- <connections>
-  <connection>
-   <sender>showToolbarButton</sender>
-   <signal>clicked()</signal>
-   <receiver>actionShowToolbar</receiver>
-   <slot>trigger()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>2</x>
-     <y>399</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>hideToollbarButton</sender>
-   <signal>clicked()</signal>
-   <receiver>actionHideToolbar</receiver>
-   <slot>trigger()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>26</x>
-     <y>11</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionShowToolbar</sender>
-   <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>showToolbar()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>349</x>
-     <y>399</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionHideToolbar</sender>
-   <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>hideToolbar()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>349</x>
-     <y>399</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>openFileButton</sender>
-   <signal>clicked()</signal>
-   <receiver>actionOpenFile</receiver>
-   <slot>trigger()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>32</x>
-     <y>109</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionOpenFile</sender>
-   <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>openFile()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>2108</x>
-     <y>399</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>fullScreenButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>onFullScreen()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>74</x>
-     <y>586</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>349</x>
-     <y>399</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>exitButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>close()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>80</x>
-     <y>775</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>349</x>
-     <y>399</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>editTrimButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>updateTrimButtons()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>75</x>
-     <y>237</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>349</x>
-     <y>399</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>aboutButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>aboutBox()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>74</x>
-     <y>53</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>349</x>
-     <y>399</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
  <slots>
   <slot>showToolbar()</slot>
   <slot>hideToolbar()</slot>

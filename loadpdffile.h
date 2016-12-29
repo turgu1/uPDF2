@@ -31,7 +31,7 @@ class LoadPDFFile : public QObject
 
   signals:
     void refresh();
-    void resultReady();
+    void loadCompleted();
 };
 
 #endif // LOADPDFFILE_H

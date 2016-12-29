@@ -10,7 +10,6 @@
 #include <ctype.h>
 #include <sys/time.h>
 #include <lzo/lzo1x.h>
-#include <omp.h>
 
 #include <QObject>
 #include <PDFDoc.h>

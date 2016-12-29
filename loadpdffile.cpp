@@ -17,9 +17,11 @@ Modifications Copyright (C) 2016 Guy Turcotte
 */
 
 #include <ErrorCodes.h>
+#include <QThreadPool>
 
 #include "updf.h"
 #include "loadpdffile.h"
+#include "pdfpageworker.h"
 
 void LoadPDFFile::clean()
 {
@@ -92,7 +94,7 @@ LoadPDFFile::LoadPDFFile(const QString & fname, PDFFile & pdfFile) :
   file.filename = fname;
   file.pdf      = pdfDoc;
   file.pages    = file.pdf->getNumPages();
-  file.maxw     = file.maxh
+  file.maxW     = file.maxH
                 = file.firstVisible
                 = file.lastVisible = 0;
 
@@ -107,20 +109,25 @@ LoadPDFFile::LoadPDFFile(const QString & fname, PDFFile & pdfFile) :
   if (pdfLoader) delete pdfLoader;
   pdfLoader = new PDFLoader(file);
 
-  connect(pdfLoader, &PDFLoader::resultReady, this, &LoadPDFFile::handleResults);
-  connect(pdfLoader, &PDFLoader::refresh,     this, &LoadPDFFile::pageReadyForRefresh);
+  connect(pdfLoader, &PDFLoader::loadCompleted, this, &LoadPDFFile::handleResults);
+  connect(pdfLoader, &PDFLoader::refresh,       this, &LoadPDFFile::pageReadyForRefresh);
 
-  pdfLoader->dopage(0);
+  // Do first page and wait for the result
+  QThreadPool::globalInstance()->start(new PDFPageWorker(file, 0));
+  QThreadPool::globalInstance()->waitForDone();
+
+  //pdfLoader->dopage(0);
+
   file.setValid(true);
   file.setLoading(true);
-  pdfLoader->start();
+  pdfLoader->start();   // Do the rest of the document
 }
 
 void LoadPDFFile::handleResults()
 {
   debug(tr("Document Load complete!"));
 
-  emit resultReady();
+  emit loadCompleted();
 }
 
 void LoadPDFFile::pageReadyForRefresh()

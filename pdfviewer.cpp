@@ -6,6 +6,8 @@
 #include <QVBoxLayout>
 #include <QPainter>
 #include <QKeyEvent>
+#include <QClipboard>
+#include <QGuiApplication>
 #include <TextOutputDev.h>
 
 #define CTRL_PRESSED event->modifiers().testFlag(Qt::ControlModifier)
@@ -21,6 +23,7 @@ PDFViewer::PDFViewer(QWidget * parent) : QWidget(parent),
   titlePages(0),
   leftDClickColumnsCount(2),
   rightDClickColumnsCount(5),
+  silent(false),
   zoneSelection(false),
   trimZoneSelection(false),
   textSelection(false),
@@ -40,6 +43,7 @@ PDFViewer::PDFViewer(QWidget * parent) : QWidget(parent),
 
   customTrim.initialized = false;
   customTrim.similar     = true;
+  customTrim.singles     = NULL;
 
   // Initialize the uncompressed images cache
   srand(time(NULL));
@@ -74,19 +78,24 @@ void PDFViewer::keyPressEvent(QKeyEvent * event)
     case Qt::Key_Home: if (CTRL_PRESSED) top();    else beginningOfPage();     break;
     case Qt::Key_End:  if (CTRL_PRESSED) bottom(); else endOfPage();           break;
 
-    case Qt::Key_Up:       up();       break;
-    case Qt::Key_Down:     down();     break;
-    case Qt::Key_PageDown: pageDown(); break;
-    case Qt::Key_PageUp:   pageUp();   break;
+    case Qt::Key_Up:       up();              break;
+    case Qt::Key_Down:     down();            break;
+    case Qt::Key_PageDown: pageDown();        break;
+    case Qt::Key_PageUp:   pageUp();          break;
 
     default:
-      QWidget::keyPressEvent(event);
+      if (event->matches(QKeySequence::Copy)) {
+        copyToClipboard();
+      }
+      else {
+        QWidget::keyPressEvent(event);
+      }
   }
 }
 
 void PDFViewer::wheelEvent(QWheelEvent * event)
 {
-  int numPixels  = event->angleDelta().y() / 30;
+  int numPixels  = - event->angleDelta().y() / 30;
 
   if (event->inverted()) numPixels = -numPixels;
 
@@ -110,14 +119,65 @@ void PDFViewer::wheelEvent(QWheelEvent * event)
 
 void PDFViewer::mouseMoveEvent(QMouseEvent * event)
 {
-  if (LEFT_BUTTON) {
-    debug(QString("Drag..."));
+  const int mY = event->y();
+  const int mX = event->x();
+
+  if ((mX < 0) || (mY < 0)) return;
+
+  if (dragging) {
+
+    const int movedY = mY - lastY;
+    const int movedX = mX - lastX;
+
+    someDrag = true;
+    if (zoneSelection) {
+
+      switch (zoneLoc) {
+        case TZL_NE: 	selX2 = mX; selY  = mY; break;
+        case TZL_NW:  selX  = mX; selY  = mY; break;
+        case TZL_SE:  selX2 = mX; selY2 = mY; break;
+        case TZL_SW:  selX  = mX; selY2 = mY; break;
+        case TZL_E:  	selX2 = mX;             break;
+        case TZL_W:   selX  = mX;             break;
+        case TZL_N:   selY  = mY;             break;
+        case TZL_S:   selY2 = mY;             break;
+        default:      selX2 = mX; selY2 = mY; break;
+      }
+
+      update();
+    }
+    else {
+      setCursor(Qt::OpenHandCursor);
+
+      if (pdfFile->maxH) {
+        adjustYOff(-((movedY / viewZoom) / pdfFile->maxH));
+      }
+      else {
+        adjustYOff(-((movedY / (float) height()) / viewZoom));
+      }
+
+      if (viewMode == VM_ZOOMFACTOR) {
+        const u32 lineWidth  = fullW(yOff);
+        xOff += ((float) movedX / viewZoom) / lineWidth;
+        float maxchg = (((((float) width() / viewZoom) + lineWidth) / 2) / lineWidth) - 0.1f;
+        if (xOff < -maxchg) {
+          xOff = -maxchg;
+        }
+        if (xOff > maxchg) {
+          xOff = maxchg;
+        }
+      }
+
+      lastY = mY;
+      lastX = mX;
+      pageChanged();
+    }
   }
   else {
+
     // Set the cursor appropriately
     if (zoneSelection) {
       ZoneLoc zl = getZoneLoc(event->x(), event->y());
-      debug(QString("Zone Loc: %1").arg(zl));
       switch (zl) {
         case TZL_NW:
         case TZL_SE: setCursor(Qt::SizeAllCursor); break;
@@ -144,18 +204,13 @@ void PDFViewer::mousePressEvent(QMouseEvent * event)
   lastY = event->y();
 
   if (LEFT_BUTTON) {
+    dragging = true;
     resetSelection();
-    if (textSelection) {
-
-      selX   = lastX;
-      selY   = lastY;
-      update();
-    }
-    else if (trimZoneSelection) {
+    if (zoneSelection) {
       savedX = selX;
       savedY = selY;
 
-      ZoneLoc zoneLoc = getZoneLoc(event->x(), event->y());
+      zoneLoc = getZoneLoc(event->x(), event->y());
       if (zoneLoc == TZL_NONE) {
         selX   = lastX;
         selY   = lastY;
@@ -173,6 +228,7 @@ void PDFViewer::mouseDoubleClickEvent(QMouseEvent * event)
 
   if (LEFT_BUTTON) {
     someDrag = false;
+    dragging = false;
     selectPageAt(lastX, lastY, CTRL_PRESSED);
   }
   else if (RIGHT_BUTTON) {
@@ -184,8 +240,12 @@ void PDFViewer::mouseDoubleClickEvent(QMouseEvent * event)
 
 void PDFViewer::mouseReleaseEvent(QMouseEvent * event)
 {
+  dragging = false;
+  setCursor(Qt::ArrowCursor);
+
   if (zoneSelection && LEFT_BUTTON &&
       selX && selY && selX2 && selY2) {
+
     if ((selX != selX2) && (selY != selY2) && someDrag) {
 
       if (trimZoneSelection) {
@@ -215,11 +275,82 @@ QSize PDFViewer::sizeHint() const
   return QSize(0,0);
 }
 
+QStringList PDFViewer::getSinglePageTrims()
+{
+  SinglePageTrim * pt = customTrim.singles;
+  QStringList list;
+  while (pt) {
+    list.append(QString("%1").arg(pt->page + 1));
+    pt = pt->next;
+  }
+  return list;
+}
+
+bool PDFViewer::getFileViewParameters(FileViewParameters & params)
+{
+  if (!pdfFile->isValid()) return false;
+
+  params.filename       = pdfFile->filename;
+  params.columns        = columns          ;
+  params.titlePageCount = titlePages       ;
+  params.xOff           = xOff             ;
+  params.yOff           = yOff             ;
+  params.viewMode       = viewMode         ;
+  params.viewZoom       = viewZoom         ;
+  params.customTrim     = customTrim       ;
+
+  if (customTrim.initialized) {
+    copySingles(customTrim, params.customTrim);
+  }
+  else {
+    params.customTrim.singles = NULL;
+  }
+
+  return true;
+}
+
+void PDFViewer::setFileViewParameters(FileViewParameters & params)
+{
+  silent = true;
+
+  if (customTrim.initialized) clearSingles(customTrim);
+
+  customTrim = params.customTrim;
+
+  if (customTrim.initialized) {
+    copySingles(params.customTrim, customTrim);
+  }
+
+  setColumnCount(params.columns);
+  setTitlePageCount(params.titlePageCount);
+
+  xOff        = params.xOff;
+  yOff        = params.yOff;
+  viewZoom    = params.viewZoom;
+  setViewMode(params.viewMode);
+
+  silent = false;
+  pageChanged();
+}
+
+// Called when a new document is to be loaded
+void PDFViewer::reset()
+{
+  xOff = yOff = 0.0f;
+  //adjustYOff(0.0f);
+  resetSelection();
+
+  for (u32 i = 0; i < CACHE_MAX; i++) {
+    cachedPage[i] = USHRT_MAX;
+  }
+}
+
 void PDFViewer::sendState()
 {
   ViewState state;
   u32 page = yOff;
 
+  state.validDocument = pdfFile->isValid();
   state.page          = page;
   state.pageCount     = pdfFile->pages;
   state.viewMode      = viewMode;
@@ -227,19 +358,51 @@ void PDFViewer::sendState()
   state.fileLoading   = fileIsLoading;
   state.trimSelection = trimZoneSelection;
   state.textSelection = textSelection;
+  state.trimSimilar   = customTrim.similar;
+  state.thisPageTrim  = singlePageTrim;
+  state.someClipText  = clipText.size() > 0;
 
   emit stateUpdated(state);
 }
 
-void PDFViewer::clearSingles(CustomTrim & customTrim)
+void copySingles(CustomTrim &from, CustomTrim &to)
+{
+  SinglePageTrim *curr, *curr_i, *prev;
+
+  if (!from.initialized) {
+    to.singles = NULL;
+    return;
+  }
+
+  curr_i = from.singles;
+  prev = NULL;
+
+  while (curr_i) {
+    curr = (SinglePageTrim *) xmalloc(sizeof(SinglePageTrim));
+    *curr = *curr_i;
+    if (prev) {
+      prev->next = curr;
+    }
+    else {
+      to.singles = curr;
+    }
+    prev = curr;
+    curr->next = NULL;
+    curr_i = curr_i->next;
+  }
+}
+
+void clearSingles(CustomTrim & customTrim)
 {
   SinglePageTrim *curr, *next;
 
-  curr = customTrim.singles;
-  while (curr) {
-    next = curr->next;
-    free(curr);
-    curr = next;
+  if (customTrim.initialized) {
+    curr = customTrim.singles;
+    while (curr) {
+      next = curr->next;
+      free(curr);
+      curr = next;
+    }
   }
   customTrim.singles = NULL;
 }
@@ -360,9 +523,12 @@ void PDFViewer::endOfSelection()
 
     // Save it for clipboard retrieval
     clipText = cstr;
+    debug(QString("ClipText: %1").arg(clipText));
 
     delete str;
     delete dev;
+
+    sendState();
   }
   else if (trimZoneSelection) {
     if (singlePageTrim) {
@@ -388,15 +554,23 @@ ZoneLoc PDFViewer::getZoneLoc(s32 x, s32 y) const
   if (x > (selX - 5) && x < (selX + 5)) {
     if      (y > (selY  - 5) && y < (selY  + 5)) return TZL_NW;
     else if (y > (selY2 - 5) && y < (selY2 + 5)) return TZL_SW;
-    else                                         return TZL_W;
+    else if (y > (selY  - 5) && y < (selY2 + 5)) return TZL_W;
+    else                                         return TZL_NONE;
   }
   else if (x > (selX2 - 5) && x < (selX2 + 5)) {
-    if      (y > (selY  - 5) && y < (selY + 5 )) return TZL_NE;
+    if      (y > (selY  - 5) && y < (selY  + 5)) return TZL_NE;
     else if (y > (selY2 - 5) && y < (selY2 + 5)) return TZL_SE;
-    else                                         return TZL_E;
+    else if (y > (selY  - 5) && y < (selY2 + 5)) return TZL_E;
+    else                                         return TZL_NONE;
   }
-  else if (y > (selY  - 5) && y < (selY  + 5))   return TZL_N;
-  else if (y > (selY2 - 5) && y < (selY2 + 5))   return TZL_S;
+  else if (y > (selY - 5) && y < (selY + 5)) {
+    if      (x > (selX - 5) && x < (selX2 + 5))  return TZL_N;
+    else                                         return TZL_NONE;
+  }
+  else if (y > (selY2 - 5) && y < (selY2 + 5)) {
+    if      (x > (selX - 5) && x < (selX2 + 5))  return TZL_S;
+    else                                         return TZL_NONE;
+  }
   else                                           return TZL_NONE;
 }
 
@@ -684,8 +858,6 @@ void PDFViewer::paintEvent(QPaintEvent * event)
   int X, Y, W, H;
   int Xs, Ys, Ws, Hs; // Saved values
 
-  //--> fl_overlay_clear(); rubber banding...
-
   CachedPage * cur = &pdfFile->cache[pdfFile->firstVisible];
 
   if (!cur->ready) return;
@@ -804,7 +976,7 @@ void PDFViewer::paintEvent(QPaintEvent * event)
         zh = ratioY * zoom;
 
         X -= zw * (theTrim.x() - cur->left) - zoomedMarginHalf;
-        Y -= zh * (theTrim.y() - cur->top) - zoomedMarginHalf;
+        Y -= zh * (theTrim.y() - cur->top ) - zoomedMarginHalf;
 
         W = zw * cur->w;
         H = zh * cur->h;
@@ -852,37 +1024,65 @@ void PDFViewer::paintEvent(QPaintEvent * event)
       QPixmap img = getPage(page);
       painter.drawPixmap(QRect(X, Y, W, H), img);
 
-//      if (viewMode == VM_CUSTOMTRIM &&
-//          !trimZoneSelection &&
-//          my_trim.initialized) {
-//        fl_pop_clip();
-//      }
+      if (painter.hasClipping()) painter.setClipping(false);
 
-      if (firstPage && (viewMode == VM_CUSTOMTRIM) && trimZoneSelection) {
+      if (zoneSelection) {
+        if (!selector) selector = new QRubberBand(QRubberBand::Rectangle, this);
+        if (dragging) {
+          int x, y, w, h;
+          if (selX < selX2) {
+            x = selX;
+            w = selX2 - selX;
+          }
+          else {
+            x = selX2;
+            w = selX - selX2;
+          }
+          if (selY < selY2) {
+            y = selY;
+            h = selY2 - selY;
+          }
+          else {
+            y = selY2;
+            h = selY - selY2;
+          }
 
-        if (customTrim.initialized) {
+          if ((x != 0) && (y != 0) && (w != 0) && (h != 0)) {
+            if (!selector) selector = new QRubberBand(QRubberBand::Rectangle, this);
+            selector->setGeometry(QRect(x, y, w, h));
+            if (!selector->isVisible()) selector->show();
+          }
+          else {
+            if (selector && selector->isVisible()) selector->hide();
+          }
+        }
+        else if (firstPage && (viewMode == VM_CUSTOMTRIM) && trimZoneSelection) {
 
-          s32 w, h;
+          if (customTrim.initialized) {
 
-          QRect theTrim = getTrimmingForPage(page);
+            s32 w, h;
 
-          if (!selector) selector = new QRubberBand(QRubberBand::Rectangle, this);
-          selector->setGeometry(
-            selX = Xs + (zoom * theTrim.x()     ),
-            selY = Ys + (zoom * theTrim.y()     ),
-            w    =      (zoom * theTrim.width() ),
-            h    =      (zoom * theTrim.height()));
+            QRect theTrim = getTrimmingForPage(page);
 
-          if (!selector->isVisible()) selector->show();
+            selector->setGeometry(
+              selX = Xs + (zoom * theTrim.x()     ),
+              selY = Ys + (zoom * theTrim.y()     ),
+              w    =      (zoom * theTrim.width() ),
+              h    =      (zoom * theTrim.height()));
 
-          selX2 = selX + w;
-          selY2 = selY + h;
+            if (!selector->isVisible()) selector->show();
 
-          //fl_message("selX: %d, selY: %d, w: %d, h: %d", selX, selY, w, h);
+            selX2 = selX + w;
+            selY2 = selY + h;
+          }
+        }
+        else if (!((viewMode == VM_CUSTOMTRIM) && trimZoneSelection)) {
+          if (selector && selector->isVisible()) selector->hide();
         }
       }
-
-      if (!zoneSelection && selector && selector->isVisible()) selector->hide();
+      else {
+        if (selector && selector->isVisible()) selector->hide();
+      }
 
       // For each displayed page, we keep those parameters
       // to permit the localization of the page on screen when
@@ -937,6 +1137,9 @@ void PDFViewer::paintEvent(QPaintEvent * event)
 
 void PDFViewer::pageChanged()
 {
+  if (silent) return;
+  if (!pdfFile->isValid()) return;
+
   s32 page = yOff;
 
   if (trimZoneSelection) {
@@ -946,6 +1149,7 @@ void PDFViewer::pageChanged()
     singlePageTrim = curr && (curr->page == page);
   }
 
+  resetSelection();
   sendState();
   update();
 }
@@ -1118,7 +1322,23 @@ void PDFViewer::textSelect(bool doSelect)
   zoneSelection = textSelection = doSelect;
   trimZoneSelection = false;
   resetSelection();
+
+  if (doSelect) {
+    setMouseTracking(true);
+  }
+  else {
+    setMouseTracking(false);
+    setCursor(Qt::ArrowCursor);
+  }
+
   update();
+}
+
+void PDFViewer::copyToClipboard()
+{
+  if (clipText.size() > 0) {
+    QGuiApplication::clipboard()->setText(clipText);
+  }
 }
 
 void PDFViewer::trimZoneDifferent(bool diff)
@@ -1202,11 +1422,16 @@ void PDFViewer::addSinglePageTrim(s32 page, QRect trim)
 
   curr->page     = page;
   curr->pageTrim = trim;
+  sendState();
 }
 
 void PDFViewer::clearAllSingleTrims()
 {
   clearSingles(customTrim);
+
+  singlePageTrim = false;
+
+  sendState();
 }
 
 // User requested trimming zone selection (or not if do_select is false).
@@ -1217,8 +1442,6 @@ void PDFViewer::trimZoneSelect(bool doSelect)
   static float savedYOff;
   static u32   savedColumns;
   static bool  initialized = false;
-
-  debug(QString("trimZoneSelect: %1").arg(doSelect));
 
   trimZoneSelection = (viewMode == VM_CUSTOMTRIM) && doSelect;
 
@@ -1234,6 +1457,7 @@ void PDFViewer::trimZoneSelect(bool doSelect)
       initialized   = true;
       columns       = 1;
       textSelection = false;
+
       yOff          = floorf(yOff);
 
       if (!customTrim.initialized) {
@@ -1267,6 +1491,7 @@ void PDFViewer::trimZoneSelect(bool doSelect)
       }
 
       setMouseTracking(false);
+      setCursor(Qt::ArrowCursor);
     }
 
     resetSelection();

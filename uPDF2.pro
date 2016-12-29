@@ -28,23 +28,28 @@ SOURCES += \
     mainwindow.cpp \
     utils.cpp \
     pdfloader.cpp \
-    pdfviewerplugin.cpp \
     pdfviewer.cpp \
     loadpdffile.cpp \
-    pdffile.cpp
+    pdffile.cpp \
+    pdfpageworker.cpp \
+    config.cpp \
+    selectrecentdialog.cpp
 
 HEADERS  += \
     mainwindow.h \
     updf.h \
     utils.h \
     pdfloader.h \
-    pdfviewerplugin.h \
     pdfviewer.h \
     loadpdffile.h \
-    pdffile.h
+    pdffile.h \
+    pdfpageworker.h \
+    config.h \
+    selectrecentdialog.h
 
 FORMS    += \
-    mainwindow.ui
+    mainwindow.ui \
+    selectrecentdialog.ui
 
 RESOURCES += \
     updf.qrc
@@ -53,11 +58,10 @@ INCLUDEPATH += /usr/local/include
 INCLUDEPATH += /usr/local/include/poppler
 INCLUDEPATH += /usr/include/poppler
 
-QMAKE_CXXFLAGS += -isystem -Wall -Wextra -Wno-unused-parameter -fopenmp
+LIBS += -L/usr/local/lib
 
+QMAKE_CXXFLAGS += -isystem -Wall -Wextra -Wno-unused-parameter
 unix|win32: LIBS += -lpoppler -llzo2
-
-QMAKE_LFLAGS += -fopenmp
 
 QT          += widgets uiplugin
 CONFIG      += plugin

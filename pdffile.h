@@ -31,7 +31,7 @@ class PDFFile : public QObject
     QString      filename;
     CachedPage * cache;
     PDFDoc     * pdf;
-    u32          maxw, maxh;
+    u32          maxW, maxH;
     u32          pages;
     u32          firstVisible;
     u32          lastVisible;

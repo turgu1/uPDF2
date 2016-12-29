@@ -1,6 +1,8 @@
 #include "pdfviewerplugin.h"
 #include "pdfviewer.h"
 
+// Currently not in use...
+
 PDFViewerPlugin::PDFViewerPlugin(QObject * parent) : QObject(parent), initialized(false)
 {
 

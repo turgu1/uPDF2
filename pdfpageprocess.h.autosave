@@ -1,0 +1,26 @@
+#ifndef PDFPAGEPROCESS_H
+#define PDFPAGEPROCESS_H
+
+#include <QObject>
+#include <QRunnable>
+
+#include "updf.h"
+
+class PDFPageProcess : public QRunnable
+{
+    Q_OBJECT
+    
+  public:
+    PDFPageProcess(PDFFile & pdfFile, const u32 pageNbr);
+    void run();
+    void dopage();    
+    
+  private:
+    PDFFile & pdfFile;
+    u32 page;
+    
+  signals:
+    void refresh();
+};
+
+#endif // PDFPAGEPROCESS_H

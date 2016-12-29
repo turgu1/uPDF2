@@ -1,6 +1,8 @@
 #ifndef PDFVIEWERPLUGIN_H
 #define PDFVIEWERPLUGIN_H
 
+// Currently not in use...
+
 #include <QObject>
 #include <QWidget>
 #include <QString>
