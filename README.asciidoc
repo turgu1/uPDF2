@@ -9,7 +9,7 @@ uPDF is a PDF Viewer specifically designed to minimize keyboard interaction requ
 Main caracteristics:
 
 - Multi-columns document display (up to 5 columns)
-- Selection for the last 30 viewed documents
+- Open selection from the last 30 viewed documents
 - Automatically open the last viewed document with last display parameters
 - Fullscreen mode
 - Text selection and copy to clipboard (from FlaxPDF)
@@ -19,6 +19,7 @@ Main caracteristics:
     * specific page to page trimming selection
 - Fast background document retrieval through multithreading (from FlaxPDF)
 - Whole document caching in memory (no delay in going from a page to other once loaded) (from FlaxPDF)
+- Controls pane can be hidden to maximize document screen usage (from FlaxPDF)
 - Free and open source (Gnu General Public License V3.0)
 
 This is a spinoff made from the excellent piece of software FlaxPDF (see http://github.com/clbr/flaxpdf). The original announcement page of FlaxPDF is available below under the <<FlaxPDF,FlaxPDF>> header below.
