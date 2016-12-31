@@ -5,6 +5,11 @@ version.h
 Makefile
 uPDF2.pro.user.*
 *.autosave
+ui_*
+prc_*
+moc_*
+.qmake*
+uPDF2
 
 autom4te.cache
 config

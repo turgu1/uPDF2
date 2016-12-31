@@ -163,7 +163,30 @@ void PDFViewer::mouseMoveEvent(QMouseEvent * event)
         default:      selX2 = mX; selY2 = mY; break;
       }
 
-      update();
+      int x, y, w, h;
+      if (selX < selX2) {
+        x = selX;
+        w = selX2 - selX;
+      }
+      else {
+        x = selX2;
+        w = selX - selX2;
+      }
+      if (selY < selY2) {
+        y = selY;
+        h = selY2 - selY;
+      }
+      else {
+        y = selY2;
+        h = selY - selY2;
+      }
+
+      if ((x != 0) && (y != 0) && (w != 0) && (h != 0)) {
+        if (!selector) selector = new QRubberBand(QRubberBand::Rectangle, this);
+        selector->setGeometry(QRect(x, y, w, h));
+        if (!selector->isVisible()) selector->show();
+      }
+//    update();
     }
     else {
       setCursor(Qt::OpenHandCursor);
