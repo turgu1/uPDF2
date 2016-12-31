@@ -183,7 +183,7 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="updf.qrc">
+            <iconset resource="../res/updf.qrc">
              <normaloff>:/icons/32/img/32x32/window-close.png</normaloff>:/icons/32/img/32x32/window-close.png</iconset>
            </property>
            <property name="iconSize">
@@ -248,7 +248,7 @@
           <string/>
          </property>
          <property name="icon">
-          <iconset resource="updf.qrc">
+          <iconset resource="../res/updf.qrc">
            <normaloff>:/icons/48/img/48x48/updf.png</normaloff>:/icons/48/img/48x48/updf.png</iconset>
          </property>
          <property name="iconSize">
@@ -294,7 +294,7 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="updf.qrc">
+            <iconset resource="../res/updf.qrc">
              <normaloff>:/icons/32/img/32x32/document-open.png</normaloff>:/icons/32/img/32x32/document-open.png</iconset>
            </property>
            <property name="iconSize">
@@ -335,7 +335,7 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="updf.qrc">
+            <iconset resource="../res/updf.qrc">
              <normaloff>:/icons/32/img/32x32/emblem-documents.png</normaloff>:/icons/32/img/32x32/emblem-documents.png</iconset>
            </property>
            <property name="iconSize">
@@ -379,6 +379,11 @@
              <height>16777215</height>
             </size>
            </property>
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
            <property name="toolTip">
             <string>Curent Page</string>
            </property>
@@ -417,6 +422,11 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
            <property name="toolTip">
             <string>Document Page Count</string>
            </property>
@@ -452,6 +462,11 @@
            <width>16777215</width>
            <height>16777215</height>
           </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
          </property>
          <property name="toolTip">
           <string>View Mode</string>
@@ -587,6 +602,11 @@ Trim Parameters</string>
               <height>0</height>
              </size>
             </property>
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
             <property name="toolTip">
              <string>Edit Trimming Zone</string>
             </property>
@@ -612,6 +632,11 @@ Trim Parameters</string>
               <height>0</height>
              </size>
             </property>
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
             <property name="toolTip">
              <string>Even and Odd Pages use Different Trim Parameters</string>
             </property>
@@ -636,6 +661,11 @@ Trim Parameters</string>
               <width>0</width>
               <height>0</height>
              </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
             </property>
             <property name="toolTip">
              <string>Set this page with a Specific Trim Zone</string>
@@ -708,6 +738,11 @@ Trim Parameters</string>
               <height>0</height>
              </size>
             </property>
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
             <property name="toolTip">
              <string>Clear All Pages having a Specific Trim Zone</string>
             </property>
@@ -721,6 +756,11 @@ Trim Parameters</string>
        </item>
        <item>
         <widget class="QPushButton" name="selectTextButton">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
          <property name="toolTip">
           <string>Text Selection</string>
          </property>
@@ -734,6 +774,11 @@ Trim Parameters</string>
        </item>
        <item>
         <widget class="QPushButton" name="copyButton">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
          <property name="toolTip">
           <string>Copy Text To Clipboard</string>
          </property>
@@ -799,7 +844,7 @@ Trim Parameters</string>
              <string/>
             </property>
             <property name="icon">
-             <iconset resource="updf.qrc">
+             <iconset resource="../res/updf.qrc">
               <normaloff>:/icons/32/img/32x32/zoom-in.png</normaloff>:/icons/32/img/32x32/zoom-in.png</iconset>
             </property>
             <property name="iconSize">
@@ -840,7 +885,7 @@ Trim Parameters</string>
              <string/>
             </property>
             <property name="icon">
-             <iconset resource="updf.qrc">
+             <iconset resource="../res/updf.qrc">
               <normaloff>:/icons/32/img/32x32/zoom-out.png</normaloff>:/icons/32/img/32x32/zoom-out.png</iconset>
             </property>
             <property name="iconSize">
@@ -886,7 +931,7 @@ Trim Parameters</string>
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="updf.qrc">
+            <iconset resource="../res/updf.qrc">
              <normaloff>:/icons/32/img/32x32/go-top.png</normaloff>:/icons/32/img/32x32/go-top.png</iconset>
            </property>
            <property name="iconSize">
@@ -915,7 +960,7 @@ Trim Parameters</string>
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="updf.qrc">
+            <iconset resource="../res/updf.qrc">
              <normaloff>:/icons/32/img/32x32/go-up.png</normaloff>:/icons/32/img/32x32/go-up.png</iconset>
            </property>
            <property name="iconSize">
@@ -954,7 +999,7 @@ Trim Parameters</string>
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="updf.qrc">
+            <iconset resource="../res/updf.qrc">
              <normaloff>:/icons/32/img/32x32/go-bottom.png</normaloff>:/icons/32/img/32x32/go-bottom.png</iconset>
            </property>
            <property name="iconSize">
@@ -983,7 +1028,7 @@ Trim Parameters</string>
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="updf.qrc">
+            <iconset resource="../res/updf.qrc">
              <normaloff>:/icons/32/img/32x32/go-down.png</normaloff>:/icons/32/img/32x32/go-down.png</iconset>
            </property>
            <property name="iconSize">
@@ -1001,6 +1046,11 @@ Trim Parameters</string>
        </item>
        <item>
         <widget class="QComboBox" name="columnCountCombo">
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
+         </property>
          <property name="toolTip">
           <string>Columns Count</string>
          </property>
@@ -1036,6 +1086,11 @@ Trim Parameters</string>
        </item>
        <item>
         <widget class="QComboBox" name="titlePageCountCombo">
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
+         </property>
          <property name="toolTip">
           <string>Title Page Count</string>
          </property>
@@ -1090,7 +1145,7 @@ Trim Parameters</string>
           <string/>
          </property>
          <property name="icon">
-          <iconset resource="updf.qrc">
+          <iconset resource="../res/updf.qrc">
            <normaloff>:/icons/32/img/32x32/view-fullscreen.png</normaloff>
            <selectedon>:/icons/32/img/32x32/view-restore.png</selectedon>:/icons/32/img/32x32/view-fullscreen.png</iconset>
          </property>
@@ -1153,7 +1208,7 @@ Trim Parameters</string>
           <string/>
          </property>
          <property name="icon">
-          <iconset resource="updf.qrc">
+          <iconset resource="../res/updf.qrc">
            <normaloff>:/icons/32/img/32x32/application-exit.png</normaloff>:/icons/32/img/32x32/application-exit.png</iconset>
          </property>
          <property name="iconSize">
@@ -1208,7 +1263,7 @@ Trim Parameters</string>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
-  <include location="updf.qrc"/>
+  <include location="../res/updf.qrc"/>
  </resources>
  <connections/>
  <slots>

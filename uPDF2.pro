@@ -63,6 +63,6 @@ LIBS += -L/usr/local/lib
 QMAKE_CXXFLAGS += -isystem -Wall -Wextra -Wno-unused-parameter
 unix|win32: LIBS += -lpoppler -llzo2
 
-QT          += widgets uiplugin
+QT          += widgets
 CONFIG      += plugin
 #TEMPLATE    = lib
