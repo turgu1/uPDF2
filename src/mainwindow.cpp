@@ -248,6 +248,9 @@ void MainWindow::updateButtons(ViewState & state)
     else {
       ui->copyButton->hide();
     }
+    ui->columnCountCombo->setCurrentIndex(state.columnCount - 1);
+    ui->titlePageCountCombo->setCurrentIndex(state.titlePageCount);
+
     ui->columnCountCombo->setEnabled(state.validDocument);
     ui->titlePageCountCombo->setEnabled(state.validDocument);
     ui->selectTextButton->setEnabled(state.validDocument);

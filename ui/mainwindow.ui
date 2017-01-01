@@ -381,7 +381,7 @@
            </property>
            <property name="font">
             <font>
-             <pointsize>12</pointsize>
+             <pointsize>11</pointsize>
             </font>
            </property>
            <property name="toolTip">
@@ -424,7 +424,7 @@
            </property>
            <property name="font">
             <font>
-             <pointsize>12</pointsize>
+             <pointsize>11</pointsize>
             </font>
            </property>
            <property name="toolTip">
@@ -604,7 +604,7 @@ Trim Parameters</string>
             </property>
             <property name="font">
              <font>
-              <pointsize>12</pointsize>
+              <pointsize>11</pointsize>
              </font>
             </property>
             <property name="toolTip">
@@ -634,7 +634,7 @@ Trim Parameters</string>
             </property>
             <property name="font">
              <font>
-              <pointsize>12</pointsize>
+              <pointsize>11</pointsize>
              </font>
             </property>
             <property name="toolTip">
@@ -664,7 +664,7 @@ Trim Parameters</string>
             </property>
             <property name="font">
              <font>
-              <pointsize>12</pointsize>
+              <pointsize>11</pointsize>
              </font>
             </property>
             <property name="toolTip">
@@ -740,7 +740,7 @@ Trim Parameters</string>
             </property>
             <property name="font">
              <font>
-              <pointsize>12</pointsize>
+              <pointsize>11</pointsize>
              </font>
             </property>
             <property name="toolTip">
@@ -758,7 +758,7 @@ Trim Parameters</string>
         <widget class="QPushButton" name="selectTextButton">
          <property name="font">
           <font>
-           <pointsize>12</pointsize>
+           <pointsize>11</pointsize>
           </font>
          </property>
          <property name="toolTip">
@@ -776,7 +776,7 @@ Trim Parameters</string>
         <widget class="QPushButton" name="copyButton">
          <property name="font">
           <font>
-           <pointsize>12</pointsize>
+           <pointsize>11</pointsize>
           </font>
          </property>
          <property name="toolTip">

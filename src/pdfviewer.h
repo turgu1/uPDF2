@@ -97,6 +97,8 @@ struct ViewState {
     bool     validDocument;
     int      page;
     int      pageCount;
+    int      titlePageCount;
+    int      columnCount;
     ViewMode viewMode;
     float    viewZoom;
     bool     fileLoading;
@@ -124,6 +126,7 @@ class PDFViewer : public QWidget
     void  mouseReleaseEvent(QMouseEvent * event)     Q_DECL_OVERRIDE;
     void  paintEvent(QPaintEvent * event)            Q_DECL_OVERRIDE;
     QSize sizeHint() const                           Q_DECL_OVERRIDE;
+    void  rubberBanding(bool show = true);
     QStringList getSinglePageTrims();
     bool  getFileViewParameters(FileViewParameters & params);
     void  setFileViewParameters(FileViewParameters & params);

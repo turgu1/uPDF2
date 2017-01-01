@@ -392,17 +392,19 @@ void PDFViewer::sendState()
   ViewState state;
   u32 page = yOff;
 
-  state.validDocument = pdfFile->isValid();
-  state.page          = page;
-  state.pageCount     = pdfFile->pages;
-  state.viewMode      = viewMode;
-  state.viewZoom      = viewZoom;
-  state.fileLoading   = fileIsLoading;
-  state.trimSelection = trimZoneSelection;
-  state.textSelection = textSelection;
-  state.trimSimilar   = customTrim.similar;
-  state.thisPageTrim  = singlePageTrim;
-  state.someClipText  = clipText.size() > 0;
+  state.validDocument  = pdfFile->isValid();
+  state.page           = page;
+  state.pageCount      = pdfFile->pages;
+  state.columnCount    = columns;
+  state.titlePageCount = titlePages;
+  state.viewMode       = viewMode;
+  state.viewZoom       = viewZoom;
+  state.fileLoading    = fileIsLoading;
+  state.trimSelection  = trimZoneSelection;
+  state.textSelection  = textSelection;
+  state.trimSimilar    = customTrim.similar;
+  state.thisPageTrim   = singlePageTrim;
+  state.someClipText   = clipText.size() > 0;
 
   emit stateUpdated(state);
 }
@@ -1071,35 +1073,7 @@ void PDFViewer::paintEvent(QPaintEvent * event)
 
       if (zoneSelection) {
         if (!selector) selector = new QRubberBand(QRubberBand::Rectangle, this);
-        if (dragging) {
-          int x, y, w, h;
-          if (selX < selX2) {
-            x = selX;
-            w = selX2 - selX;
-          }
-          else {
-            x = selX2;
-            w = selX - selX2;
-          }
-          if (selY < selY2) {
-            y = selY;
-            h = selY2 - selY;
-          }
-          else {
-            y = selY2;
-            h = selY - selY2;
-          }
-
-          if ((x != 0) && (y != 0) && (w != 0) && (h != 0)) {
-            if (!selector) selector = new QRubberBand(QRubberBand::Rectangle, this);
-            selector->setGeometry(QRect(x, y, w, h));
-            if (!selector->isVisible()) selector->show();
-          }
-          else {
-            if (selector && selector->isVisible()) selector->hide();
-          }
-        }
-        else if (firstPage && (viewMode == VM_CUSTOMTRIM) && trimZoneSelection) {
+        if (!dragging && firstPage && (viewMode == VM_CUSTOMTRIM) && trimZoneSelection) {
 
           if (customTrim.initialized) {
 
@@ -1119,9 +1093,9 @@ void PDFViewer::paintEvent(QPaintEvent * event)
             selY2 = selY + h;
           }
         }
-        else if (!((viewMode == VM_CUSTOMTRIM) && trimZoneSelection)) {
-          if (selector && selector->isVisible()) selector->hide();
-        }
+//      else if (!((viewMode == VM_CUSTOMTRIM) && trimZoneSelection)) {
+//        if (selector && selector->isVisible()) selector->hide();
+//      }
       }
       else {
         if (selector && selector->isVisible()) selector->hide();
@@ -1176,6 +1150,41 @@ void PDFViewer::paintEvent(QPaintEvent * event)
   }
 
   pdfFile->lastVisible = page;
+}
+
+void PDFViewer::rubberBanding(bool show)
+{
+  if (show) {
+    int x, y, w, h;
+    if (selX < selX2) {
+      x = selX;
+      w = selX2 - selX;
+    }
+    else {
+      x = selX2;
+      w = selX - selX2;
+    }
+    if (selY < selY2) {
+      y = selY;
+      h = selY2 - selY;
+    }
+    else {
+      y = selY2;
+      h = selY - selY2;
+    }
+
+    if ((x != 0) && (y != 0) && (w != 0) && (h != 0)) {
+      if (!selector) selector = new QRubberBand(QRubberBand::Rectangle, this);
+      selector->setGeometry(QRect(x, y, w, h));
+      if (!selector->isVisible()) selector->show();
+    }
+    else {
+      if (selector && selector->isVisible()) selector->hide();
+    }
+  }
+  else {
+    if (selector && selector->isVisible()) selector->hide();
+  }
 }
 
 void PDFViewer::pageChanged()
@@ -1522,6 +1531,7 @@ void PDFViewer::trimZoneSelect(bool doSelect)
         }
       }
 
+      rubberBanding(true);
       setMouseTracking(true);
     }
     else {
@@ -1533,6 +1543,7 @@ void PDFViewer::trimZoneSelect(bool doSelect)
         columns = savedColumns;
       }
 
+      rubberBanding(false);
       setMouseTracking(false);
       setCursor(Qt::ArrowCursor);
     }
