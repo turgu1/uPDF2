@@ -51,6 +51,9 @@ class PDFFile : public QObject
     u32          pages;
     u32          firstVisible;
     u32          lastVisible;
+    u32          totalSize;
+    u32          totalSizeCompressed;
+    u32          loadTime;
 
     void setLoading(bool val);
     void setLoaded(bool val);

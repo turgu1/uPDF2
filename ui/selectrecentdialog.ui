@@ -91,5 +91,21 @@ or press Cancel to continue:</string>
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>recentFileList</sender>
+   <signal>itemDoubleClicked(QListWidgetItem*)</signal>
+   <receiver>SelectRecentDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>184</x>
+     <y>147</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>184</x>
+     <y>145</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
 </ui>

@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
     a.setApplicationVersion("V1.0");
     a.setStyle(QStyleFactory::create("fusion"));
 
-    a.setStyleSheet("QWidget {font: 12px;}");
+    a.setStyleSheet("QWidget {font: 13px;}");
 
     MainWindow w;
     w.setWindowTitle("uPDF");

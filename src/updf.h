@@ -23,14 +23,26 @@ typedef uint32_t u32;
 typedef uint16_t u16;
 typedef uint8_t  u8;
 
-typedef int64_t s64;
-typedef int32_t s32;
-typedef int16_t s16;
-typedef int8_t  s8;
+typedef int64_t  s64;
+typedef int32_t  s32;
+typedef int16_t  s16;
+typedef int8_t   s8;
+
+struct Preferences {
+  bool fullScreenAtStartup;
+  bool hideControlsAtStartup;
+  bool viewClipboardSelection;
+  bool keepRecent;
+  bool recentGeometry;
+  bool showLoadMetrics;
+  bool logTrace;
+  QString logFilename;
+};
 
 // They are instantiated at the beginning of mainwindow.cpp
-extern u32 details;
-extern QString filenameAtStartup;
+extern u32         details;
+extern QString     filenameAtStartup;
+extern Preferences preferences;
 
 #include "utils.h"
 

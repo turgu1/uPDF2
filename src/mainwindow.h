@@ -53,6 +53,7 @@ class MainWindow : public QMainWindow
     void openFile();
     void closeApp();
     void openRecent();
+    void askPreferences();
 
   private:
     ViewState        currentState;

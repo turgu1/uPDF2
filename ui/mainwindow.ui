@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>761</height>
+    <height>783</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -177,7 +177,7 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>Hide Toolbar</string>
+            <string>Hide Toolbar (F8)</string>
            </property>
            <property name="text">
             <string/>
@@ -780,7 +780,7 @@ Trim Parameters</string>
           </font>
          </property>
          <property name="toolTip">
-          <string>Copy Text To Clipboard</string>
+          <string>Copy Previously Selected Text To Clipboard</string>
          </property>
          <property name="text">
           <string>Copy</string>
@@ -1125,43 +1125,73 @@ Trim Parameters</string>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="fullScreenButton">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
+        <layout class="QHBoxLayout" name="horizontalLayout_9">
+         <property name="spacing">
+          <number>4</number>
          </property>
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>0</height>
-          </size>
+         <property name="topMargin">
+          <number>0</number>
          </property>
-         <property name="toolTip">
-          <string>Full Screen View</string>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="icon">
-          <iconset resource="../res/updf.qrc">
-           <normaloff>:/icons/32/img/32x32/view-fullscreen.png</normaloff>
-           <selectedon>:/icons/32/img/32x32/view-restore.png</selectedon>:/icons/32/img/32x32/view-fullscreen.png</iconset>
-         </property>
-         <property name="iconSize">
-          <size>
-           <width>32</width>
-           <height>32</height>
-          </size>
-         </property>
-         <property name="checkable">
-          <bool>false</bool>
-         </property>
-         <property name="flat">
-          <bool>false</bool>
-         </property>
-        </widget>
+         <item>
+          <widget class="QPushButton" name="fullScreenButton">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Full Screen View</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../res/updf.qrc">
+             <normaloff>:/icons/32/img/32x32/view-fullscreen.png</normaloff>
+             <selectedon>:/icons/32/img/32x32/view-restore.png</selectedon>:/icons/32/img/32x32/view-fullscreen.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>32</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="checkable">
+            <bool>false</bool>
+           </property>
+           <property name="flat">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="preferencesButton">
+           <property name="toolTip">
+            <string>Preferences</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../res/updf.qrc">
+             <normaloff>:/icons/32/img/32x32/system-run.png</normaloff>:/icons/32/img/32x32/system-run.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>32</width>
+             <height>32</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item>
         <spacer name="verticalSpacer_2">
@@ -1183,6 +1213,13 @@ Trim Parameters</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="metricsLabel">
+         <property name="text">
+          <string/>
          </property>
         </widget>
        </item>

@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef PDFLOADER_H
 #define PDFLOADER_H
 
+#include <QtGlobal>
 #include <QObject>
 #include <QThread>
 #include <QThreadPool>

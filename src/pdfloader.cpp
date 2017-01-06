@@ -107,13 +107,22 @@ void PDFLoader::run()
     }
   }
 
+  u32 total = 0, totalcomp = 0;
+  for (u32 i = 0; i < pdfFile.pages; i++) {
+    total += pdfFile.cache[i].uncompressed;
+    totalcomp += pdfFile.cache[i].size;
+  }
+
+  pdfFile.totalSize = total;
+  pdfFile.totalSizeCompressed = totalcomp;
+
+  gettimeofday(&end, NULL);
+  const u32 us = usecs(start, end);
+
+  pdfFile.loadTime = us;
+
   // Print stats
   if (details) {
-    u32 total = 0, totalcomp = 0;
-    for (u32 i = 0; i < pdfFile.pages; i++) {
-      total += pdfFile.cache[i].uncompressed;
-      totalcomp += pdfFile.cache[i].size;
-    }
 
     qInfo() <<
       "Compressed mem usage " <<
@@ -121,9 +130,6 @@ void PDFLoader::run()
       "mb, compressed to " <<
       (100 * totalcomp / (float) total) <<
       "%" << endl;
-
-    gettimeofday(&end, NULL);
-    const u32 us = usecs(start, end);
 
     qInfo() <<
       "Processing the file took" <<
@@ -143,7 +149,6 @@ void PDFLoader::run()
   pdfFile.maxW = maxW;
   pdfFile.maxH = maxH;
 
-  // Set normal cursor
   pdfFile.setLoaded(true);
 
   return;

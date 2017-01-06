@@ -86,6 +86,19 @@ void loadConfig()
 
   if (version != CONFIG_VERSION) return;
 
+  cfg.beginGroup("preferences");
+
+  preferences.fullScreenAtStartup    = cfg.value("fullScreenAtStartup",             false).toBool();
+  preferences.hideControlsAtStartup  = cfg.value("hideControlsAtStartup",           false).toBool();
+  preferences.viewClipboardSelection = cfg.value("viewClipboardSelection",          false).toBool();
+  preferences.keepRecent             = cfg.value("keepRecent",                       true).toBool();
+  preferences.recentGeometry         = cfg.value("recentGeometry",                   true).toBool();
+  preferences.showLoadMetrics        = cfg.value("showLoadMetrics",                 false).toBool();
+  preferences.logTrace               = cfg.value("logTrace",                        false).toBool();
+  preferences.logFilename            = cfg.value("logFilename",           "/tmp/updf.log").toString();
+
+  cfg.endGroup();
+
   int cnt = cfg.beginReadArray("fileViewParameters");
 
   FileViewParameters *prev = NULL;
@@ -166,6 +179,19 @@ void saveConfig()
   cfg.clear();
 
   cfg.setValue("Version", CONFIG_VERSION);
+
+  cfg.beginGroup("preferences");
+
+  cfg.setValue("fullScreenAtStartup",    preferences.fullScreenAtStartup   );
+  cfg.setValue("hideControlsAtStartup",  preferences.hideControlsAtStartup );
+  cfg.setValue("viewClipboardSelection", preferences.viewClipboardSelection);
+  cfg.setValue("keepRecent",             preferences.keepRecent            );
+  cfg.setValue("recentGeometry",         preferences.recentGeometry        );
+  cfg.setValue("showLoadMetrics",        preferences.showLoadMetrics       );
+  cfg.setValue("logTrace",               preferences.logTrace              );
+  cfg.setValue("logFilename",            preferences.logFilename           );
+
+  cfg.endGroup();
 
   cfg.beginWriteArray("fileViewParameters");
 

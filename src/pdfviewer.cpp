@@ -28,6 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QGuiApplication>
 #include <TextOutputDev.h>
 #include <QDebug>
+#include <QMessageBox>
 
 #define CTRL_PRESSED event->modifiers().testFlag(Qt::ControlModifier)
 #define LEFT_BUTTON  (event->button() == Qt::LeftButton)
@@ -247,7 +248,6 @@ void PDFViewer::mousePressEvent(QMouseEvent * event)
 
   if (LEFT_BUTTON) {
     dragging = true;
-    resetSelection();
     if (zoneSelection) {
       savedX = selX;
       savedY = selY;
@@ -405,6 +405,16 @@ void PDFViewer::sendState()
   state.trimSimilar    = customTrim.similar;
   state.thisPageTrim   = singlePageTrim;
   state.someClipText   = clipText.size() > 0;
+
+  if (pdfFile->totalSize > 0) {
+    state.metrics = QString(tr("Mem %1MB\nRatio %2%\nTime %3s"))
+        .arg((float)pdfFile->totalSizeCompressed / 1000000.0f, 0, 'f', 2)
+        .arg((float)(pdfFile->totalSizeCompressed) / pdfFile->totalSize * 100.0, 0, 'f', 1)
+        .arg((float)pdfFile->loadTime / 1000000.0f, 0, 'f', 2);
+  }
+  else {
+    state.metrics = "";
+  }
 
   emit stateUpdated(state);
 }
@@ -568,6 +578,24 @@ void PDFViewer::endOfSelection()
     // Save it for clipboard retrieval
     clipText = cstr;
 
+    if (preferences.viewClipboardSelection) {
+      QMessageBox msgBox;
+      QPushButton * copyButton = NULL;
+      if (clipText.size() > 0) {
+        copyButton = msgBox.addButton(tr("Copy to Clipboard"), QMessageBox::ActionRole);
+      }
+      QPushButton * abortButton = msgBox.addButton(QMessageBox::Close);
+
+      msgBox.setWindowTitle("Selected Text");
+      msgBox.setText(clipText.size() > 0 ? clipText : "[No Text Selected]");
+      msgBox.exec();
+
+      if ((msgBox.clickedButton() != NULL) &&
+          (msgBox.clickedButton() == (QAbstractButton *) copyButton)) {
+        copyToClipboard();
+      }
+    }
+
     delete str;
     delete dev;
 
@@ -683,9 +711,9 @@ u32 PDFViewer::pageW(u32 page) const
     }
   }
   else { // VM_PAGE || VM_WIDTH || VM_ZOOMFACTOR || (VM_CUSTOMTRIM && trimZoneSelection)
-    return pdfFile->cache[page].w +
-        pdfFile->cache[page].left  +
-        pdfFile->cache[page].right;
+    return pdfFile->cache[page].w    +
+           pdfFile->cache[page].left +
+           pdfFile->cache[page].right;
   }
 }
 
@@ -1058,15 +1086,15 @@ void PDFViewer::paintEvent(QPaintEvent * event)
         H -= (cur->top  + cur->bottom) * zoom;
       }
 
+      QPixmap img = getPage(page);
+
       // Render real content
-      #if DEBUGGING && 0
-        if (firstPage) {
-          qDebug("Drawing page %d: X: %d, Y: %d, W: %d, H: %d\n", page, X, Y, W, H);
-        }
-      #endif
+//      if (firstPage) {
+//        qDebug("Drawing page %d: X: %d, Y: %d, W: %d, H: %d (%d)",
+//               page, X, Y, W, H, img.size());
+//      }
 
       // Do render the page on the canvas
-      QPixmap img = getPage(page);
       painter.drawPixmap(QRect(X, Y, W, H), img);
 
       if (painter.hasClipping()) painter.setClipping(false);
@@ -1093,9 +1121,13 @@ void PDFViewer::paintEvent(QPaintEvent * event)
             selY2 = selY + h;
           }
         }
-//      else if (!((viewMode == VM_CUSTOMTRIM) && trimZoneSelection)) {
-//        if (selector && selector->isVisible()) selector->hide();
-//      }
+        else if (!((viewMode == VM_CUSTOMTRIM) && trimZoneSelection)) {
+          if (selector && selector->isVisible()) {
+            if ((selX == 0) && (selY == 0) && (selX2 == 0) && (selY2 == 0)) {
+              selector->hide();
+            }
+          }
+        }
       }
       else {
         if (selector && selector->isVisible()) selector->hide();
@@ -1377,6 +1409,7 @@ void PDFViewer::textSelect(bool doSelect)
 
   if (doSelect) {
     setMouseTracking(true);
+    setCursor(Qt::CrossCursor);
   }
   else {
     setMouseTracking(false);

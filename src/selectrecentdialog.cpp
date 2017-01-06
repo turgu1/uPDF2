@@ -65,10 +65,9 @@ FileViewParameters * SelectRecentDialog::run()
 void SelectRecentDialog::clearRecentsList()
 {
   QMessageBox msgBox;
-  msgBox.setText("Are you sure you want to\ndelete the Recent File List content?");
+  msgBox.setText(tr("Are you sure you want to\ndelete the Recent File List content?"));
   msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
   msgBox.setDefaultButton(QMessageBox::Cancel);
-
 
   if (msgBox.exec() == QMessageBox::Ok) {
     clearFileViewParameters();

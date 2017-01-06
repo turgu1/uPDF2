@@ -19,6 +19,7 @@
         <file>img/22x22/zoom-out.png</file>
         <file>img/22x22/emblem-documents.png</file>
         <file>img/22x22/window-close.png</file>
+        <file>img/22x22/system-run.png</file>
     </qresource>
     <qresource prefix="/icons/32">
         <file>img/32x32/updf.png</file>
@@ -35,6 +36,7 @@
         <file>img/32x32/zoom-in.png</file>
         <file>img/32x32/zoom-out.png</file>
         <file>img/32x32/window-close.png</file>
+        <file>img/32x32/system-run.png</file>
     </qresource>
     <qresource prefix="/icons/48">
         <file>img/48x48/updf.png</file>
@@ -51,6 +53,7 @@
         <file>img/48x48/zoom-in.png</file>
         <file>img/48x48/zoom-out.png</file>
         <file>img/48x48/window-close.png</file>
+        <file>img/48x48/system-run.png</file>
     </qresource>
     <qresource prefix="/agif">
         <file>img/busy.gif</file>

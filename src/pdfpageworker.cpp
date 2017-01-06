@@ -1,5 +1,6 @@
 /*
-Copyright (C) 2017 Guy Turcotte
+Copyright (C) 2015 Lauri Kasanen
+Modifications Copyright (C) 2017 Guy Turcotte
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <GlobalParams.h>
 #include <SplashOutputDev.h>
 #include <splash/SplashBitmap.h>
+#include <QDebug>
 
 #include "pdfpageworker.h"
 
@@ -28,16 +30,147 @@ PDFPageWorker::PDFPageWorker(PDFFile & file, const u32 pageNbr) :
 
 }
 
-static bool nonwhite(const u8 * const pixel) {
+#define METRICS 0
 
-  return pixel[0] != 255 ||
+#if 0
+
+// This version is a little bit faster (about 33% faster) than the original algo,
+// but maybe not good enough to be retained, considering the readability lost
+// for the developper and the amount of time spent to do the calculation that is
+// already minimal (~200us per page...) (GT)
+//
+// May *not* work on a big endian architecture if not running under gnu linux or OSX.
+// It is also expected that the pixels will be stored at a 32 bit boundary address.
+
+#if __gnu_linux__ || (__APPLE__ && __MACH__)
+  #include <endian.h>
+#endif
+
+static bool nonwhite(const u32 pixel)
+{
+  return (pixel & le32toh(0x00FFFFFF)) != le32toh(0x00FFFFFF);
+}
+
+static void getmargins(const u8 * const src, const u32 w, const u32 h,
+      const u32 rowsize,
+      u32 *minx, u32 *maxx,
+      u32 *miny, u32 *maxy)
+{
+
+  #if METRICS
+    struct timeval start, end;
+    static bool firstPage = true;
+
+    if (firstPage) {
+      gettimeofday(&start, NULL);
+    }
+  #endif
+
+  int i, j;
+  const u32 *pixel;
+  const u32 *pixel2;
+
+  bool found = false;
+  pixel2 = (const u32 *) src;
+  pixel = pixel2++;
+  for (i = 0; i < (int) w && !found; i++) {
+    for (j = 0; j < (int) h && !found; j++) {
+      if (nonwhite(*pixel)) {
+        found = true;
+        *minx = i;
+      }
+      else {
+        pixel += w;
+      }
+    }
+    pixel = pixel2++;
+  }
+
+  found = false;
+  pixel = (const u32 *)(src) + *minx;
+  for (j = 0; j < (int) h && !found; j++) {
+    for (i = *minx; i < (int) w && !found; i++) {
+      if (nonwhite(*pixel++)) {
+        found = true;
+        *miny = j;
+      }
+    }
+    pixel += *minx;
+  }
+
+  const int startx = *minx, starty = *miny;
+
+  found = false;
+  pixel2 = (const u32 *)(src) + (w - 1 + starty * w);
+  pixel  = pixel2--;
+
+  for (i = w - 1; i >= startx && !found; i--) {
+    for (j = starty; j < h && !found; j++) {
+      if (nonwhite(*pixel)) {
+        found = true;
+        *maxx = i;
+      }
+      else {
+        pixel += w;
+      }
+    }
+    pixel = pixel2--;
+  }
+
+  found = false;
+  pixel = pixel2 = (const u32 *)(src) + ((h - 1) * w + startx);
+  for (j = h - 1; j >= starty && !found; j--) {
+    for (i = startx; i <= *maxx && !found; i++) {
+      if (nonwhite(*pixel++)) {
+        found = true;
+        *maxy = j;
+      }
+    }
+    pixel = (pixel2 -= w);
+  }
+
+  #if METRICS
+    if (firstPage) {
+      firstPage = false;
+
+      gettimeofday(&end, NULL);
+      const u32 us = usecs(start, end);
+
+      qInfo() <<
+        "Processing the first page took" <<
+        us <<
+        "us (" <<
+        (us / 1000000.0f) <<
+        " s)" << endl;
+    }
+  #endif
+}
+
+#else
+
+// This is the original algorithm from Lauri Kasanen (GT)
+
+static bool nonwhite(const u8 * const pixel)
+{
+  return
+    pixel[0] != 255 ||
     pixel[1] != 255 ||
     pixel[2] != 255;
 }
 
 static void getmargins(const u8 * const src, const u32 w, const u32 h,
-      const u32 rowsize, u32 *minx, u32 *maxx,
-      u32 *miny, u32 *maxy) {
+      const u32 rowsize,
+      u32 *minx, u32 *maxx,
+      u32 *miny, u32 *maxy)
+{
+  #if METRICS
+    struct timeval start, end;
+    static bool firstPage = true;
+
+    if (firstPage) {
+      gettimeofday(&start, NULL);
+    }
+  #endif
 
   int i, j;
 
@@ -86,7 +219,27 @@ static void getmargins(const u8 * const src, const u32 w, const u32 h,
       }
     }
   }
+
+  #if METRICS
+    if (firstPage) {
+      firstPage = false;
+
+      gettimeofday(&end, NULL);
+      const u32 us = usecs(start, end);
+
+      qInfo() <<
+        "Processing the first page took" <<
+        us <<
+        "us (" <<
+        (us / 1000000.0f) <<
+        " s)" << endl;
+    }
+  #endif
 }
+
+#endif
+
+#undef METRICS
 
 void store(SplashBitmap * const bm, CachedPage & cache)
 {

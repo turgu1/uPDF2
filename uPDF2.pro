@@ -33,7 +33,8 @@ SOURCES += \
     src/pdfpageworker.cpp \
     src/pdfviewer.cpp \
     src/selectrecentdialog.cpp \
-    src/utils.cpp
+    src/utils.cpp \
+    src/preferencesdialog.cpp
 
 HEADERS  += \
     src/config.h \
@@ -45,11 +46,13 @@ HEADERS  += \
     src/pdfviewer.h \
     src/selectrecentdialog.h \
     src/updf.h \
-    src/utils.h
+    src/utils.h \
+    src/preferencesdialog.h
 
 FORMS    += \
     ui/mainwindow.ui \
-    ui/selectrecentdialog.ui
+    ui/selectrecentdialog.ui \
+    ui/preferencesdialog.ui
 
 RESOURCES += \
     res/updf.qrc
@@ -60,7 +63,7 @@ INCLUDEPATH += /usr/include/poppler
 
 LIBS += -L/usr/local/lib
 
-QMAKE_CXXFLAGS += -isystem -Wall -Wextra -Wno-unused-parameter
+QMAKE_CXXFLAGS   += -isystem -Wall -Wextra -Wno-unused-parameter
 unix|win32: LIBS += -lpoppler -llzo2
 
 QT          += widgets

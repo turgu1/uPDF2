@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef PDFVIEWER_H
 #define PDFVIEWER_H
 
+#include <QtGlobal>
 #include <QWidget>
 #include <QPixmap>
 #include <QRubberBand>
@@ -107,6 +108,7 @@ struct ViewState {
     bool     trimSimilar;
     bool     thisPageTrim;
     bool     someClipText;
+    QString  metrics;
 };
 
 class PDFViewer : public QWidget
