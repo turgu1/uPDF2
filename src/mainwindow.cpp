@@ -390,7 +390,10 @@ void MainWindow::openRecent()
 
   ui->openRecentButton->setEnabled(fileViewParameters != NULL);
 
-  if (params) loadRecentFile(*params);
+  if (params) {
+    saveFileParameters();
+    loadRecentFile(*params);
+  }
 }
 
 void MainWindow::askPreferences()
