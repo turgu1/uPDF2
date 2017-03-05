@@ -4,7 +4,7 @@ This software is licensed under Gnu General Public License Version 3. Please loo
 uPDF (micro PDF) - Qt Creator - Version 2.0
 ===========================================
 
-uPDF is a PDF Viewer specifically designed to minimize keyboard interaction requirements. It's being used by the author as a tool to display musical scores on a dedicated Raspberry Pi and a monitor hooked to an electronic piano. A mouse is the only tool available for interaction with the device. A keyboard is supported by uPDF if available. It is usable as a general, very fast PDF file viewer.
+uPDF is a PDF Viewer specifically designed to minimize keyboard interaction requirements. It's being used by the author as a tool to display musical scores on a dedicated Raspberry Pi and a monitor on top of a piano. A mouse is the only tool available for interaction with the device. A keyboard is supported by uPDF if available. The software is usable as a general, very fast PDF file viewer.
 
 Main caracteristics:
 
@@ -88,7 +88,7 @@ All the previously indicated libraries must have been installed before building 
 
 Insallation packages for OSX, Linux and Rapsberry Pi are under development.
 
-Here is the original announcement for the FlaxPDF application:
+Here is the original announcement for the FlaxPDF application. uPDF is fast, but due to the use of Qt and the added functionalities, it is a bit slower than FlaxPDF:
 
 [[FLAXPDF]]
 FlaxPDF

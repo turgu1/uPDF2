@@ -125,6 +125,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
   if (!filenameAtStartup.isEmpty()) {
     loadFile(filenameAtStartup);
+    setFileViewParameters(preferences.defaultView, false);
   }
   else {
     if (fileViewParameters) loadRecentFile(*fileViewParameters);
@@ -321,11 +322,9 @@ void MainWindow::loadFile(QString filename)
   pdfViewer->setFocus();
 }
 
-void MainWindow::loadRecentFile(FileViewParameters & params)
+void MainWindow::setFileViewParameters(FileViewParameters & params, bool recent)
 {
-  loadFile(params.filename);
-
-  if (preferences.recentGeometry) {
+  if (!recent || preferences.recentGeometry) {
     if (params.fullscreen) {
       if (!isFullScreen()) {
         ui->fullScreenButton->setIcon(*iconRestore);
@@ -349,14 +348,21 @@ void MainWindow::loadRecentFile(FileViewParameters & params)
   updateGeometry();
 }
 
+void MainWindow::loadRecentFile(FileViewParameters & params)
+{
+  loadFile(params.filename);
+
+  setFileViewParameters(params, true);
+}
+
 void MainWindow::saveFileParameters()
 {
   if (file.isValid() && preferences.keepRecent) {
     FileViewParameters params;
 
     params.customTrim.singles = NULL;
-    params.winGeometry = geometry();
-    params.fullscreen  = isFullScreen();
+    params.winGeometry        = geometry();
+    params.fullscreen         = isFullScreen();
 
     pdfViewer->getFileViewParameters(params);
     saveToConfig(params);
@@ -372,6 +378,8 @@ void MainWindow::openFile()
   if (filename.isEmpty()) return;
 
   loadFile(filename);
+
+  setFileViewParameters(preferences.defaultView, false);
 }
 
 void MainWindow::closeApp()
@@ -400,5 +408,14 @@ void MainWindow::askPreferences()
 {
   PreferencesDialog * preferencesDialog = new PreferencesDialog(this);
 
-  preferencesDialog->run();
+  FileViewParameters currentView;
+
+  currentView.customTrim.initialized = false;
+  currentView.customTrim.singles     = NULL;
+  currentView.winGeometry            = geometry();
+  currentView.fullscreen             = isFullScreen();
+
+  pdfViewer->getFileViewParameters(currentView);
+
+  preferencesDialog->run(currentView);
 }

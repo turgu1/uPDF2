@@ -29,6 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <TextOutputDev.h>
 #include <QDebug>
 #include <QMessageBox>
+#include <QApplication>
 
 #define CTRL_PRESSED event->modifiers().testFlag(Qt::ControlModifier)
 #define LEFT_BUTTON  (event->button() == Qt::LeftButton)
@@ -53,6 +54,7 @@ PDFViewer::PDFViewer(QWidget * parent) : QWidget(parent),
   someDrag(false),
   selector(NULL),
   clipText(""),
+  wasMouseDoubleClick(false),
   cachedSize(7 * 1024 * 1024),
   singlePageTrim(false),
   fileIsLoading(false)
@@ -75,6 +77,20 @@ PDFViewer::PDFViewer(QWidget * parent) : QWidget(parent),
   }
 
   setFocusPolicy(Qt::StrongFocus);
+
+  QApplication::setDoubleClickInterval(preferences.doubleClickSpeed);
+
+  singleClickTimer = new QTimer(this);
+  singleClickTimer->setSingleShot(true);
+  connect(singleClickTimer, SIGNAL(timeout()), this, SLOT(singleMouseClick()));
+}
+
+PDFViewer::~PDFViewer()
+{
+  if (singleClickTimer) {
+    singleClickTimer->stop();
+    delete singleClickTimer;
+  }
 }
 
 void PDFViewer::setPDFFile(PDFFile * f)
@@ -263,8 +279,33 @@ void PDFViewer::mousePressEvent(QMouseEvent * event)
   event->accept();
 }
 
+// This is called at the end of a mouseReleaseEvent, if no text or trim zone selection
+// was being processed.
+void PDFViewer::mouseClickEvent(QMouseEvent * event)
+{
+  if (!someDrag) {
+    theMouseKey = (LEFT_BUTTON) ? 1 : (RIGHT_BUTTON) ? 2 : 0;
+    singleClickTimer->start(preferences.doubleClickSpeed + 50);
+  }
+  someDrag = false;
+  event->accept();
+}
+
+void PDFViewer::singleMouseClick()
+{
+  if (theMouseKey == 1) {
+    pageDownWithOverlap();
+  }
+  else if (theMouseKey == 2) {
+    pageUpWithOverlap();
+  }
+}
+
 void PDFViewer::mouseDoubleClickEvent(QMouseEvent * event)
 {
+  singleClickTimer->stop();
+  wasMouseDoubleClick = true;
+
   lastX = event->x();
   lastY = event->y();
 
@@ -285,30 +326,35 @@ void PDFViewer::mouseReleaseEvent(QMouseEvent * event)
   dragging = false;
   setCursor(Qt::ArrowCursor);
 
-  if (zoneSelection && LEFT_BUTTON &&
-      selX && selY && selX2 && selY2) {
+  if (zoneSelection) {
+    if (LEFT_BUTTON && selX && selY && selX2 && selY2) {
 
-    if ((selX != selX2) && (selY != selY2) && someDrag) {
+      if ((selX != selX2) && (selY != selY2) && someDrag) {
 
-      if (trimZoneSelection) {
-        s32 tmp;
-        if (selX > selX2) {
-          tmp   = selX;
-          selX  = selX2;
-          selX2 = tmp;
+        if (trimZoneSelection) {
+          s32 tmp;
+          if (selX > selX2) {
+            tmp   = selX;
+            selX  = selX2;
+            selX2 = tmp;
+          }
+          if (selY > selY2) {
+            tmp   = selY;
+            selY  = selY2;
+            selY2 = tmp;
+          }
         }
-        if (selY > selY2) {
-          tmp   = selY;
-          selY  = selY2;
-          selY2 = tmp;
-        }
+        endOfSelection();
       }
-      endOfSelection();
+      if (trimZoneSelection && !someDrag) {
+        selX = savedX;
+        selY = savedY;
+      }
     }
-    if (trimZoneSelection && !someDrag) {
-      selX = savedX;
-      selY = savedY;
-    }
+  }
+  else {
+    if (!wasMouseDoubleClick) mouseClickEvent(event);
+    wasMouseDoubleClick = false;
   }
 }
 
@@ -764,8 +810,8 @@ u32 PDFViewer::fullW(u32 page) const
     fw += pageW(i < limit ? i : 0);
   }
 
-  // Add the margins between columns
-  return fw + (columns - 1) * MARGINHALF;
+  // Add the padding between columns
+  return fw + (columns - 1) * preferences.horizontalPadding;
 }
 
 bool PDFViewer::hasMargins(const u32 page) const
@@ -1165,7 +1211,7 @@ void PDFViewer::paintEvent(QPaintEvent * event)
       W = Ws;
       H = Hs;
 
-      X += zoomedMarginHalf + (pageW(page) * zoom);
+      X += preferences.horizontalPadding + (pageW(page) * zoom);
       page++; column++;
 
       firstPage = false;
@@ -1173,7 +1219,7 @@ void PDFViewer::paintEvent(QPaintEvent * event)
 
     // Prepare for next line of pages
 
-    Y += (lineHeight * zoom) + zoomedMarginHalf;
+    Y += preferences.verticalPadding + (lineHeight * zoom);
 
     firstPageInLine += limit;
     currentScreenVPos = Y - y();
@@ -1278,10 +1324,10 @@ float PDFViewer::maxYOff() const
 
     while (true) {
       zoom = lineZoomFactor(last, lineWidth, lineHeight);
-      H   -= (h = zoom * (lineHeight + MARGINHALF));
+      H   -= (h = zoom * (lineHeight + preferences.verticalPadding));
 
       if (H <= 0) {
-        H += (MARGINHALF * zoom);
+        H += (preferences.verticalPadding * zoom);
         f = last + (float)(-H) / (zoom * lineHeight);
         break;
       }

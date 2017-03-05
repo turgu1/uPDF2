@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QWidget>
 #include <QPixmap>
 #include <QRubberBand>
+#include <QTimer>
 
 #include "updf.h"
 #include "pdffile.h"
@@ -34,7 +35,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define MARGIN               36
 #define MARGINHALF           18
 #define SMALL_MOVE         0.05f
-
 
 // Used to keep drawing postion of displayed pages to
 // help in the identification of the selection zone.
@@ -55,43 +55,6 @@ enum ZoneLoc {
   TZL_SE,
   TZL_SW,
   TZL_NONE
-};
-
-enum ViewMode {
-  VM_TRIM = 0,
-  VM_WIDTH,
-  VM_PAGE,
-  VM_PGTRIM,
-  VM_CUSTOMTRIM,
-  VM_ZOOMFACTOR
-};
-
-struct SinglePageTrim {
-  int              page;
-  QRect            pageTrim;
-  SinglePageTrim * next;
-};
-
-struct CustomTrim {
-  QRect            odd, even;
-  SinglePageTrim * singles;
-  bool             initialized;  // true if the struct contains valid data
-  bool             similar;      // true if even and odd are the same
-};
-
-struct FileViewParameters {
-    QString       filename;
-    int           columns;
-    int           titlePageCount;
-    float         xOff;
-    float         yOff;
-    float         viewZoom;
-    QRect         winGeometry;
-    bool          fullscreen;
-    ViewMode      viewMode;
-    CustomTrim    customTrim;
-
-    FileViewParameters * next;
 };
 
 struct ViewState {
@@ -117,13 +80,14 @@ class PDFViewer : public QWidget
 
   public:
     explicit PDFViewer(QWidget * parent = 0);
-    ~PDFViewer() {}
+    ~PDFViewer();
 
     void  setPDFFile(PDFFile * f);
     void  keyPressEvent(QKeyEvent * event)           Q_DECL_OVERRIDE;
     void  wheelEvent(QWheelEvent * event)            Q_DECL_OVERRIDE;
     void  mouseMoveEvent(QMouseEvent * event)        Q_DECL_OVERRIDE;
     void  mousePressEvent(QMouseEvent * event)       Q_DECL_OVERRIDE;
+    void  mouseClickEvent(QMouseEvent * event);      // My own event generated from mouseReleaseEvent...
     void  mouseDoubleClickEvent(QMouseEvent * event) Q_DECL_OVERRIDE;
     void  mouseReleaseEvent(QMouseEvent * event)     Q_DECL_OVERRIDE;
     void  paintEvent(QPaintEvent * event)            Q_DECL_OVERRIDE;
@@ -158,6 +122,9 @@ class PDFViewer : public QWidget
     bool          dragging;
     QRubberBand * selector;
     QString       clipText;
+    QTimer      * singleClickTimer;
+    u32           theMouseKey;
+    bool          wasMouseDoubleClick;
 
     // caching
     u32           cachedSize;
@@ -223,6 +190,7 @@ class PDFViewer : public QWidget
     void refreshView();
     void fileLoading();
     void fileLoaded();
+    void singleMouseClick();
 
   signals:
     void stateUpdated(ViewState & state);

@@ -4,6 +4,7 @@ version.h
 *.mo
 Makefile
 uPDF2.pro.user.*
+uPDF2.pro.user
 *.autosave
 ui_*
 prc_*

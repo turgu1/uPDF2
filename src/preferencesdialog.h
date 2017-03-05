@@ -3,6 +3,9 @@
 
 #include <QDialog>
 
+#include "updf.h"
+#include "config.h"
+
 namespace Ui {
   class PreferencesDialog;
 }
@@ -16,14 +19,16 @@ public:
   ~PreferencesDialog();
   void setContent();
   void saveContent();
-  void run();
+  void run(FileViewParameters & current);
 
 private:
   Ui::PreferencesDialog *ui;
+  FileViewParameters defaultView, currentView;
 
 private slots:
   void clearRecentsList();
   void selectLogFile();
+  void setDefaultView();
 };
 
 #endif // PREFERENCESDIALOG_H

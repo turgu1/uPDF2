@@ -69,6 +69,7 @@ class MainWindow : public QMainWindow
 
     void loadFile(QString filename);
     void saveFileParameters();
+    void setFileViewParameters(FileViewParameters & params, bool recent);
     void loadRecentFile(FileViewParameters & params);
 };
 

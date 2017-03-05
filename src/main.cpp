@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
     a.setApplicationName("updf");
     a.setOrganizationName("updf");
     a.setApplicationDisplayName("uPDF");
-    a.setApplicationVersion("V1.0");
+    a.setApplicationVersion("V2.0");
     a.setStyle(QStyleFactory::create("fusion"));
 
     a.setStyleSheet("QWidget {font: 13px;}");

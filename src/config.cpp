@@ -82,20 +82,38 @@ void loadConfig()
 {
   QSettings cfg;
 
-  QString version = cfg.value("Version", "0.0").toString();
+  QString version = cfg.value("Version", CONFIG_VERSION).toString();
 
   if (version != CONFIG_VERSION) return;
 
   cfg.beginGroup("preferences");
 
-  preferences.fullScreenAtStartup    = cfg.value("fullScreenAtStartup",             false).toBool();
-  preferences.hideControlsAtStartup  = cfg.value("hideControlsAtStartup",           false).toBool();
-  preferences.viewClipboardSelection = cfg.value("viewClipboardSelection",          false).toBool();
-  preferences.keepRecent             = cfg.value("keepRecent",                       true).toBool();
-  preferences.recentGeometry         = cfg.value("recentGeometry",                   true).toBool();
-  preferences.showLoadMetrics        = cfg.value("showLoadMetrics",                 false).toBool();
-  preferences.logTrace               = cfg.value("logTrace",                        false).toBool();
-  preferences.logFilename            = cfg.value("logFilename",           "/tmp/updf.log").toString();
+    preferences.fullScreenAtStartup     = cfg.value("fullScreenAtStartup",             false).toBool();
+    preferences.hideControlsAtStartup   = cfg.value("hideControlsAtStartup",           false).toBool();
+    preferences.viewClipboardSelection  = cfg.value("viewClipboardSelection",          false).toBool();
+    preferences.keepRecent              = cfg.value("keepRecent",                       true).toBool();
+    preferences.recentGeometry          = cfg.value("recentGeometry",                   true).toBool();
+    preferences.showLoadMetrics         = cfg.value("showLoadMetrics",                 false).toBool();
+    preferences.logTrace                = cfg.value("logTrace",                        false).toBool();
+    preferences.logFilename             = cfg.value("logFilename",           "/tmp/updf.log").toString();
+    preferences.horizontalPadding       = cfg.value("horizontalPadding",                   4).toInt();
+    preferences.verticalPadding         = cfg.value("verticalPadding",                     8).toInt();
+    preferences.doubleClickSpeed        = cfg.value("doubleClickSpeed",                  300).toInt();
+
+    cfg.beginGroup("defaultView");
+
+      preferences.defaultView.columns                = cfg.value("columns"       ,                       1).toInt();
+      preferences.defaultView.titlePageCount         = cfg.value("titlePageCount",                       0).toInt();
+      preferences.defaultView.xOff                   = 0.0f;
+      preferences.defaultView.yOff                   = 0.0f;
+      preferences.defaultView.viewZoom               = cfg.value("viewZoom"      ,                    0.5f).toFloat();
+      preferences.defaultView.viewMode      = ViewMode(cfg.value("viewMode"      ,                 VM_PAGE).toInt());
+      preferences.defaultView.winGeometry            = cfg.value("winGeometry"   , QRect(50, 50, 800, 800)).toRect();
+      preferences.defaultView.fullscreen             = cfg.value("fullscreen"    ,                   false).toBool();
+      preferences.defaultView.customTrim.initialized = false;
+      preferences.defaultView.customTrim.singles     = NULL;
+
+    cfg.endGroup();
 
   cfg.endGroup();
 
@@ -182,14 +200,28 @@ void saveConfig()
 
   cfg.beginGroup("preferences");
 
-  cfg.setValue("fullScreenAtStartup",    preferences.fullScreenAtStartup   );
-  cfg.setValue("hideControlsAtStartup",  preferences.hideControlsAtStartup );
-  cfg.setValue("viewClipboardSelection", preferences.viewClipboardSelection);
-  cfg.setValue("keepRecent",             preferences.keepRecent            );
-  cfg.setValue("recentGeometry",         preferences.recentGeometry        );
-  cfg.setValue("showLoadMetrics",        preferences.showLoadMetrics       );
-  cfg.setValue("logTrace",               preferences.logTrace              );
-  cfg.setValue("logFilename",            preferences.logFilename           );
+    cfg.setValue("fullScreenAtStartup",     preferences.fullScreenAtStartup       );
+    cfg.setValue("hideControlsAtStartup",   preferences.hideControlsAtStartup     );
+    cfg.setValue("viewClipboardSelection",  preferences.viewClipboardSelection    );
+    cfg.setValue("keepRecent",              preferences.keepRecent                );
+    cfg.setValue("recentGeometry",          preferences.recentGeometry            );
+    cfg.setValue("showLoadMetrics",         preferences.showLoadMetrics           );
+    cfg.setValue("logTrace",                preferences.logTrace                  );
+    cfg.setValue("logFilename",             preferences.logFilename               );
+    cfg.setValue("horizontalPadding",       preferences.horizontalPadding         );
+    cfg.setValue("verticalPadding",         preferences.verticalPadding           );
+    cfg.setValue("doubleClickSpeed",        preferences.doubleClickSpeed          );
+
+    cfg.beginGroup("defaultView");
+
+      cfg.setValue("columns",               preferences.defaultView.columns       );
+      cfg.setValue("titlePageCount",        preferences.defaultView.titlePageCount);
+      cfg.setValue("viewZoom",              preferences.defaultView.viewZoom      );
+      cfg.setValue("viewMode",              preferences.defaultView.viewMode      );
+      cfg.setValue("winGeometry",           preferences.defaultView.winGeometry   );
+      cfg.setValue("fullscreen",            preferences.defaultView.fullscreen    );
+
+    cfg.endGroup();
 
   cfg.endGroup();
 
