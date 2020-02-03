@@ -36,28 +36,34 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define RIGHT_BUTTON (event->button() == Qt::RightButton)
 
 PDFViewer::PDFViewer(QWidget * parent) : QWidget(parent),
-  viewMode(VM_PAGE),
-  viewZoom(0.5f),
-  xOff(0.0f),
-  yOff(0.0f),
-  columns(1),
-  titlePages(0),
-  leftDClickColumnsCount(2),
+                 viewMode(VM_PAGE),
+                 viewZoom(0.5f),
+                     xOff(0.0f),
+                     yOff(0.0f),
+                  columns(1),
+               titlePages(0),
+   leftDClickColumnsCount(2),
   rightDClickColumnsCount(5),
-  silent(false),
-  zoneSelection(false),
-  trimZoneSelection(false),
-  textSelection(false),
-  pagePosCount(0),
-  selX(0), selY(0), selX2(0), selY2(0), savedX(0), savedY(0),
-  lastX(0), lastY(0),
-  someDrag(false),
-  selector(NULL),
-  clipText(""),
-  wasMouseDoubleClick(false),
-  cachedSize(7 * 1024 * 1024),
-  singlePageTrim(false),
-  fileIsLoading(false)
+                   silent(false),
+            zoneSelection(false),
+        trimZoneSelection(false),
+            textSelection(false),
+             pagePosCount(0),
+                     selX(0),
+                     selY(0),
+                    selX2(0),
+                    selY2(0),
+                   savedX(0),
+                   savedY(0),
+                    lastX(0),
+                    lastY(0),
+                 someDrag(false),
+                 selector(NULL),
+                 clipText(""),
+      wasMouseDoubleClick(false),
+               cachedSize(7 * 1024 * 1024),
+           singlePageTrim(false),
+            fileIsLoading(false)
 {
   setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   update();
@@ -118,6 +124,8 @@ void PDFViewer::keyPressEvent(QKeyEvent * event)
     case Qt::Key_Down:     down();            break;
     case Qt::Key_PageDown: pageDown();        break;
     case Qt::Key_PageUp:   pageUp();          break;
+    case Qt::Key_Right:    pageDown();        break;
+    case Qt::Key_Left:     pageUp();          break;
 
     default:
       if (event->matches(QKeySequence::Copy)) {
@@ -619,7 +627,8 @@ void PDFViewer::endOfSelection()
     TextOutputDev * const dev = new TextOutputDev(NULL, true, 0, false, false);
     pdfFile->pdf->displayPage(dev, pp->page + 1, 144, 144, 0, true, false, false);
     GooString *str = dev->getText(X, Y, X + W, Y + H);
-    const char * const cstr = str->getCString();
+//  const char * const cstr = str->getCString();
+    const char * const cstr = str->c_str();
 
     // Save it for clipboard retrieval
     clipText = cstr;
@@ -713,6 +722,7 @@ QRect PDFViewer::getTrimmingForPage(s32 page) const
   return result;
 }
 
+// Compute the height of a page
 u32 PDFViewer::pageH(u32 page) const
 {
   if (!pdfFile->cache[page].ready) page = 0;
@@ -740,6 +750,7 @@ u32 PDFViewer::pageH(u32 page) const
   return h < 2*MARGIN ? h + MARGIN : h;
 }
 
+// Compute the width of a page
 u32 PDFViewer::pageW(u32 page) const
 {
   if (!pdfFile->cache[page].ready) page = 0;

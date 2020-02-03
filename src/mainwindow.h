@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2017 Guy Turcotte
+Copyright (C) 2017, 2020 Guy Turcotte
 Portion Copyright (C) 2015 Lauri Kasanen
 
 This program is free software: you can redistribute it and/or modify
@@ -28,6 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "loadpdffile.h"
 #include "pdffile.h"
 #include "pdfviewer.h"
+#include "bookmarksdb.h"
 
 namespace Ui {
   class MainWindow;
@@ -40,20 +41,23 @@ class MainWindow : public QMainWindow
   public:
     explicit MainWindow(QWidget * parent = 0);
     ~MainWindow();
+
     void  keyPressEvent(QKeyEvent * event) Q_DECL_OVERRIDE;
-    void  closeEvent();
+    void     closeEvent();
 
   private slots:
-    void showToolbar();
-    void hideToolbar();
-    void updateButtons(ViewState & state);
-    void updateTrimButtons(ViewState & state);
-    void onFullScreen();
-    void aboutBox();
-    void openFile();
-    void closeApp();
-    void openRecent();
-    void askPreferences();
+    void          showToolbar();
+    void          hideToolbar();
+    void        updateButtons(ViewState & state);
+    void    updateTrimButtons(ViewState & state);
+    void         onFullScreen();
+    void             aboutBox();
+    void             openFile();
+    void             closeApp();
+    void           openRecent();
+    void       askPreferences();
+    void showBookmarkSelector();
+    void          addBookmark();
 
   private:
     ViewState        currentState;
@@ -67,10 +71,11 @@ class MainWindow : public QMainWindow
     LoadPDFFile    * loadedPDFFile;
     QMovie         * busyMovie;
 
-    void loadFile(QString filename);
-    void saveFileParameters();
+    void              loadFile(QString filename);
+    void    saveFileParameters();
     void setFileViewParameters(FileViewParameters & params, bool recent);
-    void loadRecentFile(FileViewParameters & params);
+    void        loadRecentFile(FileViewParameters & params);
+
 };
 
 #endif // MAINWINDOW_H

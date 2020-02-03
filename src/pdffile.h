@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2017 Guy Turcotte
+Copyright (C) 2017, 2020 Guy Turcotte
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ class PDFFile : public QObject
     bool         loading;
 
   public:
-    explicit PDFFile(QObject *parent = 0);
+    explicit PDFFile(QObject * parent = 0);
     ~PDFFile();
 
     QString      filename;
@@ -56,14 +56,14 @@ class PDFFile : public QObject
     u32          loadTime;
 
     void setLoading(bool val);
-    void setLoaded(bool val);
-    void setValid(bool val);
-    bool isValid() { return valid; }
+    void  setLoaded(bool val);
+    void   setValid(bool val);
+    bool    isValid() { return valid; }
 
   signals:
-    void fileIsLoading();
+    void     fileIsLoading();
     void fileLoadCompleted();
-    void fileIsValid();
+    void       fileIsValid();
     void pageLoadCompleted();
 
   public slots:

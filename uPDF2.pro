@@ -4,12 +4,15 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui sql svg xml
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = uPDF2
 TEMPLATE = app
+
+win32: RC_ICONS = updf.ico
+macOs: ICON = updf.ico
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked as deprecated (the exact warnings
@@ -24,10 +27,19 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \
+    src/bookmarksbrowser.cpp \
+    src/bookmarksdb.cpp \
+    src/bookmarkselector.cpp \
+    src/documenteditdialog.cpp \
     src/config.cpp \
+    src/documentmapperdelegate.cpp \
+    src/documentmodel.cpp \
+    src/entrymapperdelegate.cpp \
     src/loadpdffile.cpp \
     src/main.cpp \
     src/mainwindow.cpp \
+    src/newbookmarkdialog.cpp \
+    src/pagenbrdelegate.cpp \
     src/pdffile.cpp \
     src/pdfloader.cpp \
     src/pdfpageworker.cpp \
@@ -37,9 +49,18 @@ SOURCES += \
     src/preferencesdialog.cpp
 
 HEADERS  += \
+    src/bookmarksbrowser.h \
+    src/bookmarksdb.h \
+    src/bookmarkselector.h \
+    src/documenteditdialog.h \
     src/config.h \
+    src/documentmapperdelegate.h \
+    src/documentmodel.h \
+    src/entrymapperdelegate.h \
     src/loadpdffile.h \
     src/mainwindow.h \
+    src/newbookmarkdialog.h \
+    src/pagenbrdelegate.h \
     src/pdffile.h \
     src/pdfloader.h \
     src/pdfpageworker.h \
@@ -50,7 +71,11 @@ HEADERS  += \
     src/preferencesdialog.h
 
 FORMS    += \
+    ui/bookmarksbrowser.ui \
+    ui/bookmarkselector.ui \
+    ui/documenteditdialog.ui \
     ui/mainwindow.ui \
+    ui/newbookmarkdialog.ui \
     ui/selectrecentdialog.ui \
     ui/preferencesdialog.ui
 

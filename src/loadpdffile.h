@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2015 Lauri Kasanen
-Modifications Copyright (C) 2017 Guy Turcotte
+Modifications Copyright (C) 2017, 2020 Guy Turcotte
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -44,11 +44,11 @@ class LoadPDFFile : public QObject
     void clean();
 
   public slots:
-    void handleResults();
+    void       handleResults();
     void pageReadyForRefresh();
 
   signals:
-    void refresh();
+    void       refresh();
     void loadCompleted();
 };
 

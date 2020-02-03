@@ -1,3 +1,20 @@
+/*
+Copyright (C) 2017, 2020 Guy Turcotte
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
 #ifndef UPDF_H
 #define UPDF_H
 
@@ -14,6 +31,8 @@
 #include <QObject>
 #include <QRect>
 #include <PDFDoc.h>
+
+#include "bookmarksdb.h"
 
 #define UPDF_VERSION "2.0.0"
 
@@ -66,6 +85,12 @@ struct FileViewParameters {
     FileViewParameters * next;
 };
 
+struct BookmarksParameters {
+    bool          bookmarksDbEnabled;
+    QString       bookmarksDbFilename;
+    QString       pdfFolderPrefix;
+};
+
 struct Preferences {
   bool fullScreenAtStartup;
   bool hideControlsAtStartup;
@@ -79,12 +104,16 @@ struct Preferences {
   int  doubleClickSpeed;
   QString logFilename;
   FileViewParameters defaultView;
+  BookmarksParameters bookmarksParameters;
 };
 
+class BookmarksDB;
+
 // They are instantiated at the beginning of mainwindow.cpp
-extern u32         details;
-extern QString     filenameAtStartup;
-extern Preferences preferences;
+extern u32           details;
+extern QString       filenameAtStartup;
+extern Preferences   preferences;
+extern BookmarksDB * bookmarksDB;
 
 #include "utils.h"
 

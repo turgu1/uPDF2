@@ -1,6 +1,5 @@
 /*
-Copyright (C) 2015 Lauri Kasanen
-Modifications Copyright (C) 2017, 2020 Guy Turcotte
+Copyright (C) 2017, 2020 Guy Turcotte
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -16,37 +15,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-#ifndef PDFLOADER_H
-#define PDFLOADER_H
+#ifndef PAGENBRDELEGATE_H
+#define PAGENBRDELEGATE_H
 
-#include <QtGlobal>
 #include <QObject>
-#include <QThread>
-#include <QThreadPool>
 
-#include "updf.h"
-#include "pdffile.h"
+#include <QItemDelegate>
 
-class PDFLoader : public QThread
+class PageNbrDelegate : public QItemDelegate
 {
     Q_OBJECT
 
-  public:
-    PDFLoader(PDFFile & pdfFile);
-    void run() Q_DECL_OVERRIDE;
-
-  signals:
-    void loadCompleted();
-    void       refresh();
-
-  public slots:
-    void          abort();
-    void refreshRequest();
-
-  private:
-    bool          aborting;
-    PDFFile     & pdfFile;
-    QThreadPool * threadPool;
+public:
+    PageNbrDelegate(int column, QObject * parent = nullptr);
+    void paint(QPainter * painter,
+               const QStyleOptionViewItem & option,
+               const QModelIndex & index) const;
+private:
+    int column;
 };
 
-#endif // PDFLOADER_H
+#endif // PAGENBRDELEGATE_H

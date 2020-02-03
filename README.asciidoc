@@ -1,7 +1,7 @@
 
 This software is licensed under Gnu General Public License Version 3. Please look at the COPYING file for further details.
 
-uPDF (micro PDF) - Qt Creator - Version 2.0
+uPDF (micro PDF) - Qt Creator - Version 2.1
 ===========================================
 
 uPDF is a PDF Viewer specifically designed to minimize keyboard interaction requirements. It's being used by the author as a tool to display musical scores on a dedicated Raspberry Pi and a monitor on top of a piano. A mouse is the only tool available for interaction with the device. A keyboard is supported by uPDF if available. The software is usable as a general, very fast PDF file viewer.
@@ -20,6 +20,8 @@ Main caracteristics:
 - Fast background document retrieval through multithreading (from FlaxPDF)
 - Whole document caching in memory (no delay in going from a page to other once loaded) (from FlaxPDF)
 - Controls pane can be hidden to maximize document screen usage (from FlaxPDF)
+- Bookmarking capability as a kind of index inside documents. They can be seen as 
+  table of content of multiple documents managed inside a single SQLite database.
 - Free and open source (Gnu General Public License V3.0)
 
 This is a spinoff made from the excellent piece of software FlaxPDF (see http://github.com/clbr/flaxpdf). The original announcement page of FlaxPDF is available below under the <<FlaxPDF,FlaxPDF>> header below.
@@ -33,10 +35,8 @@ Planned development
 
 - Installation packages for OSX, Linux and Raspberry Pi
 - Installation package for Windows
-- Horizontal/Vertical Scrollbars
-- Bookmarks
+- Tabulation for multiple opened documents
 - Text search tool
-- Preferences Pane
 - Printing
 
 Some of the new capabilities have been sent to the original author of FlaxPDF for potential integration in his own application at the time uPDF was using FLTK as the GUI framework. Since then, the decision was made to go with Qt creator for further development.
@@ -47,35 +47,47 @@ Build
 The following packages are required and may need to be built and installed if not
 available as a package:
 
-- poppler (At least version 0.50 available as http://poppler.freedesktop.org/poppler-0.50.0.tar.xz)
+- poppler (At least version 0.84 available as http://poppler.freedesktop.org/poppler-0.84.0.tar.xz)
 - liblzo (package liblzo2-dev)
 
-The following packages are usually available via package management under linux and are required by poppler:
+Linux
+-----
 
-- libjpeg (package libjpeg-dev)
-- libpng (package libpng12-dev)
-- libtiff (package libtiff5-dev)
+The following packages are usually available via package management under linux and are required by poppler is installation from the source code distribution is required:
+
+- curl (package curl)
+- nss (package libnss3-dev)
+- jpeg (package libjpeg-dev)
+- png (package libpng12-dev)
+- tiff (package libtiff5-dev)
+- cairo (package libcairo-dev)
+- icu (package libicu-dev)
+- lcms2 (package liblcms2-dev)
+- fontconfig (package libfontconfig1)
+- freetype (package libfreetype6-dev)
+- build-essential (package build-essential)
+- cmake (package cmake)
+- gobject-introspection (package gobject-introspection)
+- boost (package libboost-all-dev)
 
 For example with the apt-get command, they can be installed as follow:
 
-  $ sudo apt-get install libjpeg-dev libpng12-dev libtiff5-dev liblzo2-dev
+------------------------------------------
+  $ sudo apt-get install curl libnss3-dev libjpeg-dev libpng12-dev libtiff5-dev liblzo2-dev libcairo-dev libicu-dev liblcms2-dev libfontconfig1 libfreetype6-dev build-essential cmake gobject-introspection
+------------------------------------------
 
 Poppler
--------
 
 To properly build poppler, some libraries are required to be installed. That's the case for libjpeg, libpng and libtiff to manage embedded images in PDFs. Other libraries are required and are often already installed. Here is a page to get some more information about dependencies:
 
 http://www.linuxfromscratch.org/blfs/view/svn/general/poppler.html
 
-Once the popper library is untared, you need to build it with the following commands:
+Once the popper library is untared, you need to build it with the following commands from the main poppler folder:
 
 ------------------------------------------
-$ ./configure --prefix=/usr               \
-              --sysconfdir=/etc           \
-              --disable-static            \
-              --enable-build-type=release \
-              --enable-cmyk               \
-              --enable-xpdf-headers
+$ mkdir build
+$ cd build
+$ cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=release
 $ make
 $ sudo make install
 ------------------------------------------

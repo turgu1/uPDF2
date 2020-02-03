@@ -18,6 +18,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QObject>
 #include <QTextStream>
+#include <QImage>
+
+#include <PDFDoc.h>
+#include <splash/SplashBitmap.h>
+#include <SplashOutputDev.h>
+#include <QFileInfo>
 
 #include "updf.h"
 
@@ -56,3 +62,74 @@ u64 msec() {
   return ms;
 }
 
+static PDFDoc * pdf = nullptr;
+
+int getPageCount(QString & filename)
+{
+    GooString * gfilename = new GooString(filename.toLatin1());
+    if ((pdf == nullptr) || (pdf->getFileName() != gfilename)) {
+        if (pdf != nullptr) { free(pdf); pdf = nullptr; }
+
+        pdf = new PDFDoc(gfilename);
+    }
+
+    return ((pdf == nullptr) || (!pdf->isOk())) ? 0 : pdf->getNumPages();
+}
+
+bool getPageImage(QString & filename, QImage & img, int pixelsPerInch, int page) {
+
+    GooString * gfilename = new GooString(filename.toLatin1());
+    if ((pdf == nullptr) || (pdf->getFileName() != gfilename)) {
+        if (pdf != nullptr) { free(pdf); pdf = nullptr; }
+
+        pdf = new PDFDoc(gfilename);
+    }
+
+    if ((pdf != nullptr) && pdf->isOk()) {
+        SplashColor       white  = { 255, 255, 255 };
+        SplashOutputDev * splash = new SplashOutputDev(splashModeXBGR8, 4, false, white);
+        splash->startDoc(pdf);
+
+        pdf->displayPage(splash, page, pixelsPerInch, pixelsPerInch, 0, true, false, false);
+
+        SplashBitmap * const bm = splash->takeBitmap();
+
+        img = QImage(bm->getDataPtr(), bm->getWidth(), bm->getHeight(), QImage::Format_RGB32);
+    }
+    else {
+        return false;
+    }
+
+    return true;
+}
+
+QString absoluteFilename(const QString & filename)
+{
+    QString & prefix = preferences.bookmarksParameters.pdfFolderPrefix;
+    if (prefix.right(1) != "/") prefix += "/";
+
+    return QFileInfo(filename).exists() ? filename : prefix + filename;
+}
+
+QString relativeFilename(const QString & filename)
+{
+    QString & prefix = preferences.bookmarksParameters.pdfFolderPrefix;
+    if (prefix.right(1) != "/") prefix += "/";
+
+    if (filename.length() > prefix.length()) {
+        if (filename.left(prefix.length()).compare(prefix, Qt::CaseInsensitive) == 0) {
+            return filename.right(filename.length() - prefix.length());
+        }
+    }
+
+    return filename;
+}
+
+QString extractFilename(const QString & filename)
+{
+    QString name = QFileInfo(filename).fileName();
+    if (name.right(4).compare(".pdf", Qt::CaseInsensitive) == 0) {
+        return name.left(name.length() - 4);
+    }
+    return name;
+}

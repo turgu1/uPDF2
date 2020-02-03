@@ -1,6 +1,5 @@
 /*
-Copyright (C) 2015 Lauri Kasanen
-Modifications Copyright (C) 2017, 2020 Guy Turcotte
+Copyright (C) 2020 Guy Turcotte
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -16,37 +15,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-#ifndef PDFLOADER_H
-#define PDFLOADER_H
+#ifndef DOCUMENTMAPPERDELEGATE_H
+#define DOCUMENTMAPPERDELEGATE_H
 
-#include <QtGlobal>
 #include <QObject>
-#include <QThread>
-#include <QThreadPool>
+#include <QSqlRelationalDelegate>
 
 #include "updf.h"
-#include "pdffile.h"
 
-class PDFLoader : public QThread
+class DocumentMapperDelegate : public QSqlRelationalDelegate
 {
-    Q_OBJECT
-
-  public:
-    PDFLoader(PDFFile & pdfFile);
-    void run() Q_DECL_OVERRIDE;
-
-  signals:
-    void loadCompleted();
-    void       refresh();
-
-  public slots:
-    void          abort();
-    void refreshRequest();
-
-  private:
-    bool          aborting;
-    PDFFile     & pdfFile;
-    QThreadPool * threadPool;
+public:
+    DocumentMapperDelegate(QObject * parent = 0);
+        void setEditorData(QWidget * editor, const QModelIndex & index) const;
+         void setModelData(QWidget * editor, QAbstractItemModel * model, const QModelIndex & index ) const;
 };
 
-#endif // PDFLOADER_H
+#endif // DOCUMENTMAPPERDELEGATE_H

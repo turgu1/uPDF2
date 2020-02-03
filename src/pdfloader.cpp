@@ -30,7 +30,7 @@ PDFLoader::PDFLoader(PDFFile & pdfFile) :
   pdfFile(pdfFile)
 {
   if (!globalParams) {
-    globalParams = new GlobalParams;
+    globalParams.reset(new GlobalParams());
   }
   threadPool = QThreadPool::globalInstance();
 }
@@ -68,7 +68,8 @@ void PDFLoader::run()
       threadPool->start(pw);
     }
     threadPool->waitForDone(10000);
-  } else {
+  }
+  else {
     // With a lot of pages, the user may want to go far before things
     // are fully loaded, say to page 500. Render in chunks and adapt.
 
@@ -141,10 +142,12 @@ void PDFLoader::run()
 
   u32 maxW = 0, maxH = 0;
   for (u32 i = 0; i < pdfFile.pages; i++) {
-    if (pdfFile.cache[i].w > maxW)
+    if (pdfFile.cache[i].w > maxW) {
       maxW = pdfFile.cache[i].w;
-    if (pdfFile.cache[i].h > maxH)
+    }
+    if (pdfFile.cache[i].h > maxH) {
       maxH = pdfFile.cache[i].h;
+    }
   }
   pdfFile.maxW = maxW;
   pdfFile.maxH = maxH;

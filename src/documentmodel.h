@@ -1,6 +1,5 @@
 /*
-Copyright (C) 2015 Lauri Kasanen
-Modifications Copyright (C) 2017, 2020 Guy Turcotte
+Copyright (C) 2017, 2020 Guy Turcotte
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -16,37 +15,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-#ifndef PDFLOADER_H
-#define PDFLOADER_H
+#ifndef DOCUMENTMODEL_H
+#define DOCUMENTMODEL_H
 
-#include <QtGlobal>
 #include <QObject>
-#include <QThread>
-#include <QThreadPool>
+#include <QSqlTableModel>
 
 #include "updf.h"
-#include "pdffile.h"
 
-class PDFLoader : public QThread
+class DocumentModel : public QSqlTableModel
 {
-    Q_OBJECT
+public:
+    DocumentModel(QObject *parent = nullptr, QSqlDatabase db = QSqlDatabase());
 
-  public:
-    PDFLoader(PDFFile & pdfFile);
-    void run() Q_DECL_OVERRIDE;
-
-  signals:
-    void loadCompleted();
-    void       refresh();
-
-  public slots:
-    void          abort();
-    void refreshRequest();
-
-  private:
-    bool          aborting;
-    PDFFile     & pdfFile;
-    QThreadPool * threadPool;
+    virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
 };
 
-#endif // PDFLOADER_H
+#endif // DOCUMENTMODEL_H

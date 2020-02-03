@@ -15,18 +15,33 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef NEWBOOKMARKDIALOG_H
+#define NEWBOOKMARKDIALOG_H
 
-#include "updf.h"
-#include "pdfviewer.h"
+#include <QDialog>
+#include <QAbstractButton>
 
-extern FileViewParameters * fileViewParameters;
+namespace Ui {
+class NewBookmarkDialog;
+}
 
-extern void clearFileViewParameters();
-extern void            saveToConfig(FileViewParameters & params);
-extern void              loadConfig();
-extern void              saveConfig();
+class NewBookmarkDialog : public QDialog
+{
+    Q_OBJECT
 
-#endif
+public:
+    explicit NewBookmarkDialog(QWidget * parent = nullptr);
+    ~NewBookmarkDialog();
 
+    bool run(QString filename, int page);
+
+private slots:
+    void save();
+
+private:
+    Ui::NewBookmarkDialog * ui;
+    QString                 filename;
+    int                     page;
+};
+
+#endif // NEWBOOKMARKDIALOG_H

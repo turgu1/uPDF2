@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2017 Guy Turcotte
+Copyright (C) 2017, 2020 Guy Turcotte
 Portion Copyright (C) 2015 Lauri Kasanen
 
 This program is free software: you can redistribute it and/or modify
@@ -20,6 +20,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QSignalMapper>
 #include <QKeyEvent>
 #include <QThread>
+#include <QDebug>
+#include <QInputDialog>
+#include <QSqlRelationalTableModel>
 
 #include "updf.h"
 #include "config.h"
@@ -29,12 +32,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "loadpdffile.h"
 #include "selectrecentdialog.h"
 #include "preferencesdialog.h"
+#include "bookmarksbrowser.h"
+#include "bookmarkselector.h"
+#include "newbookmarkdialog.h"
 
 // Parameters at startup
 
-u32         details = 0;
-QString     filenameAtStartup;
-Preferences preferences;
+u32           details = 0;
+QString       filenameAtStartup;
+Preferences   preferences;
+BookmarksDB * bookmarksDB = nullptr;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -47,6 +54,10 @@ MainWindow::MainWindow(QWidget *parent) :
   loadConfig();
 
   ui->setupUi(this);
+
+  if (preferences.bookmarksParameters.bookmarksDbEnabled) {
+      bookmarksDB = new BookmarksDB(preferences.bookmarksParameters.bookmarksDbFilename);
+  }
 
   layout->setContentsMargins(0, 0, 0, 0);
   ui->viewer->setLayout(layout);
@@ -84,6 +95,9 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(ui->clearTrimsButton,    SIGNAL(clicked()),     pdfViewer, SLOT(  clearAllSingleTrims()));
   connect(ui->selectTextButton,    SIGNAL(clicked(bool)), pdfViewer, SLOT(       textSelect(bool)));
   connect(ui->copyButton,          SIGNAL(clicked()),     pdfViewer, SLOT(      copyToClipboard()));
+
+  connect(ui->bookmarksButton,     SIGNAL(clicked()),    this,       SLOT( showBookmarkSelector()));
+  connect(ui->addBookmarkButton,   SIGNAL(clicked()),    this,       SLOT(          addBookmark()));
 
   connect(ui->viewModeCombo,       static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
           [=](int index) { pdfViewer->setViewMode(ViewMode(index)); });
@@ -139,20 +153,27 @@ MainWindow::~MainWindow()
 
 void MainWindow::keyPressEvent(QKeyEvent * event)
 {
-  switch (event->key()) {
-    case Qt::Key_F8:
-      if (toolbarVisible) hideToolbar(); else showToolbar();
-      break;
+//    qDebug() << "Key event: " << event->key() << " modifier: " << event->modifiers();
 
-    case Qt::Key_Escape:
-      closeApp();
-      break;
+    if ((event->modifiers() & Qt::ControlModifier) && (event->key() == Qt::Key_N)) {
+        addBookmark();
+    }
+    else {
+        switch (event->key()) {
+        case Qt::Key_F8:
+            if (toolbarVisible) hideToolbar(); else showToolbar();
+            break;
 
-    default:
-      QWidget::keyPressEvent(event);
-  }
+        case Qt::Key_Escape:
+            closeApp();
+            break;
 
-  pdfViewer->setFocus();
+        default:
+            QWidget::keyPressEvent(event);
+        }
+    }
+
+    pdfViewer->setFocus();
 }
 
 void MainWindow::closeEvent()
@@ -166,7 +187,13 @@ void MainWindow::aboutBox()
 
   aboutBox.setIconPixmap(QPixmap(":/icons/48/img/48x48/updf.png"));
   aboutBox.setText(QString(tr("\nuPDF (micro PDF) Version %1")).arg(UPDF_VERSION));
-  aboutBox.setDetailedText(tr("Written by:\n\n(c) 2017 - Guy Turcotte\n(c) 2015 - Lauri Kasanen\n\nGNU General Public License V3.0"));
+  aboutBox.setDetailedText(tr(
+       "Written by:\n"
+       "\n"
+       "(c) 2017, 2020 - Guy Turcotte\n"
+       "(c) 2015 - Lauri Kasanen\n"
+       "\n"
+       "GNU General Public License V3.0"));
   aboutBox.setWindowTitle(tr("About uPDF"));
 
   aboutBox.setStandardButtons(QMessageBox::Ok);
@@ -175,7 +202,44 @@ void MainWindow::aboutBox()
 
   aboutBox.exec();
 
+//  bookmarksDB->saveAuthorsList(1, QString("Doe, John & Turcotte, René & Turcotte, Guy"));
+//  QString authors = bookmarksDB->getAuthorsList(1);
+
+//  QMessageBox::information(this, tr("Test..."), authors, QMessageBox::Ok, QMessageBox::Ok);
+
   pdfViewer->setFocus();
+}
+
+void MainWindow::showBookmarkSelector()
+{
+    if (bookmarksDB != nullptr) {
+
+        Selection selection;
+        BookmarkSelector * bookmarkSelector = new BookmarkSelector(this);
+
+        bool result = bookmarkSelector->select(selection, file.filename, ui->currentPageEdit->text().toInt());
+
+        // qDebug() << "showBookmarkSelection Result: " << result;
+
+        if (result) {
+            // qDebug() << "Selected filename: " << selection.filename;
+            // qDebug() << "Selected page nbr: " << selection.pageNbr;
+
+            FileViewParameters params = preferences.defaultView;
+            params.yOff = selection.pageNbr - 1;
+
+            QString filename = absoluteFilename(selection.filename);
+            if (QFileInfo(filename).exists()) {
+                if (file.filename != filename) {
+                    loadFile(filename);
+                    setFileViewParameters(params, false);
+                }
+                else {
+                    pdfViewer->gotoPage(selection.pageNbr - 1);
+                }
+            }
+        }
+    }
 }
 
 void MainWindow::onFullScreen()
@@ -283,12 +347,16 @@ void MainWindow::updateButtons(ViewState & state)
     ui-> previousPageButton->setEnabled(state.validDocument);
     ui->     nextPageButton->setEnabled(state.validDocument);
 
+    ui->  addBookmarkButton->setEnabled(preferences.bookmarksParameters.bookmarksDbEnabled);
+    ui->    bookmarksButton->setEnabled(preferences.bookmarksParameters.bookmarksDbEnabled);
+
     ui->   openRecentButton->setEnabled(fileViewParameters != NULL);
   }
   else {
     ui->showToolbarFrame->show();
     ui->    toolbarFrame->hide();
   }
+
   pdfViewer->setFocus();
 }
 
@@ -418,4 +486,33 @@ void MainWindow::askPreferences()
   pdfViewer->getFileViewParameters(currentView);
 
   preferencesDialog->run(currentView);
+
+  updateButtons(currentState);
+
+  if (preferences.bookmarksParameters.bookmarksDbEnabled) {
+    if (bookmarksDB == nullptr) {
+        bookmarksDB = new BookmarksDB(preferences.bookmarksParameters.bookmarksDbFilename);
+    }
+  }
+  else if (bookmarksDB) {
+      delete bookmarksDB;
+      bookmarksDB = nullptr;
+  }
+
 }
+
+void MainWindow::addBookmark()
+{
+    if ((bookmarksDB != nullptr) && (file.isValid())) {
+
+        int page = ui->currentPageEdit->text().toInt();
+
+        NewBookmarkDialog * dialog = new NewBookmarkDialog(nullptr);
+
+        dialog->run(file.filename, page);
+
+        delete dialog;
+        pdfViewer->setFocus();
+    }
+}
+

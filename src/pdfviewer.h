@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2017 Guy Turcotte
+Copyright (C) 2017, 2020 Guy Turcotte
 Portion Copyright (C) 2015 Lauri Kasanen
 
 This program is free software: you can redistribute it and/or modify
@@ -41,8 +41,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // Used by the endOffSelection method.
 struct PagePos {
   float zoom, ratioX, ratioY;
-  u32 page;
-  int X0, Y0, W0, H0, X, Y, W, H;
+  u32   page;
+  int   X0, Y0, W0, H0, X, Y, W, H;
 };
 
 enum ZoneLoc {
@@ -82,21 +82,21 @@ class PDFViewer : public QWidget
     explicit PDFViewer(QWidget * parent = 0);
     ~PDFViewer();
 
-    void  setPDFFile(PDFFile * f);
-    void  keyPressEvent(QKeyEvent * event)           Q_DECL_OVERRIDE;
-    void  wheelEvent(QWheelEvent * event)            Q_DECL_OVERRIDE;
-    void  mouseMoveEvent(QMouseEvent * event)        Q_DECL_OVERRIDE;
-    void  mousePressEvent(QMouseEvent * event)       Q_DECL_OVERRIDE;
-    void  mouseClickEvent(QMouseEvent * event);      // My own event generated from mouseReleaseEvent...
-    void  mouseDoubleClickEvent(QMouseEvent * event) Q_DECL_OVERRIDE;
-    void  mouseReleaseEvent(QMouseEvent * event)     Q_DECL_OVERRIDE;
-    void  paintEvent(QPaintEvent * event)            Q_DECL_OVERRIDE;
-    QSize sizeHint() const                           Q_DECL_OVERRIDE;
-    void  rubberBanding(bool show = true);
+    void                setPDFFile(PDFFile     * f);
+    void             keyPressEvent(QKeyEvent   * event)  Q_DECL_OVERRIDE;
+    void                wheelEvent(QWheelEvent * event)  Q_DECL_OVERRIDE;
+    void            mouseMoveEvent(QMouseEvent * event)  Q_DECL_OVERRIDE;
+    void           mousePressEvent(QMouseEvent * event)  Q_DECL_OVERRIDE;
+    void           mouseClickEvent(QMouseEvent * event); // My own event generated from mouseReleaseEvent...
+    void     mouseDoubleClickEvent(QMouseEvent * event)  Q_DECL_OVERRIDE;
+    void         mouseReleaseEvent(QMouseEvent * event)  Q_DECL_OVERRIDE;
+    void                paintEvent(QPaintEvent * event)  Q_DECL_OVERRIDE;
+    QSize                 sizeHint() const               Q_DECL_OVERRIDE;
+    void             rubberBanding(bool show = true);
     QStringList getSinglePageTrims();
-    bool  getFileViewParameters(FileViewParameters & params);
-    void  setFileViewParameters(FileViewParameters & params);
-    void  reset();
+    bool     getFileViewParameters(FileViewParameters & params);
+    void     setFileViewParameters(FileViewParameters & params);
+    void                     reset();
 
   private:
     PDFFile     * pdfFile;
@@ -139,58 +139,58 @@ class PDFViewer : public QWidget
     bool          fileIsLoading;
 
     // internal processing support methods
-    void        sendState();
-    void        endOfSelection();
-    ZoneLoc     getZoneLoc(s32 x, s32 y) const;
-    void        computeScreenSize();
-    QPixmap     getPage(const u32 page);
-    u32         pageH(u32 page) const;
-    u32         pageW(u32 page) const;
-    u32         fullH(u32 page) const;
-    u32         fullW(u32 page) const;
-    bool        hasMargins(const u32 page) const;
-    float       lineZoomFactor(const u32 firstPage, u32 &retWidth, u32 &retHeight) const;
-    void        updateVisible() const;
+    void                 sendState();
+    void            endOfSelection();
+    ZoneLoc             getZoneLoc(s32 x, s32 y) const;
+    void         computeScreenSize();
+    QPixmap                getPage(const u32 page);
+    u32                      pageH(u32 page) const;
+    u32                      pageW(u32 page) const;
+    u32                      fullH(u32 page) const;
+    u32                      fullW(u32 page) const;
+    bool                hasMargins(const u32 page) const;
+    float           lineZoomFactor(const u32 firstPage, u32 &retWidth, u32 &retHeight) const;
+    void             updateVisible() const;
     QRect       getTrimmingForPage(s32 page) const;
-    void        pageChanged();
-    float       maxYOff() const;
-    void        adjustYOff(float offset);
-    void        adjustFloorYOff(float offset);
-    void        resetSelection(bool anyway = false);
-    u32         pxrel(u32 page) const;
+    void               pageChanged();
+    float                  maxYOff() const;
+    void                adjustYOff(float offset);
+    void           adjustFloorYOff(float offset);
+    void            resetSelection(bool anyway = false);
+    u32                      pxrel(u32 page) const;
 
   public slots:
-    void textSelect(bool doSelect);
-    void copyToClipboard();
-    void trimZoneDifferent(bool diff);
-    void thisPageTrim(bool thisPage);
+    void           textSelect(bool doSelect);
+    void      copyToClipboard();
+    void    trimZoneDifferent(bool diff);
+    void         thisPageTrim(bool thisPage);
     void removeSinglePageTrim(s32 page);
-    void addSinglePageTrim(s32 page, QRect trim);
-    void clearAllSingleTrims();
-    void trimZoneSelect(bool doSelect);
-    void selectPageAt(s32 X, s32 Y, bool rightDClick);
-    void gotoPage(const int page);
-    void setColumnCount(int count);
-    void setTitlePageCount(int count);
-    void validFilePresent();
-    void up();
-    void down();
-    void top();
-    void bottom();
-    void beginningOfPage();
-    void endOfPage();
-    void pageUp();
-    void pageDown();
-    void pageUpWithOverlap();
-    void pageDownWithOverlap();
-    void zoomIn();
-    void zoomOut();
-    void setViewMode(ViewMode newViewMode);
-    void setZoomFactor(float zoomFactor);
-    void refreshView();
-    void fileLoading();
-    void fileLoaded();
-    void singleMouseClick();
+    void    addSinglePageTrim(s32 page, QRect trim);
+    void  clearAllSingleTrims();
+    void       trimZoneSelect(bool doSelect);
+    void         selectPageAt(s32 X, s32 Y, bool rightDClick);
+    void             gotoPage(const int page);
+    void       setColumnCount(int count);
+    void    setTitlePageCount(int count);
+    void     validFilePresent();
+    void                   up();
+    void                 down();
+    void                  top();
+    void               bottom();
+    void      beginningOfPage();
+    void            endOfPage();
+    void               pageUp();
+    void             pageDown();
+    void    pageUpWithOverlap();
+    void  pageDownWithOverlap();
+    void               zoomIn();
+    void              zoomOut();
+    void          setViewMode(ViewMode newViewMode);
+    void        setZoomFactor(float zoomFactor);
+    void          refreshView();
+    void          fileLoading();
+    void           fileLoaded();
+    void     singleMouseClick();
 
   signals:
     void stateUpdated(ViewState & state);

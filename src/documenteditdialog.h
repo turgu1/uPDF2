@@ -15,18 +15,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef DOCUMENTEDITDIALOG_H
+#define DOCUMENTEDITDIALOG_H
 
-#include "updf.h"
-#include "pdfviewer.h"
+#include <QDialog>
 
-extern FileViewParameters * fileViewParameters;
+namespace Ui {
+class DocumentEditDialog;
+}
 
-extern void clearFileViewParameters();
-extern void            saveToConfig(FileViewParameters & params);
-extern void              loadConfig();
-extern void              saveConfig();
+class DocumentEditDialog : public QDialog
+{
+    Q_OBJECT
 
-#endif
+public:
+    explicit DocumentEditDialog(QWidget *parent = nullptr);
+    ~DocumentEditDialog();
 
+private:
+    Ui::DocumentEditDialog *ui;
+};
+
+#endif // DOCUMENTEDITDIALOG_H

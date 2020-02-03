@@ -115,6 +115,13 @@ void loadConfig()
 
     cfg.endGroup();
 
+    cfg.beginGroup("bookmarks");
+
+      preferences.bookmarksParameters.bookmarksDbEnabled  = cfg.value("bookmarksDbEnabled",       false).toBool();
+      preferences.bookmarksParameters.bookmarksDbFilename = cfg.value("bookmarksDbFilename", "updf2.db").toString();
+      preferences.bookmarksParameters.pdfFolderPrefix     = cfg.value("pdfFolderPrefix",             "").toString();
+
+    cfg.endGroup();
   cfg.endGroup();
 
   int cnt = cfg.beginReadArray("fileViewParameters");
@@ -220,6 +227,14 @@ void saveConfig()
       cfg.setValue("viewMode",              preferences.defaultView.viewMode      );
       cfg.setValue("winGeometry",           preferences.defaultView.winGeometry   );
       cfg.setValue("fullscreen",            preferences.defaultView.fullscreen    );
+
+    cfg.endGroup();
+
+    cfg.beginGroup("bookmarks");
+
+     cfg.setValue("bookmarksDbEnabled",     preferences.bookmarksParameters.bookmarksDbEnabled );
+     cfg.setValue("bookmarksDbFilename",    preferences.bookmarksParameters.bookmarksDbFilename);
+     cfg.setValue("pdfFolderPrefix",        preferences.bookmarksParameters.pdfFolderPrefix);
 
     cfg.endGroup();
 

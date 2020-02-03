@@ -21,12 +21,12 @@ PDFFile::PDFFile(QObject * parent) : QObject(parent),
   valid(false),
   loaded(false),
   loading(false),
-  totalSize(0),
-  totalSizeCompressed(0),
-  loadTime(0),
   cache(NULL),
   pdf(NULL),
-  pages(0)
+  pages(0),
+  totalSize(0),
+  totalSizeCompressed(0),
+  loadTime(0)
 {
 }
 
