@@ -106,7 +106,7 @@
          </property>
          <property name="icon">
           <iconset resource="../res/updf.qrc">
-           <normaloff>:/icons/32/img/32x32/document-open.png</normaloff>:/icons/32/img/32x32/document-open.png</iconset>
+           <normaloff>:/icons/svg/24x24/folder.svg</normaloff>:/icons/svg/24x24/folder.svg</iconset>
          </property>
         </widget>
        </item>

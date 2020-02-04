@@ -4,7 +4,7 @@ This software is licensed under Gnu General Public License Version 3. Please loo
 uPDF (micro PDF) - Qt Creator - Version 2.1
 ===========================================
 
-uPDF is a PDF Viewer specifically designed to minimize keyboard interaction requirements. It's being used by the author as a tool to display musical scores on a dedicated Raspberry Pi and a monitor on top of a piano. A mouse is the only tool available for interaction with the device. A keyboard is supported by uPDF if available. The software is usable as a general, very fast PDF file viewer.
+uPDF is a PDF Viewer specifically designed to minimize keyboard interaction requirements. It's being used by the author as a tool to display musical scores on a dedicated Raspberry Pi and a monitor on top of a piano. A mouse is the only tool available for interaction with the device. A keyboard is supported by uPDF if available. The software is usable as a general, fast PDF file viewer.
 
 Main caracteristics:
 
@@ -22,19 +22,19 @@ Main caracteristics:
 - Controls pane can be hidden to maximize document screen usage (from FlaxPDF)
 - Bookmarking capability as a kind of index inside documents. They can be seen as 
   table of content of multiple documents managed inside a single SQLite database.
+- Qt based application
 - Free and open source (Gnu General Public License V3.0)
 
 This is a spinoff made from the excellent piece of software FlaxPDF (see http://github.com/clbr/flaxpdf). The original announcement page of FlaxPDF is available below under the <<FlaxPDF,FlaxPDF>> header below.
 
-uPDF is being developped using Qt Creator 4.2.0, the free version. In particular, it is used on OSX, Ubuntu, Linux Mint and Rasbian platforms.
+uPDF is being developped using Qt Creator 4.11.0 (the free version) and Qt Library 5.14. In particular, it is used on OSX, Windows 10, Ubuntu, Linux Mint and Rasbian platforms.
 
 image::screenshot.png[Screenshot,500,400,align="center"]
 
 Planned development
 -------------------
 
-- Installation packages for OSX, Linux and Raspberry Pi
-- Installation package for Windows
+- Installation packages for OSX, Windows 10, Linux and Raspberry Pi
 - Tabulation for multiple opened documents
 - Text search tool
 - Printing
@@ -53,7 +53,7 @@ available as a package:
 Linux
 -----
 
-The following packages are usually available via package management under linux and are required by poppler is installation from the source code distribution is required:
+The following packages are usually available via package management under linux and are required by poppler when installation from the source code distribution is required:
 
 - curl (package curl)
 - nss (package libnss3-dev)
@@ -95,7 +95,7 @@ $ sudo make install
 uPDF
 ----
 
-To build uPDF, you will need Qt Creator V 4.2.0 under Unix or OSX. The file uPDF2.pro need to be opened with Qt Creator.
+To build uPDF, you will need Qt Creator V 4.11.0 and Qt library Version 5.14 under Unix or OSX. The file uPDF2.pro need to be opened with Qt Creator.
 All the previously indicated libraries must have been installed before building the application.
 
 Insallation packages for OSX, Linux and Rapsberry Pi are under development.

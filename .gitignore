@@ -32,3 +32,4 @@ remove-potcdate.sed
 *.tgz
 *.pdf
 .DS_Store
+**/.DS_Store

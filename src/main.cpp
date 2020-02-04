@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
 
     filenameAtStartup = optind < argc ? argv[optind] : "";
 
-    a.setWindowIcon(QIcon(":/icons/img/updf-512x512.png"));
+    a.setWindowIcon(QIcon(":/icons/img/updf-256x256.png"));
     a.setApplicationName("updf");
     a.setOrganizationName("updf");
     a.setApplicationDisplayName("uPDF");

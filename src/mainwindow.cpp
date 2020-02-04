@@ -68,8 +68,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
   layout->addWidget(pdfViewer, 1);
 
-  iconFullScreen = new QIcon(":/icons/32/img/32x32/view-fullscreen.png");
-  iconRestore    = new QIcon(":/icons/32/img/32x32/view-restore.png"   );
+  iconFullScreen = new QIcon(":/icons/svg/24x24/maximize-2.svg");
+  iconRestore    = new QIcon(":/icons/svg/24x24/minimize-2.svg");
 
   ui->currentPageEdit->setValidator(new QIntValidator(1, 9999, this));
 
@@ -185,7 +185,7 @@ void MainWindow::aboutBox()
 {
   QMessageBox aboutBox;
 
-  aboutBox.setIconPixmap(QPixmap(":/icons/48/img/48x48/updf.png"));
+  aboutBox.setIconPixmap(QPixmap(":/icons/img/updf-48x48.png"));
   aboutBox.setText(QString(tr("\nuPDF (micro PDF) Version %1")).arg(UPDF_VERSION));
   aboutBox.setDetailedText(tr(
        "Written by:\n"

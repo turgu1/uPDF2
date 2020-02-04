@@ -184,12 +184,12 @@
            </property>
            <property name="icon">
             <iconset resource="../res/updf.qrc">
-             <normaloff>:/icons/32/img/32x32/window-close.png</normaloff>:/icons/32/img/32x32/window-close.png</iconset>
+             <normaloff>:/icons/svg/16x16/arrow-left.svg</normaloff>:/icons/svg/16x16/arrow-left.svg</iconset>
            </property>
            <property name="iconSize">
             <size>
-             <width>12</width>
-             <height>12</height>
+             <width>16</width>
+             <height>16</height>
             </size>
            </property>
            <property name="flat">
@@ -249,7 +249,7 @@
          </property>
          <property name="icon">
           <iconset resource="../res/updf.qrc">
-           <normaloff>:/icons/48/img/48x48/updf.png</normaloff>:/icons/48/img/48x48/updf.png</iconset>
+           <normaloff>:/icons/img/updf-48x48.png</normaloff>:/icons/img/updf-48x48.png</iconset>
          </property>
          <property name="iconSize">
           <size>
@@ -267,19 +267,19 @@
          <item>
           <widget class="QPushButton" name="bookmarksButton">
            <property name="toolTip">
-            <string>Indexed Selection</string>
+            <string>Bookmark Selection</string>
            </property>
            <property name="text">
             <string/>
            </property>
            <property name="icon">
             <iconset resource="../res/updf.qrc">
-             <normaloff>:/icons/32/img/32x32/edit-select-all.png</normaloff>:/icons/32/img/32x32/edit-select-all.png</iconset>
+             <normaloff>:/icons/svg/24x24/book.svg</normaloff>:/icons/svg/24x24/book.svg</iconset>
            </property>
            <property name="iconSize">
             <size>
-             <width>32</width>
-             <height>32</height>
+             <width>24</width>
+             <height>24</height>
             </size>
            </property>
           </widget>
@@ -287,19 +287,19 @@
          <item>
           <widget class="QPushButton" name="addBookmarkButton">
            <property name="toolTip">
-            <string>Add Bookmark</string>
+            <string>New Bookmark</string>
            </property>
            <property name="text">
             <string/>
            </property>
            <property name="icon">
             <iconset resource="../res/updf.qrc">
-             <normaloff>:/icons/32/img/32x32/zoom-in.png</normaloff>:/icons/32/img/32x32/zoom-in.png</iconset>
+             <normaloff>:/icons/svg/24x24/bookmark.svg</normaloff>:/icons/svg/24x24/bookmark.svg</iconset>
            </property>
            <property name="iconSize">
             <size>
-             <width>32</width>
-             <height>32</height>
+             <width>24</width>
+             <height>24</height>
             </size>
            </property>
           </widget>
@@ -342,12 +342,12 @@
            </property>
            <property name="icon">
             <iconset resource="../res/updf.qrc">
-             <normaloff>:/icons/32/img/32x32/document-open.png</normaloff>:/icons/32/img/32x32/document-open.png</iconset>
+             <normaloff>:/icons/svg/24x24/folder.svg</normaloff>:/icons/svg/24x24/folder.svg</iconset>
            </property>
            <property name="iconSize">
             <size>
-             <width>32</width>
-             <height>32</height>
+             <width>24</width>
+             <height>24</height>
             </size>
            </property>
            <property name="flat">
@@ -383,12 +383,12 @@
            </property>
            <property name="icon">
             <iconset resource="../res/updf.qrc">
-             <normaloff>:/icons/32/img/32x32/emblem-documents.png</normaloff>:/icons/32/img/32x32/emblem-documents.png</iconset>
+             <normaloff>:/icons/svg/24x24/file-text.svg</normaloff>:/icons/svg/24x24/file-text.svg</iconset>
            </property>
            <property name="iconSize">
             <size>
-             <width>32</width>
-             <height>32</height>
+             <width>24</width>
+             <height>24</height>
             </size>
            </property>
            <property name="flat">
@@ -892,12 +892,12 @@ Trim Parameters</string>
             </property>
             <property name="icon">
              <iconset resource="../res/updf.qrc">
-              <normaloff>:/icons/32/img/32x32/zoom-in.png</normaloff>:/icons/32/img/32x32/zoom-in.png</iconset>
+              <normaloff>:/icons/svg/24x24/zoom-in.svg</normaloff>:/icons/svg/24x24/zoom-in.svg</iconset>
             </property>
             <property name="iconSize">
              <size>
-              <width>32</width>
-              <height>32</height>
+              <width>24</width>
+              <height>24</height>
              </size>
             </property>
             <property name="flat">
@@ -933,12 +933,12 @@ Trim Parameters</string>
             </property>
             <property name="icon">
              <iconset resource="../res/updf.qrc">
-              <normaloff>:/icons/32/img/32x32/zoom-out.png</normaloff>:/icons/32/img/32x32/zoom-out.png</iconset>
+              <normaloff>:/icons/svg/24x24/zoom-out.svg</normaloff>:/icons/svg/24x24/zoom-out.svg</iconset>
             </property>
             <property name="iconSize">
              <size>
-              <width>32</width>
-              <height>32</height>
+              <width>24</width>
+              <height>24</height>
              </size>
             </property>
             <property name="flat">
@@ -979,7 +979,7 @@ Trim Parameters</string>
            </property>
            <property name="icon">
             <iconset resource="../res/updf.qrc">
-             <normaloff>:/icons/32/img/32x32/go-top.png</normaloff>:/icons/32/img/32x32/go-top.png</iconset>
+             <normaloff>:/icons/svg/24x24/chevrons-up.svg</normaloff>:/icons/svg/24x24/chevrons-up.svg</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -1008,7 +1008,7 @@ Trim Parameters</string>
            </property>
            <property name="icon">
             <iconset resource="../res/updf.qrc">
-             <normaloff>:/icons/32/img/32x32/go-up.png</normaloff>:/icons/32/img/32x32/go-up.png</iconset>
+             <normaloff>:/icons/svg/24x24/chevron-up.svg</normaloff>:/icons/svg/24x24/chevron-up.svg</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -1047,7 +1047,7 @@ Trim Parameters</string>
            </property>
            <property name="icon">
             <iconset resource="../res/updf.qrc">
-             <normaloff>:/icons/32/img/32x32/go-bottom.png</normaloff>:/icons/32/img/32x32/go-bottom.png</iconset>
+             <normaloff>:/icons/svg/24x24/chevrons-down.svg</normaloff>:/icons/svg/24x24/chevrons-down.svg</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -1076,7 +1076,7 @@ Trim Parameters</string>
            </property>
            <property name="icon">
             <iconset resource="../res/updf.qrc">
-             <normaloff>:/icons/32/img/32x32/go-down.png</normaloff>:/icons/32/img/32x32/go-down.png</iconset>
+             <normaloff>:/icons/svg/24x24/chevron-down.svg</normaloff>:/icons/svg/24x24/chevron-down.svg</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -1201,13 +1201,12 @@ Trim Parameters</string>
            </property>
            <property name="icon">
             <iconset resource="../res/updf.qrc">
-             <normaloff>:/icons/32/img/32x32/view-fullscreen.png</normaloff>
-             <selectedon>:/icons/32/img/32x32/view-restore.png</selectedon>:/icons/32/img/32x32/view-fullscreen.png</iconset>
+             <normaloff>:/icons/svg/24x24/maximize-2.svg</normaloff>:/icons/svg/24x24/maximize-2.svg</iconset>
            </property>
            <property name="iconSize">
             <size>
-             <width>32</width>
-             <height>32</height>
+             <width>24</width>
+             <height>24</height>
             </size>
            </property>
            <property name="checkable">
@@ -1228,12 +1227,12 @@ Trim Parameters</string>
            </property>
            <property name="icon">
             <iconset resource="../res/updf.qrc">
-             <normaloff>:/icons/32/img/32x32/system-run.png</normaloff>:/icons/32/img/32x32/system-run.png</iconset>
+             <normaloff>:/icons/svg/24x24/settings.svg</normaloff>:/icons/svg/24x24/settings.svg</iconset>
            </property>
            <property name="iconSize">
             <size>
-             <width>32</width>
-             <height>32</height>
+             <width>24</width>
+             <height>24</height>
             </size>
            </property>
           </widget>
@@ -1293,12 +1292,12 @@ Trim Parameters</string>
          </property>
          <property name="icon">
           <iconset resource="../res/updf.qrc">
-           <normaloff>:/icons/32/img/32x32/application-exit.png</normaloff>:/icons/32/img/32x32/application-exit.png</iconset>
+           <normaloff>:/icons/svg/24x24/power.svg</normaloff>:/icons/svg/24x24/power.svg</iconset>
          </property>
          <property name="iconSize">
           <size>
-           <width>32</width>
-           <height>32</height>
+           <width>24</width>
+           <height>24</height>
           </size>
          </property>
         </widget>

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Indexed Selection</string>
+   <string>Bookmark Selection</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
@@ -65,7 +65,14 @@
              </size>
             </property>
             <property name="text">
-             <string>...</string>
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="../res/updf.qrc">
+              <normaloff>:/icons/svg/24x24/search.svg</normaloff>:/icons/svg/24x24/search.svg</iconset>
+            </property>
+            <property name="autoDefault">
+             <bool>false</bool>
             </property>
            </widget>
           </item>
@@ -125,7 +132,14 @@
              </size>
             </property>
             <property name="text">
-             <string>...</string>
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="../res/updf.qrc">
+              <normaloff>:/icons/svg/24x24/search.svg</normaloff>:/icons/svg/24x24/search.svg</iconset>
+            </property>
+            <property name="autoDefault">
+             <bool>false</bool>
             </property>
            </widget>
           </item>
@@ -188,6 +202,9 @@
        <property name="text">
         <string>Cancel</string>
        </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
       </widget>
      </item>
      <item>
@@ -195,12 +212,17 @@
        <property name="text">
         <string>Select</string>
        </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
       </widget>
      </item>
     </layout>
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../res/updf.qrc"/>
+ </resources>
  <connections/>
 </ui>

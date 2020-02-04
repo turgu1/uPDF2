@@ -231,6 +231,9 @@
               <property name="text">
                <string>Log Filename:</string>
               </property>
+              <property name="buddy">
+               <cstring>logFileEdit</cstring>
+              </property>
              </widget>
             </item>
             <item>
@@ -249,12 +252,12 @@
               </property>
               <property name="icon">
                <iconset resource="../res/updf.qrc">
-                <normaloff>:/icons/32/img/32x32/document-open.png</normaloff>:/icons/32/img/32x32/document-open.png</iconset>
+                <normaloff>:/icons/svg/24x24/folder.svg</normaloff>:/icons/svg/24x24/folder.svg</iconset>
               </property>
               <property name="iconSize">
                <size>
-                <width>32</width>
-                <height>24</height>
+                <width>24</width>
+                <height>16</height>
                </size>
               </property>
              </widget>
@@ -378,6 +381,9 @@
            <property name="text">
             <string>Bookmarks DB Filename:</string>
            </property>
+           <property name="buddy">
+            <cstring>bookmarksDbFilenameEdit</cstring>
+           </property>
           </widget>
          </item>
          <item>
@@ -396,12 +402,12 @@
            </property>
            <property name="icon">
             <iconset resource="../res/updf.qrc">
-             <normaloff>:/icons/32/img/32x32/document-open.png</normaloff>:/icons/32/img/32x32/document-open.png</iconset>
+             <normaloff>:/icons/svg/24x24/folder.svg</normaloff>:/icons/svg/24x24/folder.svg</iconset>
            </property>
            <property name="iconSize">
             <size>
              <width>24</width>
-             <height>24</height>
+             <height>16</height>
             </size>
            </property>
           </widget>
@@ -424,6 +430,9 @@
            <property name="text">
             <string>PDF Folder Prefix:</string>
            </property>
+           <property name="buddy">
+            <cstring>pdfFolderPrefixEdit</cstring>
+           </property>
           </widget>
          </item>
          <item>
@@ -442,12 +451,12 @@
            </property>
            <property name="icon">
             <iconset resource="../res/updf.qrc">
-             <normaloff>:/icons/32/img/32x32/document-open.png</normaloff>:/icons/32/img/32x32/document-open.png</iconset>
+             <normaloff>:/icons/svg/24x24/folder.svg</normaloff>:/icons/svg/24x24/folder.svg</iconset>
            </property>
            <property name="iconSize">
             <size>
              <width>24</width>
-             <height>24</height>
+             <height>16</height>
             </size>
            </property>
           </widget>

@@ -169,9 +169,14 @@ bool BookmarksBrowser::getEntryPageImage(int pageNbr, bool toShowFromPDFOnly)
         }
     }
     if (result) {
+        ui->pageNbrEdit->blockSignals(true);
         ui->pageNbrEdit->setText(QString("%1").arg(pageNbr));
+        ui->pageNbrEdit->blockSignals(false);
+
+        ui->documentSlider->blockSignals(true);
         ui->documentSlider->setMaximum(pageCount);
         ui->documentSlider->setValue(pageNbr);
+        ui->documentSlider->blockSignals(false);
     }
 
     return result;
@@ -186,7 +191,7 @@ void BookmarksBrowser::changeEntry(const QModelIndex & index)
         ui->entryAuthorsEdit->setText(bookmarksDB->getAuthorsList(entryId));
 
         if (QFileInfo(currentFilename).exists()) {
-            if (getEntryPageImage(entriesModel->index(ui->entriesView->currentIndex().row(), Entry_Page_Nbr).data().toInt())) {
+            if (getEntryPageImage(entriesModel->index(ui->entriesView->currentIndex().row(), Entry_Page_Nbr).data().toInt(), false)) {
                 return;
             }
         }
@@ -208,8 +213,15 @@ void BookmarksBrowser::paintEvent(QPaintEvent * event)
     else {
         ui->pageImageLabel->clear();
         ui->pageImageLabel->setText(tr("Entry Image"));
+
+        ui->pageNbrEdit->blockSignals(true);
         ui->pageNbrEdit->setText("");
+        ui->pageNbrEdit->blockSignals(false);
+
+        ui->documentSlider->blockSignals(true);
         ui->documentSlider->setValue(1);
+        ui->documentSlider->blockSignals(false);
+
         imagePageNbr = -1;
     }
 

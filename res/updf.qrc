@@ -1,59 +1,29 @@
 <RCC>
     <qresource prefix="/icons">
+        <file>svg/24x24/chevron-up.svg</file>
+        <file>svg/24x24/chevron-down.svg</file>
+        <file>svg/24x24/chevrons-up.svg</file>
+        <file>svg/24x24/chevrons-down.svg</file>
+        <file>svg/24x24/settings.svg</file>
+        <file>svg/24x24/bookmark.svg</file>
+        <file>svg/24x24/book.svg</file>
+        <file>svg/24x24/file-text.svg</file>
+        <file>svg/24x24/folder.svg</file>
+        <file>svg/24x24/power.svg</file>
+        <file>svg/24x24/maximize-2.svg</file>
+        <file>svg/24x24/zoom-out.svg</file>
+        <file>svg/24x24/zoom-in.svg</file>
+        <file>svg/24x24/minus-square.svg</file>
+        <file>svg/24x24/plus-square.svg</file>
+        <file>svg/24x24/search.svg</file>
+        <file>svg/24x24/minimize-2.svg</file>
         <file>img/updf-64x64.png</file>
         <file>img/updf-128x128.png</file>
-        <file>img/updf-256x256.png</file>
         <file>img/updf-512x512.png</file>
-    </qresource>
-    <qresource prefix="/icons/22">
-        <file>img/22x22/document-open.png</file>
-        <file>img/22x22/go-top.png</file>
-        <file>img/22x22/view-fullscreen.png</file>
-        <file>img/22x22/application-exit.png</file>
-        <file>img/22x22/edit-select-all.png</file>
-        <file>img/22x22/go-bottom.png</file>
-        <file>img/22x22/go-down.png</file>
-        <file>img/22x22/go-up.png</file>
-        <file>img/22x22/view-restore.png</file>
-        <file>img/22x22/zoom-in.png</file>
-        <file>img/22x22/zoom-out.png</file>
-        <file>img/22x22/emblem-documents.png</file>
-        <file>img/22x22/window-close.png</file>
-        <file>img/22x22/system-run.png</file>
-    </qresource>
-    <qresource prefix="/icons/32">
-        <file>img/32x32/updf.png</file>
-        <file>img/32x32/application-exit.png</file>
-        <file>img/32x32/document-open.png</file>
-        <file>img/32x32/go-top.png</file>
-        <file>img/32x32/view-fullscreen.png</file>
-        <file>img/32x32/edit-select-all.png</file>
-        <file>img/32x32/emblem-documents.png</file>
-        <file>img/32x32/go-bottom.png</file>
-        <file>img/32x32/go-down.png</file>
-        <file>img/32x32/go-up.png</file>
-        <file>img/32x32/view-restore.png</file>
-        <file>img/32x32/zoom-in.png</file>
-        <file>img/32x32/zoom-out.png</file>
-        <file>img/32x32/window-close.png</file>
-        <file>img/32x32/system-run.png</file>
-    </qresource>
-    <qresource prefix="/icons/48">
-        <file>img/48x48/updf.png</file>
-        <file>img/48x48/application-exit.png</file>
-        <file>img/48x48/document-open.png</file>
-        <file>img/48x48/go-bottom.png</file>
-        <file>img/48x48/go-down.png</file>
-        <file>img/48x48/go-top.png</file>
-        <file>img/48x48/go-up.png</file>
-        <file>img/48x48/view-fullscreen.png</file>
-        <file>img/48x48/edit-select-all.png</file>
-        <file>img/48x48/emblem-documents.png</file>
-        <file>img/48x48/view-restore.png</file>
-        <file>img/48x48/zoom-in.png</file>
-        <file>img/48x48/zoom-out.png</file>
-        <file>img/48x48/window-close.png</file>
-        <file>img/48x48/system-run.png</file>
+        <file>img/updf-256x256.png</file>
+        <file>img/updf-48x48.png</file>
+        <file>svg/24x24/arrow-left.svg</file>
+        <file>svg/16x16/arrow-left.svg</file>
     </qresource>
     <qresource prefix="/agif">
         <file>img/busy.gif</file>
