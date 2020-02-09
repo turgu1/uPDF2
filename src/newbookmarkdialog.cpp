@@ -3,7 +3,6 @@
 
 #include <QMessageBox>
 
-#include "util.h"
 #include "bookmarksdb.h"
 
 NewBookmarkDialog::NewBookmarkDialog(QWidget *parent) :

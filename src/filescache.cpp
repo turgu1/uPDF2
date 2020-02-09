@@ -1,13 +1,15 @@
 #include "filescache.h"
 #include "pdffile.h"
 
+#include <QDebug>
+
 FilesCache::FilesCache(QObject *parent) : QObject(parent),
     loadingCount(0)
 {
 
 }
 
-PDFFile * FilesCache::getFile(QString filename)
+PDFFile * FilesCache::getFile(QString filename, int atPage)
 {
     int i;
 
@@ -22,7 +24,8 @@ PDFFile * FilesCache::getFile(QString filename)
         connect(f, SIGNAL(    fileIsLoading()), this, SLOT(    fileIsLoading()));
         connect(f, SIGNAL(fileLoadCompleted()), this, SLOT(fileLoadCompleted()));
 
-        f->load(filename);
+        f->load(filename, atPage);
+        f->setViewerCount(1);
         return f;
     }
     else {
@@ -36,9 +39,13 @@ void FilesCache::releaseFile(PDFFile * f)
 {
     int index = files.indexOf(f);
 
+    // qDebug() << "Index " << index;
+
     if (index >= 0) {
+        // qDebug() << "Viewer Count: " << f->getViewerCount();
+
         f->setViewerCount(f->getViewerCount() - 1);
-        if (f->getViewerCount() == 0) {
+        if (f->getViewerCount() <= 0) {
             delete f;
             files.removeAt(index);
         }

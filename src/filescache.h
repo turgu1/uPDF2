@@ -13,7 +13,7 @@ class FilesCache : public QObject
     Q_OBJECT
 public:
     explicit   FilesCache(QObject * parent = nullptr);
-    PDFFile *     getFile(QString   filename);
+    PDFFile *     getFile(QString   filename, int atPage = 0);
     void      releaseFile(PDFFile * f);
 signals:
     void busy(bool isBusy);

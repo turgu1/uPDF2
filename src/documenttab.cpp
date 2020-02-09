@@ -4,6 +4,7 @@
 #include "filescache.h"
 
 #include <QVBoxLayout>
+#include <QDebug>
 
 DocumentTab::DocumentTab(QWidget *parent) :
     QWidget(parent)
@@ -29,10 +30,10 @@ QString DocumentTab::getFilename()
     return (file == nullptr) ? QString("") : file->filename;
 }
 
-void DocumentTab::loadFile(QString filename)
+void DocumentTab::loadFile(QString filename, int atPage)
 {
     pdfViewer->reset();
-    file = filesCache->getFile(filename);
+    file = filesCache->getFile(filename, atPage);
     pdfViewer->setPDFFile(file);
 }
 

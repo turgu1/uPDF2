@@ -113,11 +113,15 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->fullScreenButton->setToolTip(tr("Normal View"));
   }
 
-  currentState.page          = 0;
-  currentState.pageCount     = 0;
-  currentState.viewMode      = VM_PAGE;
-  currentState.viewZoom      = 0.05f;
-  currentState.validDocument = false;
+  currentState.page           = 0;
+  currentState.pageCount      = 0;
+  currentState.viewMode       = VM_PAGE;
+  currentState.viewZoom       = 0.05f;
+  currentState.validDocument  = false;
+  currentState.textSelection  = false;
+  currentState.someClipText   = false;
+  currentState.columnCount    = 1;
+  currentState.titlePageCount = 0;
 
   updateButtons(currentState);
   update();
@@ -238,7 +242,7 @@ void MainWindow::aboutBox()
   QMessageBox aboutBox;
 
   aboutBox.setIconPixmap(QPixmap(":/icons/img/updf-48x48.png"));
-  aboutBox.setText(QString(tr("\nuPDF (micro PDF) Version %1")).arg(UPDF_VERSION));
+  aboutBox.setText(QString(tr("\nuPDF (micro PDF) Version %1")).arg(APP_VERSION));
   aboutBox.setDetailedText(tr(
        "Written by:\n"
        "\n"
@@ -285,7 +289,7 @@ void MainWindow::showBookmarkSelector()
             QString filename = absoluteFilename(selection.filename);
             if (QFileInfo(filename).exists()) {
 //                if (file.filename != filename) {
-                    loadFile(filename, selection.caption);
+                    loadFile(filename, selection.caption, selection.pageNbr - 1);
                     setFileViewParameters(params, false);
 //                }
 //                else {
@@ -417,10 +421,12 @@ void MainWindow::hideToolbar()
     if (currentDocumentTab != nullptr) currentDocumentTab->setFocus();
 }
 
-void MainWindow::loadFile(QString filename, QString title)
+void MainWindow::loadFile(QString filename, QString title, int atPage)
 {
+    // qDebug() << "Loading file " << filename << " at Page " << atPage;
+
     currentDocumentTab = new DocumentTab(nullptr);
-    currentDocumentTab->loadFile(filename);
+    currentDocumentTab->loadFile(filename, atPage);
 
     int index = ui->viewer->addTab(currentDocumentTab, title);
     ui->viewer->setCurrentIndex(index);
@@ -442,7 +448,7 @@ void MainWindow::setFileViewParameters(FileViewParameters & params, bool recent)
 void MainWindow::loadRecentFile(FileViewParameters & params)
 {
   QFileInfo fi(params.filename);
-  loadFile(params.filename, fi.fileName());
+  loadFile(params.filename, fi.fileName(), params.yOff);
 
   setFileViewParameters(params, true);
 }

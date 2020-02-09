@@ -59,9 +59,15 @@ void PDFLoader::run()
   struct timeval start, end;
   gettimeofday(&start, NULL);
 
-  const u32 chunksize = QThread::idealThreadCount() * 3;
+  u32 chunksize = QThread::idealThreadCount();
+
+  if (chunksize < 4) chunksize = 4;
+
+  // qDebug() << "Chunk Size: " << chunksize;
+  // qDebug() << "Page count: " << pdfFile.pages;
 
   if (pdfFile.pages < chunksize) {
+    // First page (page 0) already done...
     for (u32 i = 1; i < pdfFile.pages; i++) {
       PDFPageWorker * pw = new PDFPageWorker(pdfFile, i);
       connect(pw, SIGNAL(refresh()), this, SLOT(refreshRequest()));
@@ -78,17 +84,17 @@ void PDFLoader::run()
     const u32 remainder = pdfFile.pages % chunksize;
 
     bool done[chunks + 1];
-    memset(done, 0, sizeof(bool) * (chunks + 1));
+    std::fill(done, done+chunks+1, 0);
 
     while (notdone(done, chunks)) {
       for (c = 0; c <= chunks; c++) {
 
         if (aborting) return;
 
-        // Did the user skip around?
+        // Did the user skip around (beyond title page) ?
         const u32 first = __sync_fetch_and_add(&pdfFile.firstVisible, 0);
-        if (first) {
-          const u32 tmp = pdfFile.firstVisible / chunksize;
+        if (first > 0) {
+          const u32 tmp = first / chunksize;
           if (tmp <= chunks && !done[tmp]) c = tmp;
         }
 
@@ -97,11 +103,16 @@ void PDFLoader::run()
         u32 max = (c + 1) * chunksize;
         if (c == chunks) max -= (chunksize - remainder);
 
-        for (u32 i = c * chunksize; i < max; i++) {
+        // qDebug() << "Chunk " << c;
+
+        for (u32 i = (c == 0) ? 1 : c * chunksize; // Don't do page 0 again
+             i < max;
+             i++) {
           PDFPageWorker * pw = new PDFPageWorker(pdfFile, i);
           connect(pw, SIGNAL(refresh()), this, SLOT(refreshRequest()));
           threadPool->start(pw);
         }
+
         threadPool->waitForDone(10000);
         done[c] = true;
       }

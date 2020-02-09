@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
           details++;
         break;
         case 'v':
-          printf("%s\n", UPDF_VERSION);
+          printf("%s\n", APP_VERSION);
           return 0;
         break;
         case 'h':
@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
     a.setApplicationName("updf");
     a.setOrganizationName("updf");
     a.setApplicationDisplayName("uPDF");
-    a.setApplicationVersion("V2.1");
+    a.setApplicationVersion(APP_VERSION);
     a.setStyle(QStyleFactory::create("fusion"));
 
     a.setStyleSheet("QWidget {font: 13px;}");

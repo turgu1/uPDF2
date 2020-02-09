@@ -158,10 +158,16 @@ static bool nonwhite(const u8 * const pixel)
     pixel[2] != 255;
 }
 
-static void getmargins(const u8 * const src, const u32 w, const u32 h,
-      const u32 rowsize,
-      u32 *minx, u32 *maxx,
-      u32 *miny, u32 *maxy)
+static void getmargins(
+        const u8  * const src,
+        const u32   w,
+        const u32   h,
+        const u32   rowsize,
+              u32 * minx,
+              u32 * maxx,
+              u32 * miny,
+              u32 * maxy,
+        int pageNbr)
 {
   #if METRICS
     struct timeval start, end;
@@ -172,13 +178,14 @@ static void getmargins(const u8 * const src, const u32 w, const u32 h,
     }
   #endif
 
-  int i, j;
+  u32 i, j;
 
   bool found = false;
-  for (i = 0; i < (int) w && !found; i++) {
-    for (j = 0; j < (int) h && !found; j++) {
-      const u8 * const pixel = src + j * rowsize + i * 4;
+  for (i = 0; i < w && !found; i++) {
+    for (j = 0; j < h && !found; j++) {
+      const u8 * const pixel = src + (j * rowsize) + (i * 4);
       if (nonwhite(pixel)) {
+        // if (pageNbr == 1) qDebug() << "Min x at " << j;
         found = true;
         *minx = i;
       }
@@ -186,23 +193,25 @@ static void getmargins(const u8 * const src, const u32 w, const u32 h,
   }
 
   found = false;
-  for (j = 0; j < (int) h && !found; j++) {
-    for (i = *minx; i < (int) w && !found; i++) {
-      const u8 * const pixel = src + j * rowsize + i * 4;
+  for (j = 0; j < h && !found; j++) {
+    for (i = *minx; i < w && !found; i++) {
+      const u8 * const pixel = src + (j * rowsize) + (i * 4);
       if (nonwhite(pixel)) {
+        // if (pageNbr == 1) qDebug() << "Min y at " << i;
         found = true;
         *miny = j;
       }
     }
   }
 
-  const int startx = *minx, starty = *miny;
+  const u32 startx = *minx, starty = *miny;
 
   found = false;
-  for (i = w - 1; i >= startx && !found; i--) {
-    for (j = h - 1; j >= starty && !found; j--) {
-      const u8 * const pixel = src + j * rowsize + i * 4;
+  for (i = w - 1; i > startx && !found; i--) {
+    for (j = h - 1; j > starty && !found; j--) {
+      const u8 * const pixel = src + (j * rowsize) + (i * 4);
       if (nonwhite(pixel)) {
+        // if (pageNbr == 1) qDebug() << "Max x at " << j;
         found = true;
         *maxx = i;
       }
@@ -210,10 +219,11 @@ static void getmargins(const u8 * const src, const u32 w, const u32 h,
   }
 
   found = false;
-  for (j = h - 1; j >= starty && !found; j--) {
-    for (i = *maxx; i >= startx && !found; i--) {
-      const u8 * const pixel = src + j * rowsize + i * 4;
+  for (j = h - 1; j > starty && !found; j--) {
+    for (i = *maxx; i > startx && !found; i--) {
+      const u8 * const pixel = src + (j * rowsize) + (i * 4);
       if (nonwhite(pixel)) {
+        // if (pageNbr == 1) qDebug() << "Max y at " << i;
         found = true;
         *maxy = j;
       }
@@ -241,7 +251,7 @@ static void getmargins(const u8 * const src, const u32 w, const u32 h,
 
 #undef METRICS
 
-void store(SplashBitmap * const bm, CachedPage & cache)
+void store(SplashBitmap * const bm, CachedPage & cache, int pageNbr)
 {
   const u32 w          = bm->getWidth();
   const u32 h          = bm->getHeight();
@@ -250,14 +260,19 @@ void store(SplashBitmap * const bm, CachedPage & cache)
 
   u32 minx = 0,
       miny = 0,
-      maxx = w - 1,
-      maxy = h - 1;
+      maxx = 0,
+      maxy = 0;
 
   // Trim margins
-  getmargins(src, w, h, rowsize, &minx, &maxx, &miny, &maxy);
+  getmargins(src, w, h, rowsize, &minx, &maxx, &miny, &maxy, pageNbr);
 
   const u32 trimw = maxx - minx + 1;
   const u32 trimh = maxy - miny + 1;
+
+//  if (pageNbr == 1) {
+//    qDebug() << "Values " << maxx << maxy << minx << miny;
+//    qDebug() << "First pixel" << src[0] << src[1] << src[2] << src[3];
+//  }
 
   u8 * const trimmed = (u8 *) xcalloc(trimw * trimh * 4, 1);
   for (u32 j = miny; j <= maxy; j++) {
@@ -304,7 +319,7 @@ void PDFPageWorker::run()
 
   SplashBitmap * const bm = splash->takeBitmap();
   CachedPage         & c  = pdfFile.cache[page];
-  store(bm, c);
+  store(bm, c, page);
 
 //  qDebug() << "Page "         << page
 //           << ", Width "      << c.w

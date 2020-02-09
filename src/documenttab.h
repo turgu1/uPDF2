@@ -17,7 +17,7 @@ public:
 
     PDFViewer * getPdfViewer() { return pdfViewer;     }
     QString      getFilename();
-    void            loadFile(QString filename);
+    void            loadFile(QString filename, int atPage = 0);
     void            setFocus();
 
 private:

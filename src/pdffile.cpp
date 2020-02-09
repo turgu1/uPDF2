@@ -26,6 +26,8 @@ PDFFile::PDFFile(QObject * parent) : QObject(parent),
   cache(NULL),
   pdf(NULL),
   pages(0),
+  firstVisible(0),
+  lastVisible(0),
   totalSize(0),
   totalSizeCompressed(0),
   loadTime(0)
@@ -47,8 +49,9 @@ void PDFFile::setLoading(bool val)
   if (loading) emit fileIsLoading();
 }
 
-void PDFFile::load(QString filename)
+void PDFFile::load(QString filename, int atPage)
 {
+  firstVisible = lastVisible = atPage;
   loadedPDFFile = new LoadPDFFile(filename, *this);
 }
 

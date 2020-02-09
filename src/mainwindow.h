@@ -72,7 +72,7 @@ class MainWindow : public QMainWindow
     QMovie         * busyMovie;
     DocumentTab    * currentDocumentTab;
 
-    void              loadFile(QString filename, QString title);
+    void              loadFile(QString filename, QString title, int atPage = 0);
     void    saveFileParameters();
     void setFileViewParameters(FileViewParameters & params, bool recent);
     void        loadRecentFile(FileViewParameters & params);

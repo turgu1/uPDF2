@@ -67,7 +67,7 @@ class PDFFile : public QObject
     int  getViewerCount()          { return viewerCount;  }
     void setViewerCount(int count) { viewerCount = count; }
 
-    void load(QString filename);
+    void load(QString filename, int atPage = 0);
 
   signals:
     void     fileIsLoading();

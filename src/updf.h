@@ -35,8 +35,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class BookmarksDB;
 class FilesCache;
 
-#define UPDF_VERSION "2.0.0"
-
 #define DEBUGGING 1
 
 typedef uint64_t u64;

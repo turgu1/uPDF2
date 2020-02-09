@@ -4,6 +4,9 @@
 #
 #-------------------------------------------------
 
+VERSION   = 2.3.0
+DEFINES  += APP_VERSION='\\"$${VERSION}\\"'
+
 QT       += core gui sql svg xml
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets

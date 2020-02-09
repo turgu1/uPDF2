@@ -925,10 +925,18 @@ QPixmap PDFViewer::getPage(const u32 page)
 
   // Adjust cache to be big enough if required
   if (cur->uncompressed > cachedSize) {
+    qDebug() <<  "Cache size update...";
     cachedSize = cur->uncompressed;
 
     for (i = 0; i < CACHE_MAX; i++) {
+      // Reallocation render Pixmaps inconsistent. Seems that
+      // Pixmaps keep pointer on image data...
+      cachedPage[i] = USHRT_MAX;
       cache[i] = (u8 *) realloc(cache[i], cachedSize);
+      if (cache[i] == nullptr) {
+          QMessageBox::critical(nullptr, "Memory Allocation Error", "Memory Allocation Error");
+          exit(1);
+      }
     }
   }
 
@@ -1145,13 +1153,13 @@ void PDFViewer::paintEvent(QPaintEvent * event)
         H -= (cur->top  + cur->bottom) * zoom;
       }
 
-      qDebug() << "Page: " << page;
+      // qDebug() << "Page: " << page;
       QPixmap img = getPage(page);
 
       // Render real content
 //      if (firstPage) {
-//        qDebug("Drawing page %d: X: %d, Y: %d, W: %d, H: %d (%d)",
-//               page, X, Y, W, H, img.size());
+//         qDebug("Drawing page %d: X: %d, Y: %d, W: %d, H: %d (%d)",
+//                 page, X, Y, W, H, img.size());
 //      }
 
       // Do render the page on the canvas

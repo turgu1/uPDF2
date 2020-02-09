@@ -95,9 +95,7 @@ LoadPDFFile::LoadPDFFile(const QString & fname, PDFFile & pdfFile) :
   file.filename = fname;
   file.pdf      = pdfDoc;
   file.pages    = file.pdf->getNumPages();
-  file.maxW     = file.maxH
-                = file.firstVisible
-                = file.lastVisible = 0;
+  file.maxW     = file.maxH = 0;
 
   // Start threaded magic
   if (file.pages < 1) {
