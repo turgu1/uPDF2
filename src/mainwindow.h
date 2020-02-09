@@ -25,10 +25,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QMovie>
 
 #include "updf.h"
-#include "loadpdffile.h"
-#include "pdffile.h"
-#include "pdfviewer.h"
 #include "bookmarksdb.h"
+#include "pdfviewer.h"
+
+class DocumentTab;
 
 namespace Ui {
   class MainWindow;
@@ -46,6 +46,8 @@ class MainWindow : public QMainWindow
     void     closeEvent();
 
   private slots:
+    void            tabChange(int index);
+    void             closeTab(int index);
     void          showToolbar();
     void          hideToolbar();
     void        updateButtons(ViewState & state);
@@ -58,20 +60,19 @@ class MainWindow : public QMainWindow
     void       askPreferences();
     void showBookmarkSelector();
     void          addBookmark();
+    void        fileIsLoading(bool isLoading);
 
   private:
     ViewState        currentState;
 
     Ui::MainWindow * ui;
-    PDFViewer      * pdfViewer;
     QIcon          * iconFullScreen;
     QIcon          * iconRestore;
     bool             toolbarVisible;
-    PDFFile          file;
-    LoadPDFFile    * loadedPDFFile;
     QMovie         * busyMovie;
+    DocumentTab    * currentDocumentTab;
 
-    void              loadFile(QString filename);
+    void              loadFile(QString filename, QString title);
     void    saveFileParameters();
     void setFileViewParameters(FileViewParameters & params, bool recent);
     void        loadRecentFile(FileViewParameters & params);

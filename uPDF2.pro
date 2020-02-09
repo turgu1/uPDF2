@@ -34,7 +34,9 @@ SOURCES += \
     src/config.cpp \
     src/documentmapperdelegate.cpp \
     src/documentmodel.cpp \
+    src/documenttab.cpp \
     src/entrymapperdelegate.cpp \
+    src/filescache.cpp \
     src/loadpdffile.cpp \
     src/main.cpp \
     src/mainwindow.cpp \
@@ -56,7 +58,9 @@ HEADERS  += \
     src/config.h \
     src/documentmapperdelegate.h \
     src/documentmodel.h \
+    src/documenttab.h \
     src/entrymapperdelegate.h \
+    src/filescache.h \
     src/loadpdffile.h \
     src/mainwindow.h \
     src/newbookmarkdialog.h \

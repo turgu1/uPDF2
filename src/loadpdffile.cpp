@@ -110,8 +110,8 @@ LoadPDFFile::LoadPDFFile(const QString & fname, PDFFile & pdfFile) :
   if (pdfLoader) delete pdfLoader;
   pdfLoader = new PDFLoader(file);
 
-  connect(pdfLoader, &PDFLoader::loadCompleted, this, &LoadPDFFile::handleResults);
-  connect(pdfLoader, &PDFLoader::refresh,       this, &LoadPDFFile::pageReadyForRefresh);
+  connect(pdfLoader, SIGNAL(loadCompleted()), this, SLOT(      handleResults()));
+  connect(pdfLoader, SIGNAL(      refresh()), this, SLOT(pageReadyForRefresh()));
 
   // Do first page and wait for the result
   QThreadPool::globalInstance()->start(new PDFPageWorker(file, 0));

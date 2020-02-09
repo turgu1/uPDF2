@@ -32,7 +32,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QRect>
 #include <PDFDoc.h>
 
-#include "bookmarksdb.h"
+class BookmarksDB;
+class FilesCache;
 
 #define UPDF_VERSION "2.0.0"
 
@@ -78,7 +79,6 @@ struct FileViewParameters {
     float         yOff;
     float         viewZoom;
     QRect         winGeometry;
-    bool          fullscreen;
     ViewMode      viewMode;
     CustomTrim    customTrim;
 
@@ -114,6 +114,7 @@ extern u32           details;
 extern QString       filenameAtStartup;
 extern Preferences   preferences;
 extern BookmarksDB * bookmarksDB;
+extern FilesCache  * filesCache;
 
 #include "utils.h"
 

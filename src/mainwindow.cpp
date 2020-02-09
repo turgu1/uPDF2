@@ -35,6 +35,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "bookmarksbrowser.h"
 #include "bookmarkselector.h"
 #include "newbookmarkdialog.h"
+#include "documenttab.h"
+#include "filescache.h"
 
 // Parameters at startup
 
@@ -42,15 +44,14 @@ u32           details = 0;
 QString       filenameAtStartup;
 Preferences   preferences;
 BookmarksDB * bookmarksDB = nullptr;
+FilesCache  * filesCache = nullptr;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     toolbarVisible(true),
-    loadedPDFFile(NULL)
+    currentDocumentTab(nullptr)
 {
-  QVBoxLayout * layout = new QVBoxLayout;
-
   loadConfig();
 
   ui->setupUi(this);
@@ -59,63 +60,49 @@ MainWindow::MainWindow(QWidget *parent) :
       bookmarksDB = new BookmarksDB(preferences.bookmarksParameters.bookmarksDbFilename);
   }
 
-  layout->setContentsMargins(0, 0, 0, 0);
-  ui->viewer->setLayout(layout);
+  filesCache = new FilesCache;
 
   ui->trimParametersLabel->setStyleSheet("QLabel#trimParametersLabel { font: 9px }");
-  pdfViewer = new PDFViewer(ui->viewer);
-  pdfViewer->setPDFFile(&file);
-
-  layout->addWidget(pdfViewer, 1);
+  ui->viewer->setStyleSheet("QTabBar::tab { height: 20px; font: 10px }");
 
   iconFullScreen = new QIcon(":/icons/svg/24x24/maximize-2.svg");
   iconRestore    = new QIcon(":/icons/svg/24x24/minimize-2.svg");
 
   ui->currentPageEdit->setValidator(new QIntValidator(1, 9999, this));
 
-  connect(ui->showToolbarButton,   SIGNAL(clicked()),     this,      SLOT(   showToolbar()));
-  connect(ui->hideToollbarButton,  SIGNAL(clicked()),     this,      SLOT(   hideToolbar()));
-  connect(ui->openFileButton,      SIGNAL(clicked()),     this,      SLOT(      openFile()));
-  connect(ui->fullScreenButton,    SIGNAL(clicked()),     this,      SLOT(  onFullScreen()));
-  connect(ui->exitButton,          SIGNAL(clicked()),     this,      SLOT(      closeApp()));
-  connect(ui->aboutButton,         SIGNAL(clicked()),     this,      SLOT(      aboutBox()));
-  connect(ui->openRecentButton,    SIGNAL(clicked()),     this,      SLOT(    openRecent()));
-  connect(ui->preferencesButton,   SIGNAL(clicked()),     this,      SLOT(askPreferences()));
+  ui->viewer->removeTab(0);
 
-  connect(ui->beginDocumentButton, SIGNAL(clicked()),     pdfViewer, SLOT(           top()));
-  connect(ui->endDocumentButton,   SIGNAL(clicked()),     pdfViewer, SLOT(        bottom()));
-  connect(ui->previousPageButton,  SIGNAL(clicked()),     pdfViewer, SLOT(        pageUp()));
-  connect(ui->nextPageButton,      SIGNAL(clicked()),     pdfViewer, SLOT(      pageDown()));
-  connect(ui->zoomInButton,        SIGNAL(clicked()),     pdfViewer, SLOT(        zoomIn()));
-  connect(ui->zoomOutButton,       SIGNAL(clicked()),     pdfViewer, SLOT(       zoomOut()));
+  connect(ui->showToolbarButton,   SIGNAL(clicked()),     this,      SLOT(         showToolbar()));
+  connect(ui->hideToollbarButton,  SIGNAL(clicked()),     this,      SLOT(         hideToolbar()));
+  connect(ui->openFileButton,      SIGNAL(clicked()),     this,      SLOT(            openFile()));
+  connect(ui->fullScreenButton,    SIGNAL(clicked()),     this,      SLOT(        onFullScreen()));
+  connect(ui->exitButton,          SIGNAL(clicked()),     this,      SLOT(            closeApp()));
+  connect(ui->aboutButton,         SIGNAL(clicked()),     this,      SLOT(            aboutBox()));
+  connect(ui->openRecentButton,    SIGNAL(clicked()),     this,      SLOT(          openRecent()));
+  connect(ui->preferencesButton,   SIGNAL(clicked()),     this,      SLOT(      askPreferences()));
 
-  connect(ui->editTrimButton,      SIGNAL(clicked(bool)), pdfViewer, SLOT(   trimZoneSelect(bool)));
-  connect(ui->evenOddButton,       SIGNAL(clicked(bool)), pdfViewer, SLOT(trimZoneDifferent(bool)));
-  connect(ui->thisPageButton,      SIGNAL(clicked(bool)), pdfViewer, SLOT(     thisPageTrim(bool)));
-  connect(ui->clearTrimsButton,    SIGNAL(clicked()),     pdfViewer, SLOT(  clearAllSingleTrims()));
-  connect(ui->selectTextButton,    SIGNAL(clicked(bool)), pdfViewer, SLOT(       textSelect(bool)));
-  connect(ui->copyButton,          SIGNAL(clicked()),     pdfViewer, SLOT(      copyToClipboard()));
+  connect(ui->bookmarksButton,     SIGNAL(clicked()),    this,       SLOT(showBookmarkSelector()));
+  connect(ui->addBookmarkButton,   SIGNAL(clicked()),    this,       SLOT(         addBookmark()));
 
-  connect(ui->bookmarksButton,     SIGNAL(clicked()),    this,       SLOT( showBookmarkSelector()));
-  connect(ui->addBookmarkButton,   SIGNAL(clicked()),    this,       SLOT(          addBookmark()));
+  connect(ui->viewer,              SIGNAL(currentChanged(int)),   this,  SLOT(     tabChange(int)));
+  connect(ui->viewer,              SIGNAL(tabCloseRequested(int)), this, SLOT(      closeTab(int)));
+
+  connect(filesCache, SIGNAL(busy(bool)), this, SLOT(fileIsLoading(bool)));
 
   connect(ui->viewModeCombo,       static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
-          [=](int index) { pdfViewer->setViewMode(ViewMode(index)); });
+          [=](int index) { if (currentDocumentTab) currentDocumentTab->getPdfViewer()->setViewMode(ViewMode(index)); });
 
   connect(ui->columnCountCombo,    static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
-          [=](int index) { pdfViewer->setColumnCount(index + 1); });
+          [=](int index) { if (currentDocumentTab) currentDocumentTab->getPdfViewer()->setColumnCount(index + 1); });
 
   connect(ui->titlePageCountCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
-          [=](int index) { pdfViewer->setTitlePageCount(index); });
+          [=](int index) { if (currentDocumentTab) currentDocumentTab->getPdfViewer()->setTitlePageCount(index); });
 
   connect(ui->currentPageEdit,     static_cast<void(QLineEdit::*)()>(&QLineEdit::editingFinished),
-          [=](){ pdfViewer->gotoPage(ui->currentPageEdit->text().toInt() - 1); });
+          [=](){ if (currentDocumentTab) currentDocumentTab->getPdfViewer()->gotoPage(ui->currentPageEdit->text().toInt() - 1); });
 
   connect(ui->trimPageList,        static_cast<void(QListWidget::*)(QListWidgetItem *)>(&QListWidget::itemClicked),
-          [=](QListWidgetItem * item) { pdfViewer->gotoPage(item->text().toInt() - 1); });
-
-  connect(pdfViewer,               static_cast<void(PDFViewer::*)(ViewState &)>(&PDFViewer::stateUpdated),
-          [=](ViewState & state) { this->updateButtons(state); });
+          [=](QListWidgetItem * item) { if (currentDocumentTab) currentDocumentTab->getPdfViewer()->gotoPage(item->text().toInt() - 1); });
 
   ui->busyLabel->setMovie(new QMovie(":/agif/img/busy.gif"));
 
@@ -130,7 +117,6 @@ MainWindow::MainWindow(QWidget *parent) :
   currentState.pageCount     = 0;
   currentState.viewMode      = VM_PAGE;
   currentState.viewZoom      = 0.05f;
-  currentState.fileLoading   = false;
   currentState.validDocument = false;
 
   updateButtons(currentState);
@@ -138,7 +124,7 @@ MainWindow::MainWindow(QWidget *parent) :
   updateGeometry();
 
   if (!filenameAtStartup.isEmpty()) {
-    loadFile(filenameAtStartup);
+    loadFile(filenameAtStartup, QFileInfo(filenameAtStartup).fileName());
     setFileViewParameters(preferences.defaultView, false);
   }
   else {
@@ -149,6 +135,72 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::tabChange(int index)
+{
+    PDFViewer * pdfViewer;
+
+    if (currentDocumentTab != nullptr) {
+        pdfViewer = currentDocumentTab->getPdfViewer();
+
+        disconnect(ui->beginDocumentButton, SIGNAL(clicked()),     pdfViewer, SLOT(                  top()));
+        disconnect(ui->endDocumentButton,   SIGNAL(clicked()),     pdfViewer, SLOT(               bottom()));
+        disconnect(ui->previousPageButton,  SIGNAL(clicked()),     pdfViewer, SLOT(               pageUp()));
+        disconnect(ui->nextPageButton,      SIGNAL(clicked()),     pdfViewer, SLOT(             pageDown()));
+        disconnect(ui->zoomInButton,        SIGNAL(clicked()),     pdfViewer, SLOT(               zoomIn()));
+        disconnect(ui->zoomOutButton,       SIGNAL(clicked()),     pdfViewer, SLOT(              zoomOut()));
+
+        disconnect(ui->editTrimButton,      SIGNAL(clicked(bool)), pdfViewer, SLOT(   trimZoneSelect(bool)));
+        disconnect(ui->evenOddButton,       SIGNAL(clicked(bool)), pdfViewer, SLOT(trimZoneDifferent(bool)));
+        disconnect(ui->thisPageButton,      SIGNAL(clicked(bool)), pdfViewer, SLOT(     thisPageTrim(bool)));
+        disconnect(ui->clearTrimsButton,    SIGNAL(clicked()),     pdfViewer, SLOT(  clearAllSingleTrims()));
+        disconnect(ui->selectTextButton,    SIGNAL(clicked(bool)), pdfViewer, SLOT(       textSelect(bool)));
+        disconnect(ui->copyButton,          SIGNAL(clicked()),     pdfViewer, SLOT(      copyToClipboard()));
+
+//        disconnect(ui->viewModeCombo,       SIGNAL(currentIndexChanged(int)));
+//        disconnect(ui->columnCountCombo,    SIGNAL(currentIndexChanged(int)));
+//        disconnect(ui->titlePageCountCombo, SIGNAL(currentIndexChanged(int)));
+//        disconnect(ui->currentPageEdit,     SIGNAL(    editingFinished()));
+//        disconnect(ui->trimPageList,        SIGNAL(        itemClicked(QListWidgetItem *)));
+
+        disconnect(pdfViewer,               SIGNAL(       stateUpdated(ViewState &)));
+    }
+
+    currentDocumentTab = (DocumentTab *) ui->viewer->currentWidget();
+
+    if (currentDocumentTab) {
+        pdfViewer = currentDocumentTab->getPdfViewer();
+
+        connect(ui->beginDocumentButton, SIGNAL(clicked()),     pdfViewer, SLOT(                  top()));
+        connect(ui->endDocumentButton,   SIGNAL(clicked()),     pdfViewer, SLOT(               bottom()));
+        connect(ui->previousPageButton,  SIGNAL(clicked()),     pdfViewer, SLOT(               pageUp()));
+        connect(ui->nextPageButton,      SIGNAL(clicked()),     pdfViewer, SLOT(             pageDown()));
+        connect(ui->zoomInButton,        SIGNAL(clicked()),     pdfViewer, SLOT(               zoomIn()));
+        connect(ui->zoomOutButton,       SIGNAL(clicked()),     pdfViewer, SLOT(              zoomOut()));
+
+        connect(ui->editTrimButton,      SIGNAL(clicked(bool)), pdfViewer, SLOT(   trimZoneSelect(bool)));
+        connect(ui->evenOddButton,       SIGNAL(clicked(bool)), pdfViewer, SLOT(trimZoneDifferent(bool)));
+        connect(ui->thisPageButton,      SIGNAL(clicked(bool)), pdfViewer, SLOT(     thisPageTrim(bool)));
+        connect(ui->clearTrimsButton,    SIGNAL(clicked()),     pdfViewer, SLOT(  clearAllSingleTrims()));
+        connect(ui->selectTextButton,    SIGNAL(clicked(bool)), pdfViewer, SLOT(       textSelect(bool)));
+        connect(ui->copyButton,          SIGNAL(clicked()),     pdfViewer, SLOT(      copyToClipboard()));
+
+        connect(pdfViewer,               static_cast<void(PDFViewer::*)(ViewState &)>(&PDFViewer::stateUpdated),
+                [=](ViewState & state) { this->updateButtons(state); });
+
+        pdfViewer->sendState();
+        currentDocumentTab->setFocus();
+    }
+}
+
+void MainWindow::closeTab(int index)
+{
+    DocumentTab * docTab = (DocumentTab *) ui->viewer->widget(index);
+
+    ui->viewer->removeTab(index);
+
+    delete docTab;
 }
 
 void MainWindow::keyPressEvent(QKeyEvent * event)
@@ -173,7 +225,7 @@ void MainWindow::keyPressEvent(QKeyEvent * event)
         }
     }
 
-    pdfViewer->setFocus();
+    if (currentDocumentTab != nullptr) currentDocumentTab->setFocus();
 }
 
 void MainWindow::closeEvent()
@@ -207,7 +259,7 @@ void MainWindow::aboutBox()
 
 //  QMessageBox::information(this, tr("Test..."), authors, QMessageBox::Ok, QMessageBox::Ok);
 
-  pdfViewer->setFocus();
+  if (currentDocumentTab != nullptr) currentDocumentTab->setFocus();
 }
 
 void MainWindow::showBookmarkSelector()
@@ -217,7 +269,9 @@ void MainWindow::showBookmarkSelector()
         Selection selection;
         BookmarkSelector * bookmarkSelector = new BookmarkSelector(this);
 
-        bool result = bookmarkSelector->select(selection, file.filename, ui->currentPageEdit->text().toInt());
+        QString filename = currentDocumentTab == nullptr ? "" : currentDocumentTab->getFilename();
+
+        bool result = bookmarkSelector->select(selection, filename, ui->currentPageEdit->text().toInt());
 
         // qDebug() << "showBookmarkSelection Result: " << result;
 
@@ -230,13 +284,13 @@ void MainWindow::showBookmarkSelector()
 
             QString filename = absoluteFilename(selection.filename);
             if (QFileInfo(filename).exists()) {
-                if (file.filename != filename) {
-                    loadFile(filename);
+//                if (file.filename != filename) {
+                    loadFile(filename, selection.caption);
                     setFileViewParameters(params, false);
-                }
-                else {
-                    pdfViewer->gotoPage(selection.pageNbr - 1);
-                }
+//                }
+//                else {
+//                    pdfViewer->gotoPage(selection.pageNbr - 1);
+//                }
             }
         }
     }
@@ -254,7 +308,7 @@ void MainWindow::onFullScreen()
     ui->fullScreenButton->setIcon(*iconRestore);
     ui->fullScreenButton->setToolTip(tr("Normal View"));
   }
-  pdfViewer->setFocus();
+  if (currentDocumentTab != nullptr) currentDocumentTab->setFocus();
 }
 
 void MainWindow::updateTrimButtons(ViewState & state)
@@ -271,7 +325,10 @@ void MainWindow::updateTrimButtons(ViewState & state)
     ui->   evenOddButton->setChecked(!state.trimSimilar);
     ui->  thisPageButton->setChecked(state.thisPageTrim);
     ui->    trimPageList->clear();
-    ui->    trimPageList->addItems(pdfViewer->getSinglePageTrims());
+
+    if (currentDocumentTab != nullptr) {
+      ui->  trimPageList->addItems(currentDocumentTab->getPdfViewer()->getSinglePageTrims());
+    }
   }
   else {
     ui->   evenOddButton->hide();
@@ -283,7 +340,7 @@ void MainWindow::updateTrimButtons(ViewState & state)
     ui->       zoomFrame->show();
   }
 
-  pdfViewer->setFocus();
+  if (currentDocumentTab != nullptr) currentDocumentTab->setFocus();
 }
 
 void MainWindow::updateButtons(ViewState & state)
@@ -311,20 +368,6 @@ void MainWindow::updateButtons(ViewState & state)
     }
 
     ui->selectTextButton->setChecked(state.textSelection);
-
-    if (state.fileLoading) {
-      ui->metricsLabel->hide();
-      ui->busyLabel->movie()->start();
-      ui->busyLabel->show();
-    }
-    else {
-      ui->busyLabel->movie()->stop();
-      ui->busyLabel->hide();
-      if (preferences.showLoadMetrics) {
-        ui->metricsLabel->setText(state.metrics);
-        ui->metricsLabel->show();
-      }
-    }
 
     if (state.someClipText) {
       ui->copyButton->show();
@@ -357,82 +400,62 @@ void MainWindow::updateButtons(ViewState & state)
     ui->    toolbarFrame->hide();
   }
 
-  pdfViewer->setFocus();
+  if (currentDocumentTab != nullptr) currentDocumentTab->setFocus();
 }
 
 void MainWindow::showToolbar()
 {
-  toolbarVisible = true;
-  updateButtons(currentState);
-  pdfViewer->setFocus();
+    toolbarVisible = true;
+    updateButtons(currentState);
+    if (currentDocumentTab != nullptr) currentDocumentTab->setFocus();
 }
 
 void MainWindow::hideToolbar()
 {
-  toolbarVisible = false;
-  updateButtons(currentState);
-  pdfViewer->setFocus();
+    toolbarVisible = false;
+    updateButtons(currentState);
+    if (currentDocumentTab != nullptr) currentDocumentTab->setFocus();
 }
 
-void MainWindow::loadFile(QString filename)
+void MainWindow::loadFile(QString filename, QString title)
 {
-  if (loadedPDFFile) {
-    loadedPDFFile->clean();
-    delete loadedPDFFile;
-  }
+    currentDocumentTab = new DocumentTab(nullptr);
+    currentDocumentTab->loadFile(filename);
 
-  pdfViewer->reset();
-  loadedPDFFile = new LoadPDFFile(filename, file);
+    int index = ui->viewer->addTab(currentDocumentTab, title);
+    ui->viewer->setCurrentIndex(index);
 
-  QFileInfo fi(filename);
-  setWindowTitle(QString("%1 - uPDF").arg(fi.fileName()));
-
-  pdfViewer->setFocus();
+    currentDocumentTab->setFocus();
 }
 
 void MainWindow::setFileViewParameters(FileViewParameters & params, bool recent)
 {
   if (!recent || preferences.recentGeometry) {
-    if (params.fullscreen) {
-      if (!isFullScreen()) {
-        ui->fullScreenButton->setIcon(*iconRestore);
-        ui->fullScreenButton->setToolTip(tr("Normal View"));
-        showFullScreen();
-      }
+    if (currentDocumentTab != nullptr) {
+        currentDocumentTab->getPdfViewer()->setFileViewParameters(params);
     }
-    else {
-      if (isFullScreen()) {
-        ui->fullScreenButton->setIcon(*iconFullScreen);
-        ui->fullScreenButton->setToolTip(tr("Full Screen View"));
-        showNormal();
-        QApplication::processEvents();
-      }
-      setGeometry(params.winGeometry);
-    }
-
-    pdfViewer->setFileViewParameters(params);
   }
   update();
-  updateGeometry();
+//  updateGeometry();
 }
 
 void MainWindow::loadRecentFile(FileViewParameters & params)
 {
-  loadFile(params.filename);
+  QFileInfo fi(params.filename);
+  loadFile(params.filename, fi.fileName());
 
   setFileViewParameters(params, true);
 }
 
 void MainWindow::saveFileParameters()
 {
-  if (file.isValid() && preferences.keepRecent) {
+  if (currentDocumentTab && preferences.keepRecent) {
     FileViewParameters params;
 
     params.customTrim.singles = NULL;
     params.winGeometry        = geometry();
-    params.fullscreen         = isFullScreen();
 
-    pdfViewer->getFileViewParameters(params);
+    currentDocumentTab->getPdfViewer()->getFileViewParameters(params);
     saveToConfig(params);
   }
 }
@@ -445,7 +468,7 @@ void MainWindow::openFile()
 
   if (filename.isEmpty()) return;
 
-  loadFile(filename);
+  loadFile(filename, QFileInfo(filename).fileName());
 
   setFileViewParameters(preferences.defaultView, false);
 }
@@ -481,10 +504,10 @@ void MainWindow::askPreferences()
   currentView.customTrim.initialized = false;
   currentView.customTrim.singles     = NULL;
   currentView.winGeometry            = geometry();
-  currentView.fullscreen             = isFullScreen();
 
-  pdfViewer->getFileViewParameters(currentView);
-
+  if (currentDocumentTab != nullptr) {
+    currentDocumentTab->getPdfViewer()->getFileViewParameters(currentView);
+  }
   preferencesDialog->run(currentView);
 
   updateButtons(currentState);
@@ -503,16 +526,32 @@ void MainWindow::askPreferences()
 
 void MainWindow::addBookmark()
 {
-    if ((bookmarksDB != nullptr) && (file.isValid())) {
+    if ((bookmarksDB != nullptr) && (currentDocumentTab != nullptr)) {
 
         int page = ui->currentPageEdit->text().toInt();
 
         NewBookmarkDialog * dialog = new NewBookmarkDialog(nullptr);
 
-        dialog->run(file.filename, page);
+        dialog->run(currentDocumentTab->getFilename(), page);
 
         delete dialog;
-        pdfViewer->setFocus();
+        currentDocumentTab->setFocus();
     }
 }
 
+void MainWindow::fileIsLoading(bool isLoading)
+{
+    if (isLoading) {
+        ui->metricsLabel->hide();
+        ui->busyLabel->movie()->start();
+        ui->busyLabel->show();
+    }
+    else {
+        ui->busyLabel->movie()->stop();
+        ui->busyLabel->hide();
+    }
+//      if (preferences.showLoadMetrics) {
+//        ui->metricsLabel->setText(state.metrics);
+//        ui->metricsLabel->show();
+//      }
+}

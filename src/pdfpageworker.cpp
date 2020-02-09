@@ -289,7 +289,7 @@ void store(SplashBitmap * const bm, CachedPage & cache)
   cache.left         = minx;
   cache.right        = w - maxx;
   cache.top          = miny;
-  cache.bottom       = h -maxy;
+  cache.bottom       = h - maxy;
   cache.size         = outlen;
   cache.data         = dst;
 }
@@ -303,8 +303,18 @@ void PDFPageWorker::run()
   pdfFile.pdf->displayPage(splash, page + 1, 144, 144, 0, true, false, false);
 
   SplashBitmap * const bm = splash->takeBitmap();
+  CachedPage         & c  = pdfFile.cache[page];
+  store(bm, c);
 
-  store(bm, pdfFile.cache[page]);
+//  qDebug() << "Page "         << page
+//           << ", Width "      << c.w
+//           << ", Height "     << c.h
+//           << ", Left "       << c.left
+//           << ", Right "      << c.right
+//           << ", Top "        << c.top
+//           << ", Bottom "     << c.bottom
+//           << ", Size "       << c.size
+//           << ", Uncompress " << c.uncompressed;
 
   delete bm;
   delete splash;

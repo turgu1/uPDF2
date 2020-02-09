@@ -30,6 +30,7 @@ class BookmarkSelector;
 
 struct Selection {
     QString filename;
+    QString caption;
     int pageNbr;
 };
 

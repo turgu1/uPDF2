@@ -21,6 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "updf.h"
 
+class LoadPDFFile;
+
 struct CachedPage {
   u8  * data;
   u32   size;
@@ -36,9 +38,11 @@ class PDFFile : public QObject
 {
     Q_OBJECT
   private:
-    bool         valid;
-    bool         loaded;
-    bool         loading;
+    bool            valid;
+    bool            loaded;
+    bool            loading;
+    int             viewerCount;
+    LoadPDFFile *   loadedPDFFile;
 
   public:
     explicit PDFFile(QObject * parent = 0);
@@ -55,10 +59,15 @@ class PDFFile : public QObject
     u32          totalSizeCompressed;
     u32          loadTime;
 
-    void setLoading(bool val);
-    void  setLoaded(bool val);
-    void   setValid(bool val);
-    bool    isValid() { return valid; }
+    void     setLoading(bool val);
+    void      setLoaded(bool val);
+    void       setValid(bool val);
+    bool        isValid()          { return valid;        }
+    bool       isLoading()         { return loading;      }
+    int  getViewerCount()          { return viewerCount;  }
+    void setViewerCount(int count) { viewerCount = count; }
+
+    void load(QString filename);
 
   signals:
     void     fileIsLoading();

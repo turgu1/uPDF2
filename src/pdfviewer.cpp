@@ -36,6 +36,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define RIGHT_BUTTON (event->button() == Qt::RightButton)
 
 PDFViewer::PDFViewer(QWidget * parent) : QWidget(parent),
+                  pdfFile(nullptr),
                  viewMode(VM_PAGE),
                  viewZoom(0.5f),
                      xOff(0.0f),
@@ -103,10 +104,7 @@ void PDFViewer::setPDFFile(PDFFile * f)
 {
   pdfFile = f;
 
-  connect(f, &PDFFile::fileIsValid,       this, &PDFViewer::validFilePresent);
-  connect(f, &PDFFile::pageLoadCompleted, this, &PDFViewer::refreshView     );
-  connect(f, &PDFFile::fileIsLoading,     this, &PDFViewer::fileLoading     );
-  connect(f, &PDFFile::fileLoadCompleted, this, &PDFViewer::fileLoaded      );
+  connect(pdfFile, SIGNAL(pageLoadCompleted()), this, SLOT(refreshView()));
 
   update();
 }
@@ -453,7 +451,6 @@ void PDFViewer::sendState()
   state.titlePageCount = titlePages;
   state.viewMode       = viewMode;
   state.viewZoom       = viewZoom;
-  state.fileLoading    = fileIsLoading;
   state.trimSelection  = trimZoneSelection;
   state.textSelection  = textSelection;
   state.trimSimilar    = customTrim.similar;
@@ -941,12 +938,15 @@ QPixmap PDFViewer::getPage(const u32 page)
   // Insert it in the cache. Pick the slot at random.
   const u32 dst = rand() % CACHE_MAX;
 
+  // qDebug() << "Page: " << page << ", Size: " << cur->size;
+
   lzo_uint dstSize = cachedSize;
   const int ret = lzo1x_decompress(cur->data,
           cur->size,
           cache[dst],
           &dstSize,
           NULL);
+
   if (ret != LZO_E_OK || dstSize != cur->uncompressed) {
     qCritical() << tr("Fatal: Error decompressing") << endl;
     exit(1);
@@ -955,6 +955,8 @@ QPixmap PDFViewer::getPage(const u32 page)
   cachedPage[dst] = page;
 
   // Create the Pixmap
+  //qDebug() << "cur->w: " << cur->w << ", cur->h: " << cur->h;
+
   QImage img(cache[dst], cur->w, cur->h, QImage::Format_RGB32);
 
   if (!pix[dst].convertFromImage(img)) {
@@ -1143,6 +1145,7 @@ void PDFViewer::paintEvent(QPaintEvent * event)
         H -= (cur->top  + cur->bottom) * zoom;
       }
 
+      qDebug() << "Page: " << page;
       QPixmap img = getPage(page);
 
       // Render real content
@@ -1279,7 +1282,7 @@ void PDFViewer::rubberBanding(bool show)
 void PDFViewer::pageChanged()
 {
   if (silent) return;
-  if (!pdfFile->isValid()) return;
+  if ((pdfFile == nullptr) || !pdfFile->isValid()) return;
 
   s32 page = yOff;
 
@@ -1697,11 +1700,6 @@ void PDFViewer::setTitlePageCount(int count)
   }
 }
 
-void PDFViewer::validFilePresent()
-{
-  update();
-}
-
 void PDFViewer::up()
 {
   adjustYOff(-SMALL_MOVE);
@@ -1847,16 +1845,4 @@ void PDFViewer::setZoomFactor(float zoomFactor)
 void PDFViewer::refreshView()
 {
   update();
-}
-
-void PDFViewer::fileLoading()
-{
-  fileIsLoading = true;
-  sendState();
-}
-
-void PDFViewer::fileLoaded()
-{
-  fileIsLoading = false;
-  sendState();
 }

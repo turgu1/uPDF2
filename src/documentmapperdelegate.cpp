@@ -1,4 +1,5 @@
 #include "documentmapperdelegate.h"
+#include "bookmarksdb.h"
 
 #include <QLabel>
 #include <QBuffer>

@@ -65,7 +65,6 @@ struct ViewState {
     int      columnCount;
     ViewMode viewMode;
     float    viewZoom;
-    bool     fileLoading;
     bool     trimSelection;
     bool     textSelection;
     bool     trimSimilar;
@@ -97,6 +96,7 @@ class PDFViewer : public QWidget
     bool     getFileViewParameters(FileViewParameters & params);
     void     setFileViewParameters(FileViewParameters & params);
     void                     reset();
+    void                 sendState();
 
   private:
     PDFFile     * pdfFile;
@@ -139,7 +139,6 @@ class PDFViewer : public QWidget
     bool          fileIsLoading;
 
     // internal processing support methods
-    void                 sendState();
     void            endOfSelection();
     ZoneLoc             getZoneLoc(s32 x, s32 y) const;
     void         computeScreenSize();
@@ -172,7 +171,6 @@ class PDFViewer : public QWidget
     void             gotoPage(const int page);
     void       setColumnCount(int count);
     void    setTitlePageCount(int count);
-    void     validFilePresent();
     void                   up();
     void                 down();
     void                  top();
@@ -188,8 +186,6 @@ class PDFViewer : public QWidget
     void          setViewMode(ViewMode newViewMode);
     void        setZoomFactor(float zoomFactor);
     void          refreshView();
-    void          fileLoading();
-    void           fileLoaded();
     void     singleMouseClick();
 
   signals:

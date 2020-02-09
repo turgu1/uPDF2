@@ -109,7 +109,6 @@ void loadConfig()
       preferences.defaultView.viewZoom               = cfg.value("viewZoom"      ,                    0.5f).toFloat();
       preferences.defaultView.viewMode      = ViewMode(cfg.value("viewMode"      ,                 VM_PAGE).toInt());
       preferences.defaultView.winGeometry            = cfg.value("winGeometry"   , QRect(50, 50, 800, 800)).toRect();
-      preferences.defaultView.fullscreen             = cfg.value("fullscreen"    ,                   false).toBool();
       preferences.defaultView.customTrim.initialized = false;
       preferences.defaultView.customTrim.singles     = NULL;
 
@@ -147,7 +146,6 @@ void loadConfig()
     rf->viewZoom           = cfg.value("viewZoom"      ,                    0.5f).toFloat();
     rf->viewMode  = ViewMode(cfg.value("viewMode"      ,                 VM_PAGE).toInt());
     rf->winGeometry        = cfg.value("winGeometry"   , QRect(50, 50, 600, 600)).toRect();
-    rf->fullscreen         = cfg.value("fullscreen"    ,                   false).toBool();
 
     cfg.beginGroup("customTrim");
 
@@ -226,7 +224,6 @@ void saveConfig()
       cfg.setValue("viewZoom",              preferences.defaultView.viewZoom      );
       cfg.setValue("viewMode",              preferences.defaultView.viewMode      );
       cfg.setValue("winGeometry",           preferences.defaultView.winGeometry   );
-      cfg.setValue("fullscreen",            preferences.defaultView.fullscreen    );
 
     cfg.endGroup();
 
@@ -255,7 +252,6 @@ void saveConfig()
     cfg.setValue("viewZoom",       rf->viewZoom      );
     cfg.setValue("viewMode",       rf->viewMode      );
     cfg.setValue("winGeometry",    rf->winGeometry   );
-    cfg.setValue("fullscreen",     rf->fullscreen    );
 
     cfg.beginGroup("customTrim");
 

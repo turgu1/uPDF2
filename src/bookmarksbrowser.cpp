@@ -1,5 +1,6 @@
 #include "bookmarksbrowser.h"
 #include "ui_bookmarksbrowser.h"
+#include "bookmarksdb.h"
 
 #include <QtGui>
 #include <QtSql>

@@ -1317,13 +1317,30 @@ Trim Parameters</string>
        <number>0</number>
       </property>
       <item>
-       <widget class="QFrame" name="viewer">
+       <widget class="QTabWidget" name="viewer">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="tabPosition">
+         <enum>QTabWidget::North</enum>
+        </property>
+        <property name="tabShape">
+         <enum>QTabWidget::Triangular</enum>
+        </property>
+        <property name="tabsClosable">
+         <bool>true</bool>
+        </property>
+        <property name="movable">
+         <bool>true</bool>
+        </property>
+        <widget class="QWidget" name="viewerPage1">
+         <attribute name="title">
+          <string/>
+         </attribute>
+        </widget>
        </widget>
       </item>
       <item>

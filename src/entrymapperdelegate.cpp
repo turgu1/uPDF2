@@ -1,4 +1,5 @@
 #include "entrymapperdelegate.h"
+#include "bookmarksdb.h"
 
 #include <QLineEdit>
 

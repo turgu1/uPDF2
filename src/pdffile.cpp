@@ -16,11 +16,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "updf.h"
 #include "pdffile.h"
+#include "loadpdffile.h"
 
 PDFFile::PDFFile(QObject * parent) : QObject(parent),
   valid(false),
   loaded(false),
   loading(false),
+  viewerCount(0),
   cache(NULL),
   pdf(NULL),
   pages(0),
@@ -43,6 +45,11 @@ void PDFFile::setLoading(bool val)
 {
   loading = val;
   if (loading) emit fileIsLoading();
+}
+
+void PDFFile::load(QString filename)
+{
+  loadedPDFFile = new LoadPDFFile(filename, *this);
 }
 
 void PDFFile::setLoaded(bool val)
