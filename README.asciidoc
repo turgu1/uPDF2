@@ -1,6 +1,19 @@
 
 This software is licensed under Gnu General Public License Version 3. Please look at the COPYING file for further details.
 
+uPDF (micro PDF) - Qt Creator - Version 2.4.0 Update (2022/07/14)
+=================================================================
+
+- Now using Qt 6.3, Poppler 22.07.0
+- CMakefile.txt based build instead of qmake
+- LZO no longer required
+- The following bugs where corrected
+  * Crash when closing a tab for witch the pdf was still being loaded
+  * Column count mixup when loading a document from a Bookmark
+  * Memory leak while loading a pdf
+
+I have tried to use the QtPDF class, but it is too restrictive compared to poppler.
+
 uPDF (micro PDF) - Qt Creator - Version 2.3.0
 =============================================
 
@@ -48,8 +61,7 @@ Build
 The following packages are required and may need to be built and installed if not
 available as a package:
 
-- poppler (At least version 0.84 available as http://poppler.freedesktop.org/poppler-0.84.0.tar.xz)
-- liblzo (package liblzo2-dev)
+- poppler (At least version 22.06 available as http://poppler.freedesktop.org/poppler-22.06.0.tar.xz)
 
 Linux
 -----
@@ -80,7 +92,7 @@ For example with the apt-get command, they can be installed as follow:
 ------------------------------------------
   $ sudo apt-get install \
   curl libnss3-dev libjpeg-dev libpng12-dev libtiff5-dev \
-  liblzo2-dev libcairo-dev libicu-dev liblcms2-dev \
+  libcairo-dev libicu-dev liblcms2-dev \
   libfontconfig1 libfreetype6-dev build-essential \
   cmake gobject-introspection libboost-all-dev
 
@@ -99,7 +111,7 @@ Once the popper library is untared, you need to build it with the following comm
 $ mkdir build
 $ cd build
 $ cmake .. \
--DCMAKE_INSTALL_PREFIX=/usr/local \
+-DCMAKE_INSTALL_PREFIX=/usr \
 -DCMAKE_BUILD_TYPE=release \
 -DENABLE_UNSTABLE_API_ABI_HEADERS=on
 $ make

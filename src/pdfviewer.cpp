@@ -62,7 +62,7 @@ PDFViewer::PDFViewer(QWidget * parent) : QWidget(parent),
                  selector(NULL),
                  clipText(""),
       wasMouseDoubleClick(false),
-               cachedSize(7 * 1024 * 1024),
+//               cachedSize(7 * 1024 * 1024),
            singlePageTrim(false),
             fileIsLoading(false)
 {
@@ -78,7 +78,7 @@ PDFViewer::PDFViewer(QWidget * parent) : QWidget(parent),
   srand(time(NULL));
 
   for (u32 i = 0; i < CACHE_MAX; i++) {
-    cache[i]      = (u8 *) xcalloc(cachedSize, 1);
+//    cache[i]      = (u8 *) xcalloc(cachedSize, 1);
     cachedPage[i] = USHRT_MAX;
     pix[i]        = QPixmap();
   }
@@ -161,8 +161,8 @@ void PDFViewer::wheelEvent(QWheelEvent * event)
 
 void PDFViewer::mouseMoveEvent(QMouseEvent * event)
 {
-  const int mY = event->y();
-  const int mX = event->x();
+  const int mY = event->position().y();
+  const int mX = event->position().x();
 
   if ((mX < 0) || (mY < 0)) return;
 
@@ -242,7 +242,7 @@ void PDFViewer::mouseMoveEvent(QMouseEvent * event)
 
     // Set the cursor appropriately
     if (zoneSelection) {
-      ZoneLoc zl = getZoneLoc(event->x(), event->y());
+      ZoneLoc zl = getZoneLoc(event->position().x(), event->position().y());
       switch (zl) {
         case TZL_NW:
         case TZL_SE: setCursor(Qt::SizeAllCursor); break;
@@ -265,8 +265,8 @@ void PDFViewer::mouseMoveEvent(QMouseEvent * event)
 
 void PDFViewer::mousePressEvent(QMouseEvent * event)
 {
-  lastX = event->x();
-  lastY = event->y();
+  lastX = event->position().x();
+  lastY = event->position().y();
 
   if (LEFT_BUTTON) {
     dragging = true;
@@ -274,7 +274,7 @@ void PDFViewer::mousePressEvent(QMouseEvent * event)
       savedX = selX;
       savedY = selY;
 
-      zoneLoc = getZoneLoc(event->x(), event->y());
+      zoneLoc = getZoneLoc(event->position().x(), event->position().y());
       if (zoneLoc == TZL_NONE) {
         selX   = lastX;
         selY   = lastY;
@@ -312,8 +312,8 @@ void PDFViewer::mouseDoubleClickEvent(QMouseEvent * event)
   singleClickTimer->stop();
   wasMouseDoubleClick = true;
 
-  lastX = event->x();
-  lastY = event->y();
+  lastX = event->position().x();
+  lastY = event->position().y();
 
   if (LEFT_BUTTON) {
     someDrag = false;
@@ -621,6 +621,9 @@ void PDFViewer::endOfSelection()
   H /= (pp->zoom * pp->ratioY);
 
   if (textSelection) {
+
+      // TO BE COMPLETED!!!
+
     TextOutputDev * const dev = new TextOutputDev(NULL, true, 0, false, false);
     pdfFile->pdf->displayPage(dev, pp->page + 1, 144, 144, 0, true, false, false);
     GooString *str = dev->getText(X, Y, X + W, Y + H);
@@ -916,62 +919,30 @@ void PDFViewer::updateVisible() const
 // available. Return the uncompressed page.
 QPixmap PDFViewer::getPage(const u32 page)
 {
-  u32 i;
-  for (i = 0; i < CACHE_MAX; i++) {
+  for (u32 i = 0; i < CACHE_MAX; i++) {
     if (cachedPage[i] == page) return pix[i]; // Already there
   }
 
   CachedPage * const cur = &pdfFile->cache[page];
 
-  // Adjust cache to be big enough if required
-  if (cur->uncompressed > cachedSize) {
-    qDebug() <<  "Cache size update...";
-    cachedSize = cur->uncompressed;
-
-    for (i = 0; i < CACHE_MAX; i++) {
-      // Reallocation render Pixmaps inconsistent. Seems that
-      // Pixmaps keep pointer on image data...
-      cachedPage[i] = USHRT_MAX;
-      cache[i] = (u8 *) realloc(cache[i], cachedSize);
-      if (cache[i] == nullptr) {
-          QMessageBox::critical(nullptr, "Memory Allocation Error", "Memory Allocation Error");
-          exit(1);
-      }
-    }
-  }
-
   // Be safe
   if (!cur->ready) return QPixmap();
 
   // Insert it in the cache. Pick the slot at random.
+
+  // qDebug() << "Page: " << page << ", Size: " << cur->data.size();
+
+  QImage img(cur->w, cur->h, QImage::Format_RGB32);
+  img.loadFromData(cur->data, "PNG");
+
   const u32 dst = rand() % CACHE_MAX;
 
-  // qDebug() << "Page: " << page << ", Size: " << cur->size;
-
-  lzo_uint dstSize = cachedSize;
-  const int ret = lzo1x_decompress(cur->data,
-          cur->size,
-          cache[dst],
-          &dstSize,
-          NULL);
-
-  if (ret != LZO_E_OK || dstSize != cur->uncompressed) {
-    qCritical() << tr("Fatal: Error decompressing") << endl;
+  if (!pix[dst].convertFromImage(img)) {
+    qCritical() << tr("Fatal: QPixmap::convertFromImage failed") << Qt::endl;
     exit(1);
   }
 
   cachedPage[dst] = page;
-
-  // Create the Pixmap
-  //qDebug() << "cur->w: " << cur->w << ", cur->h: " << cur->h;
-
-  QImage img(cache[dst], cur->w, cur->h, QImage::Format_RGB32);
-
-  if (!pix[dst].convertFromImage(img)) {
-    qCritical() << tr("Fatal: QPixmap::loadFromData failed") << endl;
-    exit(1);
-  }
-
   return pix[dst];
 }
 
@@ -1699,6 +1670,11 @@ void PDFViewer::setColumnCount(int count)
   }
 }
 
+void PDFViewer::setColumnCountFromIndex(int index)
+{
+    setColumnCount(index + 1);
+}
+
 void PDFViewer::setTitlePageCount(int count)
 {
   if (count <= 4) {
@@ -1837,9 +1813,9 @@ void PDFViewer::zoomOut()
   pageChanged();
 }
 
-void PDFViewer::setViewMode(ViewMode newViewMode)
+void PDFViewer::setViewMode(int newViewMode)
 {
-  viewMode = newViewMode;
+  viewMode = ViewMode(newViewMode);
   pageChanged();
 }
 

@@ -24,8 +24,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class LoadPDFFile;
 
 struct CachedPage {
-  u8  * data;
-  u32   size;
+  QByteArray data;
+  //u32   size;
   u32   uncompressed;
 
   u32   w, h;

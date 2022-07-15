@@ -10,6 +10,8 @@
 
 int main(int argc, char *argv[])
 {
+    //Q_INIT_RESOURCE(updf_icons);
+
     QApplication a(argc, argv);
 
     const struct option opts[] = {

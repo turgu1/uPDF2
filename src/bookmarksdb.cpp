@@ -202,7 +202,7 @@ bool BookmarksDB::addEntry(QString filename,
              if (getPageImage(completeFilename, thumbnail)) {
                  QBuffer buf;
                  buf.open(QIODevice::WriteOnly);
-                 thumbnail.save(&buf, "PNG");
+                 thumbnail.save(&buf, "WEBP", 0);
                  rec.setValue(Document_Thumbnail, buf.data());
              }
              else {
@@ -228,7 +228,7 @@ bool BookmarksDB::addEntry(QString filename,
 
         QBuffer buf;
         buf.open(QIODevice::WriteOnly);
-        if (!image.isNull() && image.save(&buf, "PNG")) {
+        if (!image.isNull() && image.save(&buf, "WEBP", 0)) {
             rec.setValue(Entry_Thumbnail, buf.data());
         }
 
@@ -292,7 +292,7 @@ void BookmarksDB::saveEntryThumbnail(const QModelIndex & index, QImage & image)
 {
     QBuffer buf;
     buf.open(QIODevice::WriteOnly);
-    if (!image.isNull() && image.save(&buf, "PNG")) {
+    if (!image.isNull() && image.save(&buf, "WEBP", 0)) {
         if (index.isValid()) {
             entriesDBModel->setData(index, buf.data(), Qt::EditRole);
         }
@@ -345,7 +345,7 @@ bool BookmarksDB::saveAuthorsList(int entryId, const QString & authorsList)
     qDebug() << "Entry Id: " << entryId;
 
     QSqlQuery query;
-    QStringList authors = authorsList.split("&", QString::SkipEmptyParts);
+    QStringList authors = authorsList.split("&", Qt::SkipEmptyParts);
     QStringList author;
     QVector<bool> alreadyThere(authors.size(), false);
 
@@ -355,7 +355,7 @@ bool BookmarksDB::saveAuthorsList(int entryId, const QString & authorsList)
     //    Allow for 0 or 1 comma
 
     for (i = 0; i < authors.size(); i++ ) {
-        author = authors[i].split(",", QString::SkipEmptyParts);
+        author = authors[i].split(",", Qt::SkipEmptyParts);
         if (author.size() > 2) {
             return false;
         }
@@ -367,7 +367,7 @@ bool BookmarksDB::saveAuthorsList(int entryId, const QString & authorsList)
     // 2. Create entries in authors table if they do not exists
 
     for (i = 0; i < authors.size(); i++) {
-        author = authors[i].split(",", QString::SkipEmptyParts);
+        author = authors[i].split(",", Qt::SkipEmptyParts);
 
         QString last_name  = author[0].trimmed();
         QString first_name = author.size() == 2 ? author[1].trimmed() : "";
@@ -440,7 +440,7 @@ bool BookmarksDB::saveAuthorsList(int entryId, const QString & authorsList)
 
         if (!alreadyThere[i]) {
 
-            author = authors[i].split(",", QString::SkipEmptyParts);
+            author = authors[i].split(",", Qt::SkipEmptyParts);
 
             QString last_name  = author[0].trimmed();
             QString first_name = author.size() == 2 ? author[1].trimmed() : "";

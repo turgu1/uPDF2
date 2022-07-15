@@ -31,10 +31,14 @@
     <widget class="QLabel" name="preferencesTitle">
      <property name="font">
       <font>
-       <pointsize>13</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
+       <family>Arial</family>
+       <pointsize>18</pointsize>
+       <italic>false</italic>
+       <bold>false</bold>
       </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">font: 75 18pt &quot;Arial&quot;;</string>
      </property>
      <property name="text">
       <string>uPDF User Preferences</string>
@@ -47,7 +51,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="presentationTab">
       <attribute name="title">
@@ -79,7 +83,7 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <property name="spacing">
-           <number>-1</number>
+           <number>6</number>
           </property>
           <property name="leftMargin">
            <number>0</number>
@@ -117,7 +121,7 @@
             <item>
              <widget class="QPushButton" name="setViewButton">
               <property name="text">
-               <string>Set Default Geometry to Current View</string>
+               <string>Set Default Geometry from Current View</string>
               </property>
              </widget>
             </item>
@@ -251,7 +255,7 @@
                <string>...</string>
               </property>
               <property name="icon">
-               <iconset resource="../res/updf.qrc">
+               <iconset>
                 <normaloff>:/icons/svg/24x24/folder.svg</normaloff>:/icons/svg/24x24/folder.svg</iconset>
               </property>
               <property name="iconSize">
@@ -401,7 +405,7 @@
             <string>...</string>
            </property>
            <property name="icon">
-            <iconset resource="../res/updf.qrc">
+            <iconset>
              <normaloff>:/icons/svg/24x24/folder.svg</normaloff>:/icons/svg/24x24/folder.svg</iconset>
            </property>
            <property name="iconSize">
@@ -450,7 +454,7 @@
             <string>...</string>
            </property>
            <property name="icon">
-            <iconset resource="../res/updf.qrc">
+            <iconset>
              <normaloff>:/icons/svg/24x24/folder.svg</normaloff>:/icons/svg/24x24/folder.svg</iconset>
            </property>
            <property name="iconSize">
@@ -542,9 +546,7 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../res/updf.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>buttonBox</sender>

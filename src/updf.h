@@ -26,10 +26,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdarg.h>
 #include <ctype.h>
 #include <sys/time.h>
-#include <lzo/lzo1x.h>
 
 #include <QObject>
 #include <QRect>
+//#include <QtPdf>
+#include "cmake_cfg.h"
+
+//#include <lzo/lzo1x.h>
 #include <PDFDoc.h>
 
 class BookmarksDB;

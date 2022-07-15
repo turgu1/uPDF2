@@ -36,6 +36,11 @@ PDFFile::PDFFile(QObject * parent) : QObject(parent),
 
 PDFFile::~PDFFile()
 {
+  if (loadedPDFFile) {
+    if (!loaded)  emit fileLoadCompleted();
+    delete loadedPDFFile;
+    loadedPDFFile = nullptr;
+  }
 }
 
 void PDFFile::setValid(bool val) {

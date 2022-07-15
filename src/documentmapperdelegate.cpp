@@ -42,7 +42,7 @@ void DocumentMapperDelegate::setModelData(QWidget * editor, QAbstractItemModel *
             if (label) {
                 QBuffer buf;
                 buf.open(QIODevice::WriteOnly);
-                if (label->pixmap() && label->pixmap()->save(&buf, "PNG")) {
+                if (!label->pixmap().isNull() && label->pixmap().save(&buf, "PNG")) {
                     model->setData(index, buf.data(), Qt::EditRole);
                 }
             }

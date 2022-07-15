@@ -183,7 +183,7 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="../res/updf.qrc">
+            <iconset resource="../updf_resources/updf.qrc">
              <normaloff>:/icons/svg/16x16/arrow-left.svg</normaloff>:/icons/svg/16x16/arrow-left.svg</iconset>
            </property>
            <property name="iconSize">
@@ -248,7 +248,7 @@
           <string/>
          </property>
          <property name="icon">
-          <iconset resource="../res/updf.qrc">
+          <iconset resource="../updf_resources/updf.qrc">
            <normaloff>:/icons/img/updf-48x48.png</normaloff>:/icons/img/updf-48x48.png</iconset>
          </property>
          <property name="iconSize">
@@ -273,7 +273,7 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="../res/updf.qrc">
+            <iconset resource="../updf_resources/updf.qrc">
              <normaloff>:/icons/svg/24x24/book.svg</normaloff>:/icons/svg/24x24/book.svg</iconset>
            </property>
            <property name="iconSize">
@@ -293,7 +293,7 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="../res/updf.qrc">
+            <iconset resource="../updf_resources/updf.qrc">
              <normaloff>:/icons/svg/24x24/bookmark.svg</normaloff>:/icons/svg/24x24/bookmark.svg</iconset>
            </property>
            <property name="iconSize">
@@ -341,7 +341,7 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="../res/updf.qrc">
+            <iconset resource="../updf_resources/updf.qrc">
              <normaloff>:/icons/svg/24x24/folder.svg</normaloff>:/icons/svg/24x24/folder.svg</iconset>
            </property>
            <property name="iconSize">
@@ -382,7 +382,7 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="../res/updf.qrc">
+            <iconset resource="../updf_resources/updf.qrc">
              <normaloff>:/icons/svg/24x24/file-text.svg</normaloff>:/icons/svg/24x24/file-text.svg</iconset>
            </property>
            <property name="iconSize">
@@ -891,7 +891,7 @@ Trim Parameters</string>
              <string/>
             </property>
             <property name="icon">
-             <iconset resource="../res/updf.qrc">
+             <iconset resource="../updf_resources/updf.qrc">
               <normaloff>:/icons/svg/24x24/zoom-in.svg</normaloff>:/icons/svg/24x24/zoom-in.svg</iconset>
             </property>
             <property name="iconSize">
@@ -932,7 +932,7 @@ Trim Parameters</string>
              <string/>
             </property>
             <property name="icon">
-             <iconset resource="../res/updf.qrc">
+             <iconset resource="../updf_resources/updf.qrc">
               <normaloff>:/icons/svg/24x24/zoom-out.svg</normaloff>:/icons/svg/24x24/zoom-out.svg</iconset>
             </property>
             <property name="iconSize">
@@ -978,7 +978,7 @@ Trim Parameters</string>
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="../res/updf.qrc">
+            <iconset resource="../updf_resources/updf.qrc">
              <normaloff>:/icons/svg/24x24/chevrons-up.svg</normaloff>:/icons/svg/24x24/chevrons-up.svg</iconset>
            </property>
            <property name="iconSize">
@@ -1007,7 +1007,7 @@ Trim Parameters</string>
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="../res/updf.qrc">
+            <iconset resource="../updf_resources/updf.qrc">
              <normaloff>:/icons/svg/24x24/chevron-up.svg</normaloff>:/icons/svg/24x24/chevron-up.svg</iconset>
            </property>
            <property name="iconSize">
@@ -1046,7 +1046,7 @@ Trim Parameters</string>
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="../res/updf.qrc">
+            <iconset resource="../updf_resources/updf.qrc">
              <normaloff>:/icons/svg/24x24/chevrons-down.svg</normaloff>:/icons/svg/24x24/chevrons-down.svg</iconset>
            </property>
            <property name="iconSize">
@@ -1075,7 +1075,7 @@ Trim Parameters</string>
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="../res/updf.qrc">
+            <iconset resource="../updf_resources/updf.qrc">
              <normaloff>:/icons/svg/24x24/chevron-down.svg</normaloff>:/icons/svg/24x24/chevron-down.svg</iconset>
            </property>
            <property name="iconSize">
@@ -1200,7 +1200,7 @@ Trim Parameters</string>
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="../res/updf.qrc">
+            <iconset resource="../updf_resources/updf.qrc">
              <normaloff>:/icons/svg/24x24/maximize-2.svg</normaloff>:/icons/svg/24x24/maximize-2.svg</iconset>
            </property>
            <property name="iconSize">
@@ -1226,7 +1226,7 @@ Trim Parameters</string>
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="../res/updf.qrc">
+            <iconset resource="../updf_resources/updf.qrc">
              <normaloff>:/icons/svg/24x24/settings.svg</normaloff>:/icons/svg/24x24/settings.svg</iconset>
            </property>
            <property name="iconSize">
@@ -1291,7 +1291,7 @@ Trim Parameters</string>
           <string/>
          </property>
          <property name="icon">
-          <iconset resource="../res/updf.qrc">
+          <iconset resource="../updf_resources/updf.qrc">
            <normaloff>:/icons/svg/24x24/power.svg</normaloff>:/icons/svg/24x24/power.svg</iconset>
          </property>
          <property name="iconSize">
@@ -1363,7 +1363,7 @@ Trim Parameters</string>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
-  <include location="../res/updf.qrc"/>
+  <include location="../updf_resources/updf.qrc"/>
  </resources>
  <connections/>
  <slots>

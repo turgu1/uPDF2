@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <PDFDoc.h>
 #include <splash/SplashBitmap.h>
 #include <SplashOutputDev.h>
+//#include <QtPdf>
 #include <QFileInfo>
 
 #include "updf.h"
@@ -62,28 +63,68 @@ u64 msec() {
   return ms;
 }
 
+//static QPdfDocument * pdf = nullptr;
+//static QString pdfFileName;
+
 static PDFDoc * pdf = nullptr;
 
 int getPageCount(QString & filename)
 {
+//    QPdfDocument::DocumentError res = QPdfDocument::DocumentError::UnknownError;
+
+//    if ((pdf == nullptr) || (pdfFileName != filename)) {
+//        if (pdf != nullptr) { free(pdf); pdf = nullptr; }
+
+//        pdf = new QPdfDocument();
+//        res = pdf->load(filename);
+//        if (res == QPdfDocument::DocumentError::NoError) {
+//            pdfFileName = filename;
+//        }
+//        else {
+//            delete pdf;
+//            pdfFileName.clear();
+//        }
+//    }
+
+//    return ((pdf == nullptr) || (!res)) ? 0 : pdf->pageCount();
+
     GooString * gfilename = new GooString(filename.toLatin1());
     if ((pdf == nullptr) || (pdf->getFileName() != gfilename)) {
         if (pdf != nullptr) { free(pdf); pdf = nullptr; }
 
-        pdf = new PDFDoc(gfilename);
+        pdf = new PDFDoc(std::unique_ptr<GooString>(gfilename));
     }
 
     return ((pdf == nullptr) || (!pdf->isOk())) ? 0 : pdf->getNumPages();
+
 }
 
 bool getPageImage(QString & filename, QImage & img, int pixelsPerInch, int page) {
 
+//    QPdfDocument::DocumentError res = QPdfDocument::DocumentError::UnknownError;
+
+//    if ((pdf == nullptr) || (pdfFileName != filename)) {
+//        if (pdf != nullptr) { free(pdf); pdf = nullptr; }
+
+//        pdf = new QPdfDocument();
+//        res = pdf->load(filename);
+//        if (res == QPdfDocument::DocumentError::NoError) {
+//            pdfFileName = filename;
+//        }
+//        else {
+//            delete pdf;
+//            pdfFileName.clear();
+//        }
+//    }
+
     GooString * gfilename = new GooString(filename.toLatin1());
     if ((pdf == nullptr) || (pdf->getFileName() != gfilename)) {
         if (pdf != nullptr) { free(pdf); pdf = nullptr; }
 
-        pdf = new PDFDoc(gfilename);
+        pdf = new PDFDoc(std::unique_ptr<GooString>(gfilename));
     }
+
+//    if ((pdf != nullptr) && !res) {
 
     if ((pdf != nullptr) && pdf->isOk()) {
         SplashColor       white  = { 255, 255, 255 };
@@ -95,6 +136,12 @@ bool getPageImage(QString & filename, QImage & img, int pixelsPerInch, int page)
         SplashBitmap * const bm = splash->takeBitmap();
 
         img = QImage(bm->getDataPtr(), bm->getWidth(), bm->getHeight(), QImage::Format_RGB32);
+
+//        QSize size = pdf->pageSize(page).toSize();
+//        size.setHeight(size.height() * pixelsPerInch / 72);
+//        size.setWidth(size.width() * pixelsPerInch / 72);
+
+//        img = pdf->render(page, size);
     }
     else {
         return false;
@@ -108,7 +155,7 @@ QString absoluteFilename(const QString & filename)
     QString & prefix = preferences.bookmarksParameters.pdfFolderPrefix;
     if (prefix.right(1) != "/") prefix += "/";
 
-    return QFileInfo(filename).exists() ? filename : prefix + filename;
+    return QFileInfo::exists(filename) ? filename : prefix + filename;
 }
 
 QString relativeFilename(const QString & filename)

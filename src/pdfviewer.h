@@ -127,8 +127,8 @@ class PDFViewer : public QWidget
     bool          wasMouseDoubleClick;
 
     // caching
-    u32           cachedSize;
-    u8          * cache[CACHE_MAX];
+    //u32           cachedSize;
+    //u8          * cache[CACHE_MAX];
     u16           cachedPage[CACHE_MAX];
     QPixmap       pix[CACHE_MAX];
 
@@ -170,6 +170,7 @@ class PDFViewer : public QWidget
     void         selectPageAt(s32 X, s32 Y, bool rightDClick);
     void             gotoPage(const int page);
     void       setColumnCount(int count);
+    void setColumnCountFromIndex(int index);
     void    setTitlePageCount(int count);
     void                   up();
     void                 down();
@@ -183,7 +184,7 @@ class PDFViewer : public QWidget
     void  pageDownWithOverlap();
     void               zoomIn();
     void              zoomOut();
-    void          setViewMode(ViewMode newViewMode);
+    void          setViewMode(int newViewMode);
     void        setZoomFactor(float zoomFactor);
     void          refreshView();
     void     singleMouseClick();

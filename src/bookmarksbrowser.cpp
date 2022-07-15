@@ -161,7 +161,7 @@ bool BookmarksBrowser::getEntryPageImage(int pageNbr, bool toShowFromPDFOnly)
     QModelIndex index = entriesModel->index(entryMapper->currentIndex(), Entry_Thumbnail);
     if (!toShowFromPDFOnly && index.isValid() && !entriesModel->data(index).isNull()) {
         QByteArray imageData = entriesModel->data(index).toByteArray();
-        result = entryImage.loadFromData(imageData, "PNG");
+        result = entryImage.loadFromData(imageData, "WEBP");
     }
     else {
         result = getPageImage(currentFilename, entryImage, 144, imagePageNbr);

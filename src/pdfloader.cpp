@@ -122,7 +122,7 @@ void PDFLoader::run()
   u32 total = 0, totalcomp = 0;
   for (u32 i = 0; i < pdfFile.pages; i++) {
     total += pdfFile.cache[i].uncompressed;
-    totalcomp += pdfFile.cache[i].size;
+    totalcomp += pdfFile.cache[i].data.size();
   }
 
   pdfFile.totalSize = total;
@@ -141,14 +141,14 @@ void PDFLoader::run()
       (totalcomp / 1024 / 1024.0f) <<
       "mb, compressed to " <<
       (100 * totalcomp / (float) total) <<
-      "%" << endl;
+      "%" << Qt::endl;
 
     qInfo() <<
       "Processing the file took" <<
       us <<
       "us (" <<
       (us / 1000000.0f) <<
-      " s)" << endl;
+      " s)" << Qt::endl;
   }
 
   u32 maxW = 0, maxH = 0;

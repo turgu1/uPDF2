@@ -1,4 +1,4 @@
-/*
+﻿/*
 Copyright (C) 2017, 2020 Guy Turcotte
 Portion Copyright (C) 2015 Lauri Kasanen
 
@@ -84,25 +84,10 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(ui->bookmarksButton,     SIGNAL(clicked()),    this,       SLOT(showBookmarkSelector()));
   connect(ui->addBookmarkButton,   SIGNAL(clicked()),    this,       SLOT(         addBookmark()));
 
-  connect(ui->viewer,              SIGNAL(currentChanged(int)),   this,  SLOT(     tabChange(int)));
+  connect(ui->viewer,              SIGNAL(currentChanged(int)),    this, SLOT(     tabChange(int)));
   connect(ui->viewer,              SIGNAL(tabCloseRequested(int)), this, SLOT(      closeTab(int)));
 
   connect(filesCache, SIGNAL(busy(bool)), this, SLOT(fileIsLoading(bool)));
-
-  connect(ui->viewModeCombo,       static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
-          [=](int index) { if (currentDocumentTab) currentDocumentTab->getPdfViewer()->setViewMode(ViewMode(index)); });
-
-  connect(ui->columnCountCombo,    static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
-          [=](int index) { if (currentDocumentTab) currentDocumentTab->getPdfViewer()->setColumnCount(index + 1); });
-
-  connect(ui->titlePageCountCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
-          [=](int index) { if (currentDocumentTab) currentDocumentTab->getPdfViewer()->setTitlePageCount(index); });
-
-  connect(ui->currentPageEdit,     static_cast<void(QLineEdit::*)()>(&QLineEdit::editingFinished),
-          [=](){ if (currentDocumentTab) currentDocumentTab->getPdfViewer()->gotoPage(ui->currentPageEdit->text().toInt() - 1); });
-
-  connect(ui->trimPageList,        static_cast<void(QListWidget::*)(QListWidgetItem *)>(&QListWidget::itemClicked),
-          [=](QListWidgetItem * item) { if (currentDocumentTab) currentDocumentTab->getPdfViewer()->gotoPage(item->text().toInt() - 1); });
 
   ui->busyLabel->setMovie(new QMovie(":/agif/img/busy.gif"));
 
@@ -145,35 +130,34 @@ void MainWindow::tabChange(int index)
 {
     PDFViewer * pdfViewer;
 
+    disconnect(ui->beginDocumentButton, SIGNAL(clicked()), nullptr, nullptr);
+    disconnect(ui->endDocumentButton,   SIGNAL(clicked()), nullptr, nullptr);
+    disconnect(ui->previousPageButton,  SIGNAL(clicked()), nullptr, nullptr);
+    disconnect(ui->nextPageButton,      SIGNAL(clicked()), nullptr, nullptr);
+    disconnect(ui->zoomInButton,        SIGNAL(clicked()), nullptr, nullptr);
+    disconnect(ui->zoomOutButton,       SIGNAL(clicked()), nullptr, nullptr);
+
+    disconnect(ui->editTrimButton,      SIGNAL(clicked(bool)), nullptr, nullptr);
+    disconnect(ui->evenOddButton,       SIGNAL(clicked(bool)), nullptr, nullptr);
+    disconnect(ui->thisPageButton,      SIGNAL(clicked(bool)), nullptr, nullptr);
+    disconnect(ui->clearTrimsButton,    SIGNAL(clicked()),     nullptr, nullptr);
+    disconnect(ui->selectTextButton,    SIGNAL(clicked(bool)), nullptr, nullptr);
+    disconnect(ui->copyButton,          SIGNAL(clicked()),     nullptr, nullptr);
+
+    disconnect(ui->viewModeCombo,       SIGNAL(currentIndexChanged(int)), nullptr, nullptr);
+    disconnect(ui->columnCountCombo,    SIGNAL(currentIndexChanged(int)), nullptr, nullptr);
+    disconnect(ui->titlePageCountCombo, SIGNAL(currentIndexChanged(int)), nullptr, nullptr);
+    disconnect(ui->currentPageEdit,     SIGNAL(    editingFinished()),    nullptr, nullptr);
+    disconnect(ui->trimPageList,        SIGNAL(        itemClicked(QListWidgetItem *)), nullptr, nullptr);
+
     if (currentDocumentTab != nullptr) {
         pdfViewer = currentDocumentTab->getPdfViewer();
-
-        disconnect(ui->beginDocumentButton, SIGNAL(clicked()),     pdfViewer, SLOT(                  top()));
-        disconnect(ui->endDocumentButton,   SIGNAL(clicked()),     pdfViewer, SLOT(               bottom()));
-        disconnect(ui->previousPageButton,  SIGNAL(clicked()),     pdfViewer, SLOT(               pageUp()));
-        disconnect(ui->nextPageButton,      SIGNAL(clicked()),     pdfViewer, SLOT(             pageDown()));
-        disconnect(ui->zoomInButton,        SIGNAL(clicked()),     pdfViewer, SLOT(               zoomIn()));
-        disconnect(ui->zoomOutButton,       SIGNAL(clicked()),     pdfViewer, SLOT(              zoomOut()));
-
-        disconnect(ui->editTrimButton,      SIGNAL(clicked(bool)), pdfViewer, SLOT(   trimZoneSelect(bool)));
-        disconnect(ui->evenOddButton,       SIGNAL(clicked(bool)), pdfViewer, SLOT(trimZoneDifferent(bool)));
-        disconnect(ui->thisPageButton,      SIGNAL(clicked(bool)), pdfViewer, SLOT(     thisPageTrim(bool)));
-        disconnect(ui->clearTrimsButton,    SIGNAL(clicked()),     pdfViewer, SLOT(  clearAllSingleTrims()));
-        disconnect(ui->selectTextButton,    SIGNAL(clicked(bool)), pdfViewer, SLOT(       textSelect(bool)));
-        disconnect(ui->copyButton,          SIGNAL(clicked()),     pdfViewer, SLOT(      copyToClipboard()));
-
-//        disconnect(ui->viewModeCombo,       SIGNAL(currentIndexChanged(int)));
-//        disconnect(ui->columnCountCombo,    SIGNAL(currentIndexChanged(int)));
-//        disconnect(ui->titlePageCountCombo, SIGNAL(currentIndexChanged(int)));
-//        disconnect(ui->currentPageEdit,     SIGNAL(    editingFinished()));
-//        disconnect(ui->trimPageList,        SIGNAL(        itemClicked(QListWidgetItem *)));
-
-        disconnect(pdfViewer,               SIGNAL(       stateUpdated(ViewState &)));
+        disconnect(pdfViewer, SIGNAL(stateUpdated(ViewState &)));
     }
 
     currentDocumentTab = (DocumentTab *) ui->viewer->currentWidget();
 
-    if (currentDocumentTab) {
+    if (currentDocumentTab != nullptr) {
         pdfViewer = currentDocumentTab->getPdfViewer();
 
         connect(ui->beginDocumentButton, SIGNAL(clicked()),     pdfViewer, SLOT(                  top()));
@@ -190,8 +174,20 @@ void MainWindow::tabChange(int index)
         connect(ui->selectTextButton,    SIGNAL(clicked(bool)), pdfViewer, SLOT(       textSelect(bool)));
         connect(ui->copyButton,          SIGNAL(clicked()),     pdfViewer, SLOT(      copyToClipboard()));
 
-        connect(pdfViewer,               static_cast<void(PDFViewer::*)(ViewState &)>(&PDFViewer::stateUpdated),
-                [=](ViewState & state) { this->updateButtons(state); });
+        connect(ui->currentPageEdit,
+                static_cast<void(QLineEdit::*)()>(&QLineEdit::editingFinished),
+                pdfViewer,
+                [=](){ currentDocumentTab->getPdfViewer()->gotoPage(ui->currentPageEdit->text().toInt() - 1); });
+
+        connect(ui->trimPageList,
+                static_cast<void(QListWidget::*)(QListWidgetItem *)>(&QListWidget::itemClicked),
+                pdfViewer,
+                [=](QListWidgetItem * item) { currentDocumentTab->getPdfViewer()->gotoPage(item->text().toInt() - 1); });
+
+        connect(ui->viewModeCombo,       SIGNAL(currentIndexChanged(int)), pdfViewer, SLOT(            setViewMode(int)));
+        connect(ui->columnCountCombo,    SIGNAL(currentIndexChanged(int)), pdfViewer, SLOT(setColumnCountFromIndex(int)));
+        connect(ui->titlePageCountCombo, SIGNAL(currentIndexChanged(int)), pdfViewer, SLOT(      setTitlePageCount(int)));
+        connect(pdfViewer,               SIGNAL(stateUpdated(ViewState&)), this,      SLOT(          updateButtons(ViewState&)));
 
         pdfViewer->sendState();
         currentDocumentTab->setFocus();

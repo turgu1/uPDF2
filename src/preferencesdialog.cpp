@@ -12,8 +12,6 @@ PreferencesDialog::PreferencesDialog(QWidget *parent) :
 {
   ui->setupUi(this);
 
-  this->setStyleSheet("QLabel#preferencesTitle { font-size: 15px; font-weight: bold }");
-
   connect(ui->clearRecentsButton,        SIGNAL(clicked()), this, SLOT(         clearRecentsList()));
   connect(ui->logFileButton,             SIGNAL(clicked()), this, SLOT(            selectLogFile()));
   connect(ui->setViewButton,             SIGNAL(clicked()), this, SLOT(           setDefaultView()));

@@ -36,7 +36,6 @@
          <property name="font">
           <font>
            <pointsize>15</pointsize>
-           <weight>75</weight>
            <bold>true</bold>
           </font>
          </property>
@@ -105,7 +104,7 @@
           <string>...</string>
          </property>
          <property name="icon">
-          <iconset resource="../res/updf.qrc">
+          <iconset resource="../updf_resources/updf.qrc">
            <normaloff>:/icons/svg/24x24/folder.svg</normaloff>:/icons/svg/24x24/folder.svg</iconset>
          </property>
         </widget>
@@ -127,7 +126,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../res/updf.qrc"/>
+  <include location="../updf_resources/updf.qrc"/>
  </resources>
  <connections>
   <connection>

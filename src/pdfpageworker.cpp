@@ -20,6 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <SplashOutputDev.h>
 #include <splash/SplashBitmap.h>
 #include <QDebug>
+#include <QElapsedTimer>
+#include <QBuffer>
 
 #include "pdfpageworker.h"
 
@@ -30,7 +32,7 @@ PDFPageWorker::PDFPageWorker(PDFFile & file, const u32 pageNbr) :
 
 }
 
-#define METRICS 0
+#define METRICS 1
 
 #if 0
 
@@ -242,7 +244,7 @@ static void getmargins(
         us <<
         "us (" <<
         (us / 1000000.0f) <<
-        " s)" << endl;
+        " s)" << Qt::endl;
     }
   #endif
 }
@@ -251,12 +253,17 @@ static void getmargins(
 
 #undef METRICS
 
-void store(SplashBitmap * const bm, CachedPage & cache, int pageNbr)
+void store(SplashBitmap const & bm, CachedPage & cache, int pageNbr)
 {
-  const u32 w          = bm->getWidth();
-  const u32 h          = bm->getHeight();
-  const u32 rowsize    = bm->getRowSize();
-  const u8 * const src = bm->getDataPtr();
+//  const u32 w          = pg.width();
+//  const u32 h          = pg.height();
+//  const u32 rowsize    = pg.bytesPerLine();
+//  const u8 * const src = pg.constBits();
+
+  const u32 w          = bm.getWidth();
+  const u32 h          = bm.getHeight();
+  const u32 rowsize    = bm.getRowSize();
+  const u8 * const src = bm.getDataPtr();
 
   u32 minx = 0,
       miny = 0,
@@ -282,19 +289,14 @@ void store(SplashBitmap * const bm, CachedPage & cache, int pageNbr)
 
   // Trimmed copy done, compress it
 
-  u8 * const tmp = (u8 *) xcalloc(trimw * trimh * 4 * 1.08f, 1);
-  u8 workmem[LZO1X_1_MEM_COMPRESS]; // 64kb, we can afford it
-  lzo_uint outlen;
-  int ret = lzo1x_1_compress(trimmed, trimw * trimh * 4, tmp, &outlen, workmem);
-  if (ret != LZO_E_OK) {
-    qFatal("Compression failed\n");
-  }
+  QImage img(trimmed, trimw, trimh, QImage::Format_RGB32);
 
-  free(trimmed);
+  QBuffer buf(&cache.data);
+  buf.open(QIODevice::WriteOnly);
+  img.save(&buf, "PNG", 50);
+  buf.close();
 
-  u8 * const dst = (u8 *) xcalloc(outlen, 1);
-  memcpy(dst, tmp, outlen);
-  free(tmp);
+  qDebug() << "Page " << pageNbr << " size: " << cache.data.size() / 1024.0 << "KB";
 
   // Store
 
@@ -305,8 +307,10 @@ void store(SplashBitmap * const bm, CachedPage & cache, int pageNbr)
   cache.right        = w - maxx;
   cache.top          = miny;
   cache.bottom       = h - maxy;
-  cache.size         = outlen;
-  cache.data         = dst;
+  //cache.size         = tmp.size();
+  //cache.data         = dst;
+
+  free(trimmed);
 }
 
 void PDFPageWorker::run()
@@ -318,8 +322,17 @@ void PDFPageWorker::run()
   pdfFile.pdf->displayPage(splash, page + 1, 144, 144, 0, true, false, false);
 
   SplashBitmap * const bm = splash->takeBitmap();
-  CachedPage         & c  = pdfFile.cache[page];
-  store(bm, c, page);
+
+//  QSize size = pdfFile.pdf->pageSize(page).toSize();
+//  size.setWidth(size.width() * 2);
+//  size.setHeight(size.height() * 2);
+//  QImage pg = pdfFile.pdf->render(page, size);
+//  store(pg, pdfFile.cache[page], page);
+
+  store(*bm, pdfFile.cache[page], page);
+
+  delete bm;
+  delete splash;
 
 //  qDebug() << "Page "         << page
 //           << ", Width "      << c.w
@@ -330,9 +343,6 @@ void PDFPageWorker::run()
 //           << ", Bottom "     << c.bottom
 //           << ", Size "       << c.size
 //           << ", Uncompress " << c.uncompressed;
-
-  delete bm;
-  delete splash;
 
   __sync_bool_compare_and_swap(&pdfFile.cache[page].ready, 0, 1);
 

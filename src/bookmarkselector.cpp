@@ -60,7 +60,7 @@ BookmarkSelector::~BookmarkSelector()
 void BookmarkSelector::documentSelect(const QModelIndex & index)
 {
     if (index.isValid()) {
-        // qDebug() << "Index Selection: " << index.data().toString();
+        // qDebug() << "Entry Selection: " << index.data().toString();
         sel->filename = documentsModel->index(ui->documentsView->currentIndex().row(), Document_Filename).data().toString();
         sel->caption = documentsModel->index(ui->documentsView->currentIndex().row(), Document_Name).data().toString();
         sel->pageNbr  = 1;
@@ -74,7 +74,7 @@ void BookmarkSelector::documentSelect(const QModelIndex & index)
 void BookmarkSelector::entrySelect(const QModelIndex & index)
 {
     if (index.isValid()) {
-        // qDebug() << "Index Selection: " << index.data().toString();
+        // qDebug() << "Entry Selection: " << index.data().toString();
         sel->filename = documentsModel->index(ui->documentsView->currentIndex().row(), Document_Filename).data().toString();
         sel->caption  = entriesModel->index(ui->entriesView->currentIndex().row(), Entry_Caption).data().toString();
         sel->pageNbr  = entriesModel->index(ui->entriesView->currentIndex().row(), Entry_Page_Nbr).data().toInt();
@@ -159,7 +159,7 @@ void BookmarkSelector::changeEntry(const QModelIndex & index)
 
      if (idx.isValid() && !entriesModel->data(idx).isNull()) {
          QByteArray imageData = entriesModel->data(idx).toByteArray();
-         entryImage.loadFromData(imageData, "PNG");
+         entryImage.loadFromData(imageData, "WEBP");
      }
      else {
          QString filename = absoluteFilename(documentsModel->index(ui->documentsView->currentIndex().row(), Document_Filename).data().toString());
